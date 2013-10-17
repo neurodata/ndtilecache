@@ -21,8 +21,8 @@ def getTile ( request, webargs ):
 
   try:
     t = tilecache.TileCache ( token, res, xtile, ytile, zslice )
-    t.fetch()
-    return django.http.HttpResponse(t.fetch(),mimetype='image/png')
+    tile = t.fetch()
+    return django.http.HttpResponse(tile,mimetype='image/png')
   except Exception, e:
     raise
 #    return django.http.HttpResponseNotFound(e)

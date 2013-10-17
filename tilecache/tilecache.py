@@ -4,37 +4,102 @@ import cStringIO
 import urllib2
 import django
 import numpy as np
+import json
 from PIL import Image
+from multiprocessing import Process
 
 from django.conf import settings
+
+import logging
+logger=logging.getLogger("ocpcatmaid")
 
 class TileCache:
 
   def __init__ (self, token, res, xtile, ytile, zslice):
     """Setup the state for this cache request"""
 
-    self.zoffset = 1 # for kasthuri11 need to get from projinfo
+    url = 'http://{}/emca/{}/info/'.format(settings.SERVER,token)
+    try:
+      f = urllib2.urlopen ( url )
+    except urllib2.URLError, e:
+      raise
 
-    # TODO call projinfo to get all the configuration information (use the JSON version)
+    info = json.loads ( f.read() )
+    
+    # cutout a a tilesize region
     self.xdim = 512
     self.ydim = 512
-    self.zdim = 16
 
-    self.zslab = zslice/16
-    self.zoff = zslice%16
+    # TODO call projinfo to get all the configuration information (use the JSON version)
+    self.zdim = info['dataset']['cube_dimension']['{}'.format(res)][2]
+
+    # get max values for the cutout
+    self.xmax, self.ymax = info['dataset']['imagesize']['{}'.format(res)]
+    self.zoffset = info['dataset']['slicerange'][0]
+    self.zmax = info['dataset']['slicerange'][1]
+
+    self.zslab = (zslice-self.zoffset)/self.zdim
+    self.zoff = (zslice-self.zoffset)%self.zdim
 
     self.res = res
     self.xtile = xtile
     self.ytile = ytile
+    self.zslice = zslice
 
     self.token = token
 
     self.filename = '{}/{}/{}/{}/z{}y{}x{}.png'.format(settings.CACHE_DIR,token,res,self.zslab,self.zoff,ytile,xtile)
 
+  def loadData (self):
+    """Load a cube of data into the cache"""
+
+    # otherwise load a cube
+    logger.warning ("Loading cache for %s" % (self.filename))
+
+    xmin = self.xtile*self.xdim
+    xmax = min ((self.xtile+1)*self.xdim,self.xmax)
+    ymin = self.ytile*self.ydim
+    ymax = min ((self.ytile+1)*self.ydim,self.ymax)
+    zmin = (self.zslab+self.zoffset)*self.zdim
+    zmax = min ((self.zslab+self.zoffset+1)*self.zdim,self.zmax)
+
+    # Build the URL
+    cutout = '{}/{},{}/{},{}/{},{}'.format(self.res,xmin,xmax,ymin,ymax,zmin,zmax)
+
+    url = "http://{}/emca/{}/npz/{}/".format(settings.SERVER,self.token,cutout)
+
+    # need to restrict the cutout to the project size.
+    #  do this based on JSON version of projinfo
+
+    # Get cube in question
+    try:
+      f = urllib2.urlopen ( url )
+    except urllib2.URLError, e:
+      raise
+
+    zdata = f.read ()
+    # get the data out of the compressed blob
+    pagestr = zlib.decompress ( zdata[:] )
+    pagefobj = cStringIO.StringIO ( pagestr )
+
+    # Check to see is this is a partial cutout if so pad the space
+    if xmax==self.xmax or ymax==self.ymax or zmax==self.zmax:
+      cuboid = np.zeros ( (self.zdim,self.ydim,self.xdim), dtype=np.uint8) 
+      cuboid[0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = np.load(pagefobj)
+
+    # if not, it's the whole deal
+    else:
+      cuboid = np.load ( pagefobj )
+
+    # put the data into cache
+    self.addCuboid ( cuboid )
+
+    logger.warning ("Cache loaded %s" % (url))
+
 
   def fetch (self):
     """Retrieve the tile from the cache or load the cache and return"""
-
+    
     try:
 
       # open file and return
@@ -42,40 +107,26 @@ class TileCache:
       return f.read()
 
     except IOError:
+      
+      # do the fetch in the background
+      p = Process(target=self.loadData, args=())
+      p.start()
 
-      # otherwise load a cube
-      print "Loading cache for %s" % (self.filename)
-
-      # Build the URL
-      cutout = '{}/{},{}/{},{}/{},{}'.format(self.res,self.xtile*self.xdim,(self.xtile+1)*self.xdim,self.ytile*self.ydim,(self.ytile+1)*self.ydim,(self.zslab+self.zoffset)*self.zdim,(self.zslab+self.zoffset+1)*self.zdim)
-
-      url = "http://openconnecto.me/emca/{}/npz/{}/".format(self.token,cutout)
-
-      # need to restrict the cutout to the project size.
-      #  do this based on JSON version of projinfo
-
-      print "Fetching url %s" % (url)
-
-      # Get cube in question
+      # get the individual tile from the emca/catmaid service
+      # change to openconnecto.me when 
+      url = "http://rio.cs.jhu.edu/ocpcatmaid/simple/{}/512/{}/{}/{}/{}/".format(self.token,self.res,self.xtile,self.ytile,self.zslice)
+      print "Simple service fetch", url
+#      url = "http://{}/ocpcatmaid/simple/{}/{}/{}/{}/{}/{}/".format(settings.SERVER,self.xdim,self.token,self.res,self.xtile,self.ytile,self.zslice)
       try:
         f = urllib2.urlopen ( url )
       except urllib2.URLError, e:
         raise
 
-      zdata = f.read ()
-
-      # get the data out of the compressed blob
-      pagestr = zlib.decompress ( zdata[:] )
-      pagefobj = cStringIO.StringIO ( pagestr )
-      cuboid = np.load ( pagefobj )
-
-      # put the data into cache
-      self.addCuboid ( cuboid )
-
-      # open file and return
-      f=open(self.filename)
       return f.read()
 
+#      # open file and return
+#      f=open(self.filename)
+#      return f.read()
 
   def checkDirHier ( self ):
     """Ensure that the directories for caching exist"""
@@ -99,7 +150,6 @@ class TileCache:
   def addCuboid ( self, cuboid ):
     """Add the cutout to the cache"""
 
-
     self.checkDirHier()
 
     # add each image slice to memcache
@@ -116,31 +166,7 @@ class TileCache:
   def tile2WebPNG ( self, tile ):
     """Create PNG Images and write to cache for the specified tile"""
 
-##    if color != None:
-##      # 16 bit images map down to 8 bits
-##      if tile.dtype == np.uint16:
-##        tile = np.uint8(tile/256)
-##
-##      # false color the image
-##      if tile.dtype != np.uint8:
-##        raise ("Illegal color option for data type %s" % ( tile.dtype ))
-##      else:
-##        tile = self.falseColor ( tile, color )
-##
-##      img = Image.frombuffer ( 'RGBA', [self.tilesz,self.tilesz], tile.flatten(), 'raw', 'RGBA', 0, 1 )
-##
-##      # enhance false color images when requested
-##      if brightness != None:
-##        # Enhance the image
-##        import ImageEnhance
-##        enhancer = ImageEnhance.Brightness(img)
-##        img = enhancer.enhance(brightness)
-##
-##      return img
-##
-##    else:
-##
-      # write it as a png file
+    # write it as a png file
     if tile.dtype==np.uint8:
       return Image.frombuffer ( 'L', [self.ydim,self.xdim], tile.flatten(), 'raw', 'L', 0, 1 )
     elif tile.dtype==np.uint32:
