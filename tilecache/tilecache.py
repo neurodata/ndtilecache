@@ -108,14 +108,17 @@ class TileCache:
 
     except IOError:
       
+      logger.warning("Starting process")
       # do the fetch in the background
-      p = Process(target=self.loadData, args=())
-      p.start()
+#      p = Process(target=self.loadData, args=())
+#      p.start()
+      logger.warning("Returned from p.start")
 
       # get the individual tile from the emca/catmaid service
       # change to openconnecto.me when 
+      logger.warning("About to build url")
       url = "http://rio.cs.jhu.edu/ocpcatmaid/simple/{}/512/{}/{}/{}/{}/".format(self.token,self.res,self.xtile,self.ytile,self.zslice)
-      print "Simple service fetch", url
+      logger.warning("Simple service fetch {}".format(url))
 #      url = "http://{}/ocpcatmaid/simple/{}/{}/{}/{}/{}/{}/".format(settings.SERVER,self.xdim,self.token,self.res,self.xtile,self.ytile,self.zslice)
       try:
         f = urllib2.urlopen ( url )
