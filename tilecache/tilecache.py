@@ -23,6 +23,8 @@ class TileCache:
 
     self.token = token
 
+    self.db = cachedb.CacheDB (  )
+
     url = 'http://{}/ocpca/{}/info/'.format(settings.SERVER,self.token)
     try:
       f = urllib2.urlopen ( url )
@@ -56,15 +58,30 @@ class TileCache:
     # get the data out of the compressed blob
     pagestr = zlib.decompress ( zdata[:] )
     pagefobj = cStringIO.StringIO ( pagestr )
-    cuboid = np.load ( pagefobj )
+
+    ximagesize, yimagesize = self.info['dataset']['imagesize']['{}'.format(res)]
+    zimagesize = self.info['dataset']['slicerange'][1]+1
+
+    cubedata=np.load(pagefobj)
+
+    # cube at a time
+    zdim = self.info['dataset']['cube_dimension']['{}'.format(res)][2]
+
+    # Check to see is this is a partial cutout if so pad the space
+    if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
+      cuboid = np.zeros ( (zdim,settings.TILESIZE,settings.TILESIZE), dtype=cubedata.dtype)
+      cuboid[0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
+    else:
+      cuboid = cubedata
 
     xtile = xmin / settings.TILESIZE
     ytile = ymin / settings.TILESIZE
 
-    from celery.contrib import rdb
-    rdb.set_trace()
+    self.addCuboid( cuboid, res, xtile, ytile, zmin, zdim )
 
-    self.addCuboid( cuboid, res, xtile, ytile, zmin )
+    self.db.load ( cuboidurl )
+
+    logger.warning ("Load suceeded for %s" % (cuboidurl))
 
 
   def checkDirHier ( self, res ):
@@ -91,16 +108,13 @@ class TileCache:
 
 
 
-  def addCuboid ( self, cuboid, res, xtile, ytile, zmin ):
+  def addCuboid ( self, cuboid, res, xtile, ytile, zmin, zdim ):
     """Add the cutout to the cache"""
 
     self.checkDirHier(res)
 
-    # cube at a time
-    zdim = self.info['dataset']['cube_dimension']['{}'.format(res)][2]
-
     # add each image slice to memcache
-    for z in range(zdim):
+    for z in range(cuboid.shape[0]):
       self.checkZDirHier(res,z+zmin)
       tilefname = '{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,res,z+zmin,ytile,xtile)
       fobj = open ( tilefname, "w" )
