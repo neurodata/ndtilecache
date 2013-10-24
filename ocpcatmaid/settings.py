@@ -13,7 +13,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'ocpcatmaid',                      # Or path to database file if using sqlite3.
+        'NAME': 'ocpcatmaid_django',                      # Or path to database file if using sqlite3.
         'USER': settings_secret.user,                      # Not used with sqlite3.
         'PASSWORD': settings_secret.password,                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -119,12 +119,17 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'djcelery',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'tilecache',
 )
+
+# RB 10/21/2013
+import djcelery
+djcelery.setup_loader()
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -183,3 +188,12 @@ LOGGING = {
 #RB ocpcatmaid specific settings
 CACHE_DIR = settings_secret.CACHE_DIR
 SERVER = settings_secret.server
+DBNAME = 'ocpcatmaid'
+USER = settings_secret.user
+PASSWD = settings_secret.password
+TILESIZE = 512
+
+
+# Celery settings
+# only prefetch one message per worker.  fetches may take awhile
+CELERYD_PREFETCH_MULTIPLIER = 1
