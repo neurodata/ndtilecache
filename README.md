@@ -13,3 +13,7 @@ Caching gateway to connect a CATMAID server to the Open Connectome Project Web S
   CREATE TABLE contents ( url varchar(255), reftime TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (reftime, url)); 
 
 
+  Make a directory for logging. It has to have permission for the Web server (www-data or your user for the development server)
+
+    mkdir /var/log/ocpcatmaid
+
