@@ -1,6 +1,7 @@
 import urllib2
 from django.conf import settings
 import logging
+import tilekey
 logger=logging.getLogger("ocpcatmaid")
 
 class Tile:
@@ -8,11 +9,18 @@ class Tile:
 
   def __init__(self, token, res, xtile, ytile, zslice):
 
+    import cachedb
+    # do the fetch in the background
+    self.db = cachedb.CacheDB()
+
     self.token = token
     self.res = res
     self.xtile = xtile
     self.ytile = ytile
     self.zslice = zslice
+
+#  RB can't call before dataset exists
+#    self.dsid = self.db.getDatasetKey ( token )
 
     self.filename = '{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.res,self.zslice,self.ytile,self.xtile)
 
@@ -20,13 +28,17 @@ class Tile:
     self.xdim = settings.TILESIZE
     self.ydim = settings.TILESIZE
 
+    # get the dataset is for this token
+    self.dsid = self.db.getDatasetKey ( token )
+    self.tkey = tilekey.tileKey ( self.dsid, self.res, self.xtile, self.ytile, self.zslice )
+
 
   def initForFetch ( self ):
     """Configure the database when you need to get data from remote site"""
 
     import tilecache
     self.tc = tilecache.TileCache(self.token)
-
+  
     # TODO call projinfo to get all the configuration information (use the JSON version)
     self.zdim = self.tc.info['dataset']['cube_dimension']['{}'.format(self.res)][2]
 
@@ -58,15 +70,13 @@ class Tile:
     try:
       # open file and return
       f=open(self.filename)
+      self.db.touch(self.tkey)
+      self.db.reclaim(16)
       return f.read()
 
     except IOError:
 
       self.initForFetch()
-
-      import cachedb
-      # do the fetch in the background
-      db = cachedb.CacheDB()
 
       # call the celery process to fetch the url
       from tasks import fetchurl

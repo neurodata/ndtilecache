@@ -186,14 +186,17 @@ LOGGING = {
 
 
 #RB ocpcatmaid specific settings
-CACHE_DIR = settings_secret.CACHE_DIR
-SERVER = settings_secret.server
+SERVER = 'braingraph2.cs.jhu.edu/ocp'
 DBNAME = 'ocpcatmaid'
 USER = settings_secret.user
 PASSWD = settings_secret.password
 TILESIZE = 512
+CACHE_DIR = '/data/cache'
+# CACHESIZE IN MB
+CACHE_SIZE = 50
 
 
 # Celery settings
 # only prefetch one message per worker.  fetches may take awhile
 CELERYD_PREFETCH_MULTIPLIER = 1
+

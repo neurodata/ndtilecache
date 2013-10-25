@@ -55,6 +55,9 @@ def prefetch ( token, res, xmin, xmax, ymin, ymax, zmin, zmax ):
     for z in range(zlow,zhigh,zdim):
       for y in range(ylow,yhigh,ydim):
         for x in range(xlow,xhigh,xdim):
+
+          if zlow >= zhigh or ylow >= yhigh or xlow >= xhigh:
+            continue
         
           # Build the URLs
           cutout = '{}/{},{}/{},{}/{},{}'.format(level,x,min(x+xdim,ximagesize),y,min(y+ydim,yimagesize),z,min(z+zdim,zimagesize))

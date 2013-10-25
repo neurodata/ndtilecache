@@ -7,11 +7,12 @@ import numpy as np
 import json
 import re
 from PIL import Image
+import MySQLdb
 
 from django.conf import settings
 
 import cachedb
-import MySQLdb
+import tilekey
 
 import logging
 logger=logging.getLogger("ocpcatmaid")
@@ -32,7 +33,7 @@ class TileCache:
       raise
 
     self.info = json.loads ( f.read() )
-    
+
 
   def loadData (self, cuboidurl):
     """Load a cube of data into the cache"""
@@ -79,8 +80,6 @@ class TileCache:
 
     self.addCuboid( cuboid, res, xtile, ytile, zmin, zdim )
 
-    self.db.load ( cuboidurl )
-
     logger.warning ("Load suceeded for %s" % (cuboidurl))
 
 
@@ -91,6 +90,8 @@ class TileCache:
       os.stat ( settings.CACHE_DIR + "/" +  self.token )
     except:
       os.makedirs ( settings.CACHE_DIR + "/" +  self.token )
+      # when making the directory, create a dataset
+      self.db.addDataset ( self.token )
 
     try:
       os.stat ( settings.CACHE_DIR + "/" +  self.token + "/r" + str(res) )
@@ -111,7 +112,14 @@ class TileCache:
   def addCuboid ( self, cuboid, res, xtile, ytile, zmin, zdim ):
     """Add the cutout to the cache"""
 
+#    from django.contrib import rdb
+#    rdb.set_trace()
+
+    # will create the dataset if it doesn't exist
     self.checkDirHier(res)
+
+    # get the dataset id for this token
+    dsid = self.db.getDatasetKey ( self.token )
 
     # add each image slice to memcache
     for z in range(cuboid.shape[0]):
@@ -120,6 +128,10 @@ class TileCache:
       fobj = open ( tilefname, "w" )
       img = self.tile2WebPNG ( cuboid[z,:,:] )
       img.save ( fobj, "PNG" )
+      self.db.insert ( tilekey.tileKey(dsid,res,xtile,ytile,z+zmin), tilefname )
+
+    self.db.increase ( cuboid.shape[0] )
+    self.harvest()
 
 
   # Put false color back in later.
@@ -137,4 +149,30 @@ class TileCache:
       outimage = Image.frombuffer ( 'I;16', [settings.TILESIZE,settings.TILESIZE], tile.flatten(), 'raw', 'I;16', 0, 1)
       outimage = outimage.point(lambda i:i*(1./256)).convert('L')
       return outimage
+
+
+  def harvest ( self ):
+    """Get rid of tiles to respect cache limits"""
+
+    cachesize = int(settings.CACHE_SIZE) * 0x01 << 20
+
+    # determine the current cache size
+    numtiles = self.db.size()
+
+
+    currentsize = numtiles * settings.TILESIZE * settings.TILESIZE 
+
+    # if we are greater than 90% full.
+    if (cachesize - currentsize)*10 < cachesize:
+ 
+      # go down to 80% full
+      itemstoreclaim = (currentsize-int(0.8*cachesize))/(settings.TILESIZE*settings.TILESIZE)
+      from tasks import reclaim
+      reclaim.delay ( itemstoreclaim )
+      logger.warning ("Reclaiming {} items of  {}".format( itemstoreclaim, numtiles))
+
+    else:
+    
+      logger.warning ("Not harvest at a cache size of {}".format( numtiles))
+
 
