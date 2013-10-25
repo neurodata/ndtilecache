@@ -19,7 +19,7 @@ from django.conf import settings
 def prefetch ( token, res, xmin, xmax, ymin, ymax, zmin, zmax ):
   """Script to prefetch a cutout region"""
 
-  url = 'http://{}/ca/{}/info/'.format(settings.SERVER,token)
+  url = 'http://{}/ocpca/{}/info/'.format(settings.SERVER,token)
   try:
     f = urllib2.urlopen ( url )
   except urllib2.URLError, e:
