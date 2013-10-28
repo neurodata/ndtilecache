@@ -30,21 +30,26 @@ def reclaim ( ):
 
   # only one reclaiming process at a time!
   # if a reclamation is in process, return
-  reclsem = posix_ipc.Semaphore ( "/ocpreclaim", flags=posix_ipc.O_CREAT, initial_value=1 )
+  reclsem = posix_ipc.Semaphore ( "/ocpcatmaidreclaim", flags=posix_ipc.O_CREAT, initial_value=1 )
   try:
     # get the semaphore right away.
     reclsem.acquire(0)
 
-    # reclaim
-    db = cachedb.CacheDB()
-    db.reclaim ( )
+    try:
+      # reclaim
+      db = cachedb.CacheDB()
+      db.reclaim ( )
+    except Exception, e:
+      logger.error("Error in reclamation {}".format(e))
 
   except:
     # do nothing if it's not available
     logger.warning("Another reclaimer")
+
   finally:
-    # always release
+    # always release and close
     reclsem.release()
+    reclsem.close()
 
 
   

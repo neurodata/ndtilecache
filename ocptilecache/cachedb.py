@@ -168,7 +168,7 @@ class CacheDB:
 
     cursor = self.conn.cursor()
 
-    logger.warnisg ("Cache has {} tiles.  Capacity of {} tiles.  Reclaiming {}".format(numtiles,cachesize/512/512),numitems)
+    logger.warning ("Cache has {} tiles.  Capacity of {} tiles.  Reclaiming {}".format(numtiles,cachesize/512/512,numitems))
 
     sql = "SELECT highkey, lowkey, filename FROM contents ORDER BY reftime ASC LIMIT {}".format(numitems)
 
