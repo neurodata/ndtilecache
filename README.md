@@ -26,3 +26,8 @@ Caching gateway to connect a CATMAID server to the Open Connectome Project Web S
 
     mkdir /var/log/ocpcatmaid
 
+
+  Starting the celery dev server.  The service uses two queues.  For testing you can start them together.  For deployments, we should have them running separately as daemons.
+
+    python manage.py celery worker --loglevel=info -Q celery,reclaim
+
