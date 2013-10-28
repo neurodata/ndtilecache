@@ -98,9 +98,12 @@ class CacheDB:
       logger.warning ("Failed to query cache size %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
       raise
 
-#    metadatasize = int(cursor.fetchone()[0])
-    
+    return int(cursor.fetchone()[0])
+
 #    # RB testing check against the number of tiles
+#
+#    metadatasize = int(cursor.fetchone()[0])
+#    
 #    sql = "SELECT count(*) FROM contents";
 #    try:
 #      cursor.execute ( sql )
@@ -111,10 +114,10 @@ class CacheDB:
 #    countsize = int(cursor.fetchone()[0])
 #
 #    if countsize != metadatasize:
-#      from celery.contrib import rdb; rdb.set_trace()
-
-    return int(cursor.fetchone()[0])
+#      logger.warning("Cache size and metadatasize not consistent.  {} v {}".format(countsize,metadatasize))
+#
 #    return countsize
+
 
   def increase ( self, numtiles ):
     """Add tiles to the cache"""
@@ -147,10 +150,25 @@ class CacheDB:
     self.conn.commit()
 
 
-  def reclaim ( self, numitems ):
+  def reclaim ( self ):
     """Reduce the cache size to a target"""
 
+    # CACHE SIZE is in MB
+    cachesize = int(settings.CACHE_SIZE) * 0x01 << 20
+
+    # determine the current cache size
+    numtiles = self.size()
+    currentsize = numtiles * settings.TILESIZE * settings.TILESIZE 
+
+    # if we are bigger than 90% of the cache
+    if (cachesize - currentsize)*10 < cachesize:
+      numitems = (currentsize-int(0.8*cachesize))/(settings.TILESIZE*settings.TILESIZE)
+    else:
+      return
+
     cursor = self.conn.cursor()
+
+    logger.warnisg ("Cache has {} tiles.  Capacity of {} tiles.  Reclaiming {}".format(numtiles,cachesize/512/512),numitems)
 
     sql = "SELECT highkey, lowkey, filename FROM contents ORDER BY reftime ASC LIMIT {}".format(numitems)
 

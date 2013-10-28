@@ -39,10 +39,10 @@ def prefetch ( token, res, xmin, xmax, ymin, ymax, zmin, zmax ):
     # get max values for the cutout
     ximagesize, yimagesize = info['dataset']['imagesize']['{}'.format(level)]
 
-
     # zdim changes by cube size
     zdim = info['dataset']['cube_dimension']['{}'.format(res)][2]
     zoffset = info['dataset']['slicerange'][0]
+
 
     xlow = xmin / (2**(level-res)) / xdim * xdim
     ylow = ymin / (2**(level-res)) / ydim * ydim
@@ -51,6 +51,9 @@ def prefetch ( token, res, xmin, xmax, ymin, ymax, zmin, zmax ):
     xhigh = (((xmax-1) / (2**(level-res)) / xdim)+1) * xdim
     yhigh = (((ymax-1) / (2**(level-res)) / ydim)+1) * ydim
     zhigh = (((zmax-1-zoffset) / zdim)+1) * zdim + zoffset
+
+    if zlow < 0 or xlow > ximagesize or ylow > yimagesize or xhigh > ((ximagesize-1) / xdim +1 ) * xdim or yhigh > ((yimagesize-1) / ydim +1 ) * ydim:
+      raise Exception("Illegal prefetch dimensions")
 
     for z in range(zlow,zhigh,zdim):
       for y in range(ylow,yhigh,ydim):
@@ -65,7 +68,7 @@ def prefetch ( token, res, xmin, xmax, ymin, ymax, zmin, zmax ):
           print cuboidurl
 
           # call the celery process to fetch the url
-          from tasks import fetchurl
+          from ocptilecache.tasks import fetchurl
           fetchurl.delay ( cuboidurl, info )
 
 def main():

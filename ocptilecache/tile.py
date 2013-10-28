@@ -68,10 +68,10 @@ class Tile:
     """Retrieve the tile from the cache or load the cache and return"""
 
     try:
+
       # open file and return
       f=open(self.filename)
       self.db.touch(self.tkey)
-      self.db.reclaim(16)
       return f.read()
 
     except IOError:
@@ -79,7 +79,7 @@ class Tile:
       self.initForFetch()
 
       # call the celery process to fetch the url
-      from tasks import fetchurl
+      from ocptilecache.tasks import fetchurl
       fetchurl.delay ( self.cuboidurl, self.tc.info )
      
       logger.warning("CATMAID tile fetch {}".format(self.tileurl))

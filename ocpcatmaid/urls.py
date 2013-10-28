@@ -5,7 +5,7 @@ from django.conf.urls import patterns, include, url
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-    url(r'^tilecache/', include('tilecache.urls')),
+    url(r'^tilecache/', include('ocptilecache.urls')),
     # Examples:
     # url(r'^$', 'ocpcatmaid.views.home', name='home'),
     # url(r'^ocpcatmaid/', include('ocpcatmaid.foo.urls')),

@@ -12,7 +12,7 @@ logger=logging.getLogger("ocpcatmaid")
 
 celery = Celery('tasks', broker='amqp://guest@localhost//')
 
-@celery.task(name='tasks.fetchurl')
+@celery.task()
 def fetchurl ( url, info ):
   """Fetch the requested url."""
 
@@ -23,9 +23,10 @@ def fetchurl ( url, info ):
   tc = tilecache.TileCache ( token )
   tc.loadData(url)
 
-@celery.task(name='tasks.reclaim')
-def reclaim ( numitems ):
-  """Reclaim numitems from the database"""
+# automatic routing not working in django.  No big deal.  Specify the queue explicitly.
+@celery.task(queue='reclaim')
+def reclaim ( ):
+  """Reclaim space from the database"""
 
   # only one reclaiming process at a time!
   # if a reclamation is in process, return
@@ -36,7 +37,7 @@ def reclaim ( numitems ):
 
     # reclaim
     db = cachedb.CacheDB()
-    db.reclaim ( numitems )
+    db.reclaim ( )
 
   except:
     # do nothing if it's not available

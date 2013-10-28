@@ -4,7 +4,7 @@ from django.conf.urls import patterns, include, url
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('tilecache.views',
+urlpatterns = patterns('ocptilecache.views',
     # everything matches the tile cache
     url(r'^(?P<webargs>.*)$', 'getTile'),
 )
