@@ -97,8 +97,24 @@ class CacheDB:
     except MySQLdb.Error, e:
       logger.warning ("Failed to query cache size %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
       raise
+
+#    metadatasize = int(cursor.fetchone()[0])
     
+#    # RB testing check against the number of tiles
+#    sql = "SELECT count(*) FROM contents";
+#    try:
+#      cursor.execute ( sql )
+#    except MySQLdb.Error, e:
+#      logger.warning ("Failed to query cache size (count*) %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
+#      raise
+#
+#    countsize = int(cursor.fetchone()[0])
+#
+#    if countsize != metadatasize:
+#      from celery.contrib import rdb; rdb.set_trace()
+
     return int(cursor.fetchone()[0])
+#    return countsize
 
   def increase ( self, numtiles ):
     """Add tiles to the cache"""
