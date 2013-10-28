@@ -15,6 +15,7 @@ Caching gateway to connect a CATMAID server to the Open Connectome Project Web S
     CREATE TABLE contents ( highkey BIGINT, lowkey BIGINT, filename varchar(255), reftime TIMESTAMP, PRIMARY KEY ( highkey, lowkey)); 
     CREATE TABLE datasets ( dataset VARCHAR(255) PRIMARY KEY, datasetid INT UNIQUE AUTO_INCREMENT );
     CREATE TABLE metadata ( numtiles BIGINT);
+    CREATE TABLE fetching ( url VARCHAR(255) PRIMARY KEY );
     INSERT INTO metadata (numtiles) VALUES (0);
 
 

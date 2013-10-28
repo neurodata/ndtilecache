@@ -24,7 +24,32 @@ class CacheDB:
 
 
 # Some technique to make sure we don't fetch the same thing twice concurrently?
+  def fetchlock ( self, url ):
+    """Indicate that we are actively fetching a url.  Raise an Exception if it is already happening"""
+    cursor = self.conn.cursor()
 
+    sql = "INSERT INTO fetching (url) VALUE ('{}')".format(url)
+    try:
+      cursor.execute ( sql )
+    except MySQLdb.Error, e:
+      if e.args[0] != 1062:
+        logger.warning ("Unknown error in fetchlock.  Check configuration. {}:{}. sql={}".format(e.args[0], e.args[1], sql))
+      raise
+
+    self.conn.commit()
+
+  def fetchrelease ( self, url ):
+    """We are no longer fetching the url"""
+
+    cursor = self.conn.cursor()
+
+    sql = "DELETE FROM fetching WHERE url='{}'".format(url)
+    try:
+      cursor.execute ( sql )
+    except MySQLdb.Error, e:
+      logger.warning ("Unknown error in fetchrelease. {}:{}. sql={}".format(e.args[0], e.args[1], sql))
+
+    self.conn.commit()
 
   def touch(self, tkey):
     """Update the reference time on a tile"""
@@ -42,7 +67,8 @@ class CacheDB:
 
 
   def insert(self, tkey, filename):
-    """Add a tile to the cache contents.  Remove from prefetch queue."""
+    """Add a tile to the cache contents.  Remove from prefetch queue.
+        This routine returns MySQLError with e.args[0] == 1062. For duplicate tiles."""
 
     cursor = self.conn.cursor()
     
@@ -51,7 +77,9 @@ class CacheDB:
     try:
       cursor.execute ( sql )
     except MySQLdb.Error, e:
-      logger.warning ("Failed to add tile to contents %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
+      # ignore duplicate entries
+      if e.args[0] != 1062:
+        logger.warning ("Failed to add tile to contents. key=%s. file=%s.  Error= %d: %s. sql=%s" % (tkey, filename, e.args[0], e.args[1], sql))
       raise
 
     self.conn.commit()
@@ -63,7 +91,7 @@ class CacheDB:
     cursor = self.conn.cursor()
 
     # determine the current cache size
-    sql = "SELECT SUM(numtiles) FROM metadata;"
+    sql = "SELECT numtiles FROM metadata;"
     try:
       cursor.execute ( sql )
     except MySQLdb.Error, e:
@@ -71,7 +99,6 @@ class CacheDB:
       raise
     
     return int(cursor.fetchone()[0])
-
 
   def increase ( self, numtiles ):
     """Add tiles to the cache"""

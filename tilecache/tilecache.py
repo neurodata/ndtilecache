@@ -46,41 +46,55 @@ class TileCache:
     # otherwise load a cube
     logger.warning ("Loading cache for %s" % (cuboidurl))
 
-    # need to restrict the cutout to the project size.
-    #  do this based on JSON version of projinfo
-
-    # Get cube in question
+    # ensure only one requester of a cube at a time
     try:
-      f = urllib2.urlopen ( cuboidurl )
-    except urllib2.URLError, e:
-      raise
+      self.db.fetchlock(cuboidurl)
+    except Exception, e:
+      logger.warning("Already fetching {}.  Returning.".format(cuboidurl))
+      return
 
-    zdata = f.read ()
-    # get the data out of the compressed blob
-    pagestr = zlib.decompress ( zdata[:] )
-    pagefobj = cStringIO.StringIO ( pagestr )
+    # try block to ensure that we call fetchrelease
+    try:
 
-    ximagesize, yimagesize = self.info['dataset']['imagesize']['{}'.format(res)]
-    zimagesize = self.info['dataset']['slicerange'][1]+1
+      # Get cube in question
+      try:
+        f = urllib2.urlopen ( cuboidurl )
+      except urllib2.URLError, e:
+        # release the fetch lock
+        self.db.fetchrelease(cuboidurl)
+        raise
 
-    cubedata=np.load(pagefobj)
+      zdata = f.read ()
+      # get the data out of the compressed blob
+      pagestr = zlib.decompress ( zdata[:] )
+      pagefobj = cStringIO.StringIO ( pagestr )
 
-    # cube at a time
-    zdim = self.info['dataset']['cube_dimension']['{}'.format(res)][2]
+      ximagesize, yimagesize = self.info['dataset']['imagesize']['{}'.format(res)]
+      zimagesize = self.info['dataset']['slicerange'][1]+1
 
-    # Check to see is this is a partial cutout if so pad the space
-    if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
-      cuboid = np.zeros ( (zdim,settings.TILESIZE,settings.TILESIZE), dtype=cubedata.dtype)
-      cuboid[0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
-    else:
-      cuboid = cubedata
+      cubedata=np.load(pagefobj)
 
-    xtile = xmin / settings.TILESIZE
-    ytile = ymin / settings.TILESIZE
+      # cube at a time
+      zdim = self.info['dataset']['cube_dimension']['{}'.format(res)][2]
 
-    self.addCuboid( cuboid, res, xtile, ytile, zmin, zdim )
+      # Check to see is this is a partial cutout if so pad the space
+      if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
+        cuboid = np.zeros ( (zdim,settings.TILESIZE,settings.TILESIZE), dtype=cubedata.dtype)
+        cuboid[0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
+      else:
+        cuboid = cubedata
 
-    logger.warning ("Load suceeded for %s" % (cuboidurl))
+      xtile = xmin / settings.TILESIZE
+      ytile = ymin / settings.TILESIZE
+
+      self.addCuboid( cuboid, res, xtile, ytile, zmin, zdim )
+
+      logger.warning ("Load suceeded for %s" % (cuboidurl))
+    
+    finally:
+
+      # release the fetch lock
+      self.db.fetchrelease(cuboidurl)
 
 
   def checkDirHier ( self, res ):
@@ -91,7 +105,11 @@ class TileCache:
     except:
       os.makedirs ( settings.CACHE_DIR + "/" +  self.token )
       # when making the directory, create a dataset
-      self.db.addDataset ( self.token )
+      try:
+        self.db.addDataset ( self.token )
+      except MySQLdb.Error, e:
+        logger.warning ("Failed to create dataset.  Already exists in database, but not cache. {}:{}.".format(e.args[0], e.args[1]))
+
 
     try:
       os.stat ( settings.CACHE_DIR + "/" +  self.token + "/r" + str(res) )
@@ -112,14 +130,14 @@ class TileCache:
   def addCuboid ( self, cuboid, res, xtile, ytile, zmin, zdim ):
     """Add the cutout to the cache"""
 
-#    from django.contrib import rdb
-#    rdb.set_trace()
-
     # will create the dataset if it doesn't exist
     self.checkDirHier(res)
 
     # get the dataset id for this token
     dsid = self.db.getDatasetKey ( self.token )
+
+    # counter of how many new tiles we get
+    newtiles = 0
 
     # add each image slice to memcache
     for z in range(cuboid.shape[0]):
@@ -128,9 +146,16 @@ class TileCache:
       fobj = open ( tilefname, "w" )
       img = self.tile2WebPNG ( cuboid[z,:,:] )
       img.save ( fobj, "PNG" )
-      self.db.insert ( tilekey.tileKey(dsid,res,xtile,ytile,z+zmin), tilefname )
+      try:
+        self.db.insert ( tilekey.tileKey(dsid,res,xtile,ytile,z+zmin), tilefname )
+        newtiles += 1
+      except MySQLdb.Error, e:
+        # ignore duplicate entries
+        if e.args[0] != 1062:  
+          raise
 
-    self.db.increase ( cuboid.shape[0] )
+    logger.warning("Added {} new tiles to cache""".format(newtiles))
+    self.db.increase ( newtiles )
     self.harvest()
 
 
@@ -159,7 +184,6 @@ class TileCache:
     # determine the current cache size
     numtiles = self.db.size()
 
-
     currentsize = numtiles * settings.TILESIZE * settings.TILESIZE 
 
     # if we are greater than 90% full.
@@ -173,6 +197,6 @@ class TileCache:
 
     else:
     
-      logger.warning ("Not harvest at a cache size of {}".format( numtiles))
+      logger.warning ("Not harvest at a cache of {} tiles estimated size ".format( numtiles, currentsize))
 
 
