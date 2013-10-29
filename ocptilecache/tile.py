@@ -2,6 +2,8 @@ import urllib2
 from django.conf import settings
 import logging
 import tilekey
+
+import logging
 logger=logging.getLogger("ocpcatmaid")
 
 class Tile:
