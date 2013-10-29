@@ -48,3 +48,12 @@ Caching gateway to connect a CATMAID server to the Open Connectome Project Web S
 
   If all are running you should be good to go.
 
+  ** Configuring in CATMAID **
+
+  Create a stack to a remote site.  It must have the following properties:
+    * Image base = http://localhost/ocpcatmaid/[token]/
+    * File extension = png
+    * Tile width = 512
+    * Tile height = 512
+  
+
