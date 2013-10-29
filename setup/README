@@ -1,0 +1,9 @@
+
+
+** Configuration instrucitions for ubuntu nginx/uwsgi/supervisor **
+
+  * uWSGI: ocpcatmaid.ini goes in /etc/uwsgi/apps-enabled
+
+  * supervisord: celery.ini and reclaim.ini go in /etc/supervisor/conf.d/
+
+  * nginx: add the portions of default.nginx to /etc/nginx/sites-enabled/default
