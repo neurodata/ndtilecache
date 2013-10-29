@@ -41,8 +41,8 @@ class TileCache:
     p = re.compile('^http://.*/ocpca/\w+/npz/(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+),(\d+).*$')
     m = p.match(cuboidurl)
     if m == None:
-      logger.error("Failed to parse url {}".format(url))
-      raise Exception ("Failed to parse url {}".format(url))
+      logger.error("Failed to parse url {}".format(cuboidurl))
+      raise Exception ("Failed to parse url {}".format(cuboidurl))
 
     [ res, xmin, xmax, ymin, ymax, zmin, zmax ] = map(int, m.groups())
 
@@ -188,10 +188,16 @@ class TileCache:
 
     currentsize = numtiles * settings.TILESIZE * settings.TILESIZE 
 
-    # if we are greater than 90% full.
-    if (cachesize - currentsize)*10 < cachesize:
+    # if we are greater than 95% full.
+    if (cachesize - currentsize)*20 < cachesize:
 
       # start a reclaim process
       from ocptilecache.tasks import reclaim
       reclaim.delay ( )
+
+    else:
+      logger.warning ( "Not harvesting cache of {} tiles.  Capacity {}.".format(numtiles,cachesize/512/512))
+
+
+
 

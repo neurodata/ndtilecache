@@ -160,10 +160,11 @@ class CacheDB:
     numtiles = self.size()
     currentsize = numtiles * settings.TILESIZE * settings.TILESIZE 
 
-    # if we are bigger than 90% of the cache
-    if (cachesize - currentsize)*10 < cachesize:
-      numitems = (currentsize-int(0.8*cachesize))/(settings.TILESIZE*settings.TILESIZE)
+    # if we are bigger than 95% of the cache go down to 90%
+    if (cachesize - currentsize)*20 < cachesize:
+      numitems = (currentsize-int(0.9*cachesize))/(settings.TILESIZE*settings.TILESIZE)
     else:
+      logger.warning ( "Not reclaiming cache of {} tiles.  Capacity {}.".format(numtiles,cachesize/512/512))
       return
 
     cursor = self.conn.cursor()

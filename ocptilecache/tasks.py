@@ -30,7 +30,7 @@ def reclaim ( ):
 
   # only one reclaiming process at a time!
   # if a reclamation is in process, return
-  reclsem = posix_ipc.Semaphore ( "/ocpcatmaidreclaim", flags=posix_ipc.O_CREAT, initial_value=1 )
+  reclsem = posix_ipc.Semaphore ( "/ocp_reclaim", flags=posix_ipc.O_CREAT, initial_value=1 )
   try:
     # get the semaphore right away.
     reclsem.acquire(0)
