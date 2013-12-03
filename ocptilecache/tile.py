@@ -68,7 +68,7 @@ class Tile:
 
   def fetch (self):
     """Retrieve the tile from the cache or load the cache and return"""
-
+    
     try:
 
       # open file and return
