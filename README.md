@@ -18,6 +18,7 @@ Caching gateway to connect a CATMAID server to the Open Connectome Project Web S
     INSERT INTO metadata (numtiles) VALUES (0);
 
     # And a database for django
+    create database ocpcatmaid_django;
 
   Make directories for logging. It has to have permission for the Web server (www-data or your user for the development server)
 
