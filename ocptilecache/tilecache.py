@@ -14,6 +14,8 @@ from django.conf import settings
 import cachedb
 import tilekey
 
+from ocpca_cy import recolor_cy
+
 import logging
 logger=logging.getLogger("ocpcatmaid")
 

@@ -83,7 +83,7 @@ class Tile:
       # call the celery process to fetch the url
       from ocptilecache.tasks import fetchurl
       fetchurl.delay ( self.cuboidurl, self.tc.info )
-     
+
       logger.warning("CATMAID tile fetch {}".format(self.tileurl))
       try:
         f = urllib2.urlopen ( self.tileurl )
