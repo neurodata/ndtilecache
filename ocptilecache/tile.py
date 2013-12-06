@@ -9,7 +9,7 @@ logger=logging.getLogger("ocpcatmaid")
 class Tile:
   """Information specific to a given tile in the tilecache"""
 
-  def __init__(self, token, res, xtile, ytile, zslice):
+  def __init__(self, token, res, xtile, ytile, zslice, channels):
 
     import cachedb
     # do the fetch in the background
@@ -20,18 +20,23 @@ class Tile:
     self.xtile = xtile
     self.ytile = ytile
     self.zslice = zslice
+    self.channels = channels
 
-#  RB can't call before dataset exists
-#    self.dsid = self.db.getDatasetKey ( token )
-
-    self.filename = '{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.res,self.zslice,self.ytile,self.xtile)
+    if self.channels == None:
+      self.filename = '{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.res,self.zslice,self.ytile,self.xtile)
+    else:
+      self.filename = '{}/{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.channels,self.res,self.zslice,self.ytile,self.xtile)
 
     # cutout a a tilesize region
     self.xdim = settings.TILESIZE
     self.ydim = settings.TILESIZE
 
     # get the dataset is for this token
-    self.dsid = self.db.getDatasetKey ( token )
+    if self.channels == None:
+      datasetname = self.token
+    else: 
+      datasetname = self.token + self.channels
+    self.dsid = self.db.getDatasetKey ( datasetname )
     self.tkey = tilekey.tileKey ( self.dsid, self.res, self.xtile, self.ytile, self.zslice )
 
 
@@ -39,7 +44,7 @@ class Tile:
     """Configure the database when you need to get data from remote site"""
 
     import tilecache
-    self.tc = tilecache.TileCache(self.token)
+    self.tc = tilecache.TileCache(self.token,self.channels)
   
     # TODO call projinfo to get all the configuration information (use the JSON version)
     self.zdim = self.tc.info['dataset']['cube_dimension']['{}'.format(self.res)][2]
@@ -61,14 +66,19 @@ class Tile:
     self.zmax = min ((self.zslab+1)*self.zdim+self.zoffset,self.zimagesize)
 
     # Build the URLs
-    cutout = '{}/{},{}/{},{}/{},{}'.format(self.res,self.xmin,self.xmax,self.ymin,self.ymax,self.zmin,self.zmax)
-    self.cuboidurl = "http://{}/ocpca/{}/npz/{}/".format(settings.SERVER,self.token,cutout)
+    if self.channels == None:
+      cutout = '{}/{},{}/{},{}/{},{}'.format(self.res,self.xmin,self.xmax,self.ymin,self.ymax,self.zmin,self.zmax)
+      self.cuboidurl = "http://{}/ocpca/{}/npz/{}/".format(settings.SERVER,self.token,cutout)
+      self.tileurl = "http://{}/catmaid/{}/512/{}/{}/{}/{}/".format(settings.SERVER,self.token,self.res,self.xtile,self.ytile,self.zslice)
+    else:
+      cutout = '{}/{}/{},{}/{},{}/{},{}'.format(self.channels,self.res,self.xmin,self.xmax,self.ymin,self.ymax,self.zmin,self.zmax)
+      self.cuboidurl = "http://{}/ocpca/{}/npz/{}/".format(settings.SERVER,self.token,cutout)
+      self.tileurl = "http://{}/catmaid/mcfc/{}/512/{}/{}/{}/{}/{}/".format(settings.SERVER,self.token,self.channels,self.res,self.xtile,self.ytile,self.zslice)
 
-    self.tileurl = "http://{}/catmaid/{}/512/{}/{}/{}/{}/".format(settings.SERVER,self.token,self.res,self.xtile,self.ytile,self.zslice)
 
   def fetch (self):
     """Retrieve the tile from the cache or load the cache and return"""
-    
+
     try:
 
       # open file and return

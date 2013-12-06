@@ -203,11 +203,11 @@ class CacheDB:
     self.decrease ( numitems )
     self.conn.commit()
 
-  def getDatasetKey ( self, token ):
+  def getDatasetKey ( self, datasetname ):
 
     cursor = self.conn.cursor()
 
-    sql = "SELECT (datasetid) FROM datasets WHERE dataset='{}';".format(token)
+    sql = "SELECT (datasetid) FROM datasets WHERE dataset='{}';".format(datasetname)
     try:
       cursor.execute ( sql )
     except MySQLdb.Error, e:
@@ -222,7 +222,7 @@ class CacheDB:
     else:
       return r[0]
 
-  def addDataset ( self, token ):
+  def addDataset ( self, datasetname ):
     """Add a dataset to the list of cacheable datasets"""
 
     
@@ -232,7 +232,7 @@ class CacheDB:
 # because `I can't figure out how to read the autoincrement value
 #    sql = "START TRANSACTION;"
     sql = ""
-    sql += "INSERT INTO datasets (dataset) VALUES ('{}');".format(token)
+    sql += "INSERT INTO datasets (dataset) VALUES ('{}');".format(datasetname)
     try:
       cursor.execute ( sql )
     except MySQLdb.Error, e:

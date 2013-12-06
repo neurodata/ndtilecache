@@ -21,10 +21,11 @@ logger=logging.getLogger("ocpcatmaid")
 
 class TileCache:
 
-  def __init__ (self, token):
+  def __init__ (self, token, channels):
     """Setup the state for this cache request"""
 
     self.token = token
+    self.channels = channels
 
     self.db = cachedb.CacheDB (  )
 
@@ -111,7 +112,11 @@ class TileCache:
       os.makedirs ( settings.CACHE_DIR + "/" +  self.token )
       # when making the directory, create a dataset
       try:
-        self.db.addDataset ( self.token )
+        if self.channels == None:
+          datasetname = self.token
+        else: 
+          datasetname = self.token + self.channels
+        self.db.addDataset ( datasetname )
       except MySQLdb.Error, e:
         logger.warning ("Failed to create dataset.  Already exists in database, but not cache. {}:{}.".format(e.args[0], e.args[1]))
 
