@@ -6,7 +6,6 @@ import argparse
 
 import cachedb
 
-
 # Make it so that you can get settings from django
 import os
 import sys
@@ -14,12 +13,23 @@ sys.path += [os.path.abspath('..')]
 os.environ['DJANGO_SETTINGS_MODULE'] = 'ocpcatmaid.settings'
 
 from django.conf import settings
+from django.db import models
+from ocptilecache.models import ProjectServer
 
 
 def prefetch ( token, res, xmin, xmax, ymin, ymax, zmin, zmax ):
   """Script to prefetch a cutout region"""
 
-  url = 'http://{}/ocpca/{}/info/'.format(settings.SERVER,token)
+  import pdb; pdb.set_trace()
+
+  # Check for a server for this token
+  projserver = ProjectServer.objects.filter(project=token)
+  if projserver.exists():
+    server = projserver[0].server
+  else:
+    server = settings.SERVER
+  
+  url = 'http://{}/ocpca/{}/info/'.format(server,token)
   try:
     f = urllib2.urlopen ( url )
   except urllib2.URLError, e:
