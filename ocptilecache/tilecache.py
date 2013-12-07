@@ -21,7 +21,7 @@ logger=logging.getLogger("ocpcatmaid")
 
 class TileCache:
 
-  def __init__ (self, token, channels):
+  def __init__ (self, token,channels):
     """Setup the state for this cache request"""
 
     self.token = token
@@ -41,13 +41,20 @@ class TileCache:
   def loadData (self, cuboidurl):
     """Load a cube of data into the cache"""
 
-    p = re.compile('^http://.*/ocpca/\w+/npz/(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+),(\d+).*$')
+    p = re.compile('^http://.*/ca/\w+/npz/(?:([\w,-]+)/)?(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+),(\d+).*$')
     m = p.match(cuboidurl)
     if m == None:
       logger.error("Failed to parse url {}".format(cuboidurl))
       raise Exception ("Failed to parse url {}".format(cuboidurl))
 
-    [ res, xmin, xmax, ymin, ymax, zmin, zmax ] = map(int, m.groups())
+    channels = m.group(1)
+    res = int(m.group(2))
+    xmin = int(m.group(3))
+    xmax = int(m.group(4))
+    ymin = int(m.group(5))
+    ymax = int(m.group(6))
+    zmin = int(m.group(7))
+    zmax = int(m.group(8))
 
     # otherwise load a cube
     logger.warning ("Loading cache for %s" % (cuboidurl))
@@ -75,25 +82,40 @@ class TileCache:
       pagestr = zlib.decompress ( zdata[:] )
       pagefobj = cStringIO.StringIO ( pagestr )
 
+      # get the cutout data
+      cubedata=np.load(pagefobj)
+
+      # image proporties
       ximagesize, yimagesize = self.info['dataset']['imagesize']['{}'.format(res)]
       zimagesize = self.info['dataset']['slicerange'][1]+1
-
-      cubedata=np.load(pagefobj)
 
       # cube at a time
       zdim = self.info['dataset']['cube_dimension']['{}'.format(res)][2]
 
-      # Check to see is this is a partial cutout if so pad the space
-      if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
-        cuboid = np.zeros ( (zdim,settings.TILESIZE,settings.TILESIZE), dtype=cubedata.dtype)
-        cuboid[0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
+      # 3d cutout if not a channel database
+      if self.channels == None:
+
+        # Check to see is this is a partial cutout if so pad the space
+        if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
+          cuboid = np.zeros ( (zdim,settings.TILESIZE,settings.TILESIZE), dtype=cubedata.dtype)
+          cuboid[0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
+        else:
+          cuboid = cubedata
+
+      # multi-channel cutout.  turn into false color
       else:
-        cuboid = cubedata
+
+        # Check to see is this is a partial cutout if so pad the space
+        if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
+          cuboid = np.zeros ( (cubdedata.shape[0],zdim,settings.TILESIZE,settings.TILESIZE), dtype=cubedata.dtype)
+          cuboid[:,0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
+        else:
+          cuboid = cubedata
 
       xtile = xmin / settings.TILESIZE
       ytile = ymin / settings.TILESIZE
 
-      self.addCuboid( cuboid, res, xtile, ytile, zmin, zdim )
+      self.addCuboid ( cuboid, res, xtile, ytile, zmin, zdim )
 
       logger.warning ("Load suceeded for %s" % (cuboidurl))
     
@@ -106,34 +128,39 @@ class TileCache:
   def checkDirHier ( self, res ):
     """Ensure that the directories for caching exist"""
 
+    if self.channels == None:
+      datasetname = self.token
+    else: 
+      datasetname = self.token + self.channels
+
     try:
-      os.stat ( settings.CACHE_DIR + "/" +  self.token )
+      os.stat ( settings.CACHE_DIR + "/" + datasetname )
     except:
-      os.makedirs ( settings.CACHE_DIR + "/" +  self.token )
+      os.makedirs ( settings.CACHE_DIR + "/" +  datasetname )
       # when making the directory, create a dataset
       try:
-        if self.channels == None:
-          datasetname = self.token
-        else: 
-          datasetname = self.token + self.channels
         self.db.addDataset ( datasetname )
       except MySQLdb.Error, e:
         logger.warning ("Failed to create dataset.  Already exists in database, but not cache. {}:{}.".format(e.args[0], e.args[1]))
 
-
     try:
-      os.stat ( settings.CACHE_DIR + "/" +  self.token + "/r" + str(res) )
+      os.stat ( settings.CACHE_DIR + "/" +  datasetname + "/r" + str(res) )
     except:
-      os.makedirs ( settings.CACHE_DIR + "/" +  self.token + "/r" + str(res) )
+      os.makedirs ( settings.CACHE_DIR + "/" + datasetname + "/r" + str(res) )
 
 
   def checkZDirHier ( self, res, zslice ):
     """Ensure that the directories for caching exist"""
 
+    if self.channels == None:
+      datasetname = self.token
+    else:
+      datasetname = self.token + self.channels
+
     try:
-      os.stat ( settings.CACHE_DIR + "/" +  self.token + "/r" + str(res) + '/z' + str(zslice) )
+      os.stat ( settings.CACHE_DIR + "/" +  datasetname + "/r" + str(res) + '/z' + str(zslice) )
     except:
-      os.makedirs ( settings.CACHE_DIR + "/" +  self.token + "/r" + str(res) + '/z' + str(zslice) )
+      os.makedirs ( settings.CACHE_DIR + "/" +  datasetname + "/r" + str(res) + '/z' + str(zslice) )
 
 
 
@@ -149,18 +176,29 @@ class TileCache:
     # counter of how many new tiles we get
     newtiles = 0
 
+    # number of tiles
+    if self.channels == None:
+      numtiles = cuboid.shape[0]
+    else:
+      numtiles = cuboid.shape[1]
+
     # add each image slice to memcache
-    for z in range(cuboid.shape[0]):
+    for z in range(numtiles):
+
       self.checkZDirHier(res,z+zmin)
-      tilefname = '{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,res,z+zmin,ytile,xtile)
+      if self.channels == None:
+        tilefname = '{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,res,z+zmin,ytile,xtile)
+        img = self.tile2WebPNG ( cuboid[z,:,:] )
+      else:
+        tilefname = '{}/{}{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.channels,res,z+zmin,ytile,xtile)
+        img = self.channels2WebPNG ( cuboid[:,z,:,:] )
+
       fobj = open ( tilefname, "w" )
-      img = self.tile2WebPNG ( cuboid[z,:,:] )
       img.save ( fobj, "PNG" )
       try:
-        self.db.insert ( tilekey.tileKey(dsid,res,xtile,ytile,z+zmin), tilefname )
-        newtiles += 1
-      except MySQLdb.Error, e:
-        # ignore duplicate entries
+        self.db.insert ( tilekey.tileKey(dsid,res,xtile,ytile,z+zmin), tilefname ) 
+        newtiles += 1 
+      except MySQLdb.Error, e: # ignore duplicate entries
         if e.args[0] != 1062:  
           raise
 
@@ -168,8 +206,6 @@ class TileCache:
     self.harvest()
 
 
-  # Put false color back in later.
-  #def tile2WebPNG ( self, tile, color, brightness ):
   def tile2WebPNG ( self, tile ):
     """Create PNG Images and write to cache for the specified tile"""
 
@@ -183,6 +219,59 @@ class TileCache:
       outimage = Image.frombuffer ( 'I;16', [settings.TILESIZE,settings.TILESIZE], tile.flatten(), 'raw', 'I;16', 0, 1)
       outimage = outimage.point(lambda i:i*(1./256)).convert('L')
       return outimage
+
+  def channels2WebPNG ( self, chantile ):
+    """generate a false color image from multiple channels"""
+
+    combined_img = np.zeros ((chantile.shape[1], chantile.shape[2]), dtype=np.uint32 )
+
+        # reduction factor
+    if chantile.dtype == np.uint8:
+      scaleby = 1
+    elif chantile.dtype == np.uint16:
+      scaleby = 1.0/256 
+    else:
+      assert 0 #RBTODO error
+
+    for i in range(chantile.shape[0]):
+    
+      data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
+
+      # First channel is cyan
+      if i == 0:
+        combined_img = 0xFF000000 + np.left_shift(data32,8) + np.left_shift(data32,16)
+      # Second is Magenta
+      elif i == 1:
+        combined_img +=  np.left_shift(data32,16) + data32
+      # Thirs is yellow
+      elif i == 2:
+        combined_img +=  np.left_shift(data32,8) + data32
+      # Fourth is Red
+      elif i == 3:
+        combined_img +=  data32
+      # Fourth is Red
+      elif i == 3:
+        data32 = np.array ( cb.data * scaleby, dtype=np.uint32 )
+        combined_img +=  data32
+      # Fifth is Green
+      elif i == 4:
+        data32 = np.array ( cb.data * scaleby, dtype=np.uint32 )
+        combined_img += np.left_shift(data32,8)
+      # Sixth is Blue
+      elif i == 5:
+        data32 = np.array ( cb.data * scaleby, dtype=np.uint32 )
+        combined_img +=  np.left_shift(data32,16)
+      else:
+        assert 0  #RBTODO good error
+    
+    outimage =  Image.frombuffer ( 'RGBA', combined_img.shape, combined_img.flatten(), 'raw', 'RGBA', 0, 1 )
+
+    # Enhance the image
+    from PIL import ImageEnhance
+    enhancer = ImageEnhance.Brightness(outimage)
+    outimage = enhancer.enhance(4.0)
+
+    return outimage
 
 
   def harvest ( self ):

@@ -25,7 +25,7 @@ class Tile:
     if self.channels == None:
       self.filename = '{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.res,self.zslice,self.ytile,self.xtile)
     else:
-      self.filename = '{}/{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.channels,self.res,self.zslice,self.ytile,self.xtile)
+      self.filename = '{}/{}{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.channels,self.res,self.zslice,self.ytile,self.xtile)
 
     # cutout a a tilesize region
     self.xdim = settings.TILESIZE
@@ -68,11 +68,11 @@ class Tile:
     # Build the URLs
     if self.channels == None:
       cutout = '{}/{},{}/{},{}/{},{}'.format(self.res,self.xmin,self.xmax,self.ymin,self.ymax,self.zmin,self.zmax)
-      self.cuboidurl = "http://{}/ocpca/{}/npz/{}/".format(settings.SERVER,self.token,cutout)
+      self.cuboidurl = "http://{}/ca/{}/npz/{}/".format(settings.SERVER,self.token,cutout)
       self.tileurl = "http://{}/catmaid/{}/512/{}/{}/{}/{}/".format(settings.SERVER,self.token,self.res,self.xtile,self.ytile,self.zslice)
     else:
       cutout = '{}/{}/{},{}/{},{}/{},{}'.format(self.channels,self.res,self.xmin,self.xmax,self.ymin,self.ymax,self.zmin,self.zmax)
-      self.cuboidurl = "http://{}/ocpca/{}/npz/{}/".format(settings.SERVER,self.token,cutout)
+      self.cuboidurl = "http://{}/ca/{}/npz/{}/".format(settings.SERVER,self.token,cutout)
       self.tileurl = "http://{}/catmaid/mcfc/{}/512/{}/{}/{}/{}/{}/".format(settings.SERVER,self.token,self.channels,self.res,self.xtile,self.ytile,self.zslice)
 
 
@@ -92,7 +92,7 @@ class Tile:
 
       # call the celery process to fetch the url
       from ocptilecache.tasks import fetchurl
-      fetchurl.delay ( self.cuboidurl, self.tc.info )
+      fetchurl.delay ( self.token, self.channels, self.cuboidurl )
 
       logger.warning("CATMAID tile fetch {}".format(self.tileurl))
       try:
