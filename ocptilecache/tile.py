@@ -6,6 +6,9 @@ import tilekey
 import logging
 logger=logging.getLogger("ocpcatmaid")
 
+from django.db import models
+from ocptilecache.models import ProjectServer
+
 class Tile:
   """Information specific to a given tile in the tilecache"""
 
@@ -45,6 +48,13 @@ class Tile:
 
     import tilecache
     self.tc = tilecache.TileCache(self.token,self.channels)
+
+    # Check for a server for this token
+    projserver = ProjectServer.objects.filter(project=token)
+    if projserver.exists():
+      server = projserver[0].server
+    else:
+      server = settings.SERVER
   
     # TODO call projinfo to get all the configuration information (use the JSON version)
     self.zdim = self.tc.info['dataset']['cube_dimension']['{}'.format(self.res)][2]
@@ -68,12 +78,12 @@ class Tile:
     # Build the URLs
     if self.channels == None:
       cutout = '{}/{},{}/{},{}/{},{}'.format(self.res,self.xmin,self.xmax,self.ymin,self.ymax,self.zmin,self.zmax)
-      self.cuboidurl = "http://{}/ca/{}/npz/{}/".format(settings.SERVER,self.token,cutout)
-      self.tileurl = "http://{}/catmaid/{}/512/{}/{}/{}/{}/".format(settings.SERVER,self.token,self.res,self.xtile,self.ytile,self.zslice)
+      self.cuboidurl = "http://{}/ca/{}/npz/{}/".format(server,self.token,cutout)
+      self.tileurl = "http://{}/catmaid/{}/512/{}/{}/{}/{}/".format(server,self.token,self.res,self.xtile,self.ytile,self.zslice)
     else:
       cutout = '{}/{}/{},{}/{},{}/{},{}'.format(self.channels,self.res,self.xmin,self.xmax,self.ymin,self.ymax,self.zmin,self.zmax)
-      self.cuboidurl = "http://{}/ca/{}/npz/{}/".format(settings.SERVER,self.token,cutout)
-      self.tileurl = "http://{}/catmaid/mcfc/{}/512/{}/{}/{}/{}/{}/".format(settings.SERVER,self.token,self.channels,self.res,self.xtile,self.ytile,self.zslice)
+      self.cuboidurl = "http://{}/ca/{}/npz/{}/".format(server,self.token,cutout)
+      self.tileurl = "http://{}/catmaid/mcfc/{}/512/{}/{}/{}/{}/{}/".format(server,self.token,self.channels,self.res,self.xtile,self.ytile,self.zslice)
 
 
   def fetch (self):

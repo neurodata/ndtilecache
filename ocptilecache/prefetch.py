@@ -20,8 +20,6 @@ from ocptilecache.models import ProjectServer
 def prefetch ( token, res, xmin, xmax, ymin, ymax, zmin, zmax ):
   """Script to prefetch a cutout region"""
 
-  import pdb; pdb.set_trace()
-
   # Check for a server for this token
   projserver = ProjectServer.objects.filter(project=token)
   if projserver.exists():

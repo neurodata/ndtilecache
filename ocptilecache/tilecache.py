@@ -19,6 +19,10 @@ from ocpca_cy import recolor_cy
 import logging
 logger=logging.getLogger("ocpcatmaid")
 
+from django.db import models
+from ocptilecache.models import ProjectServer
+
+
 class TileCache:
 
   def __init__ (self, token,channels):
@@ -29,7 +33,14 @@ class TileCache:
 
     self.db = cachedb.CacheDB (  )
 
-    url = 'http://{}/ocpca/{}/info/'.format(settings.SERVER,self.token)
+    # Check for a server for this token
+    projserver = ProjectServer.objects.filter(project=token)
+    if projserver.exists():
+      server = projserver[0].server
+    else:
+      server = settings.SERVER
+
+    url = 'http://{}/ocpca/{}/info/'.format(server,self.token)
     try:
       f = urllib2.urlopen ( url )
     except urllib2.URLError, e:
@@ -293,7 +304,3 @@ class TileCache:
 
     else:
       logger.warning ( "Not harvesting cache of {} tiles.  Capacity {}.".format(numtiles,cachesize/512/512))
-
-
-
-
