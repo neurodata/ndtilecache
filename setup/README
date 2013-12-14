@@ -1,6 +1,6 @@
 
 
-** Configuration instrucitions for ubuntu nginx/uwsgi/supervisor **
+** Configuration instructions for ubuntu nginx/uwsgi/supervisor **
 
   * uWSGI: ocpcatmaid.ini goes in /etc/uwsgi/apps-enabled
 

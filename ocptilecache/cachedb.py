@@ -203,11 +203,11 @@ class CacheDB:
     self.decrease ( numitems )
     self.conn.commit()
 
-  def getDatasetKey ( self, token ):
+  def getDatasetKey ( self, datasetname ):
 
     cursor = self.conn.cursor()
 
-    sql = "SELECT (datasetid) FROM datasets WHERE dataset='{}';".format(token)
+    sql = "SELECT (datasetid) FROM datasets WHERE dataset='{}';".format(datasetname)
     try:
       cursor.execute ( sql )
     except MySQLdb.Error, e:
@@ -222,21 +222,56 @@ class CacheDB:
     else:
       return r[0]
 
-  def addDataset ( self, token ):
+  def addDataset ( self, datasetname ):
     """Add a dataset to the list of cacheable datasets"""
 
     
     cursor = self.conn.cursor()
 
-# I would like to run this as a transaction, but can't get it to work
-# because `I can't figure out how to read the autoincrement value
-#    sql = "START TRANSACTION;"
     sql = ""
-    sql += "INSERT INTO datasets (dataset) VALUES ('{}');".format(token)
+    sql += "INSERT INTO datasets (dataset) VALUES ('{}');".format(datasetname)
     try:
       cursor.execute ( sql )
     except MySQLdb.Error, e:
       logger.warning ("Failed to insert dataset %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
       raise
 
+    self.conn.commit()
+
+
+  def removeDataset ( self, datasetname ):
+
+    cursor = self.conn.cursor()
+
+    sql = "SELECT highkey, lowkey FROM contents WHERE filename LIKE '{}/{}/%';".format(settings.CACHE_DIR,datasetname)
+
+    try:
+      cursor.execute ( sql )
+    except MySQLdb.Error, e:
+      logger.warning ("Failed to query cache for dataset. %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
+      raise
+
+    result = cursor.fetchall()
+
+    if result==():
+      logger.warning("Found no cache entries for dataset {}.".format(datasetname))
+      return
+
+    tilekeys = [(int(item[0]),int(item[1])) for item in result]
+
+    numitems = len(tilekeys)
+
+    #files = [item[2] for item in result]
+    # don't need to delete the files.  will delete the entire directory.
+
+    sql = "DELETE FROM contents WHERE (highkey,lowkey) IN (%s)"
+    in_p=', '.join(map(lambda x: str(x), tilekeys))
+    sql = sql % in_p
+    try:
+      cursor.execute ( sql )
+    except MySQLdb.Error, e:
+      logger.warning ("Failed to remove items from cache %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
+      raise
+
+    self.decrease ( numitems )
     self.conn.commit()

@@ -13,14 +13,11 @@ logger=logging.getLogger("ocpcatmaid")
 celery = Celery('tasks', broker='amqp://guest@localhost//')
 
 @celery.task()
-def fetchurl ( url, info ):
+def fetchurl ( token, channels, url ):
   """Fetch the requested url."""
 
   logger.warning ("Fetching url {}".format(url))
-  p = re.compile('^http://.*/ocpca/(\w+)/.*$')
-  m = p.match(url)
-  token = m.group(1)
-  tc = tilecache.TileCache ( token )
+  tc = tilecache.TileCache ( token, channels )
   tc.loadData(url)
 
 # automatic routing not working in django.  No big deal.  Specify the queue explicitly.
