@@ -33,12 +33,12 @@ class TileCache:
 
     self.db = cachedb.CacheDB (  )
 
-    # Check for a server for this token
-    projserver = ProjectServer.objects.filter(project=token)
-    if projserver.exists():
-      server = projserver[0].server
-    else:
-      server = settings.SERVER
+    ## Check for a server for this token
+    #projserver = ProjectServer.objects.filter(project=token)
+    ##if projserver.exists():
+    #  server = projserver[0].server
+    #else:
+    server = settings.SERVER
 
     url = 'http://{}/ocpca/{}/info/'.format(server,self.token)
     try:
