@@ -50,11 +50,12 @@ class Tile:
     self.tc = tilecache.TileCache(self.token,self.channels)
 
     # Check for a server for this token
-    projserver = ProjectServer.objects.filter(project=token)
-    if projserver.exists():
-      server = projserver[0].server
-    else:
-      server = settings.SERVER
+# RB TODO you never implemented a different server per project
+#    projserver = ProjectServer.objects.filter(project=token)
+#    if projserver.exists():
+#      server = projserver[0].server
+#    else:
+    server = settings.SERVER
   
     # TODO call projinfo to get all the configuration information (use the JSON version)
     self.zdim = self.tc.info['dataset']['cube_dimension']['{}'.format(self.res)][2]
