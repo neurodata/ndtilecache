@@ -118,7 +118,7 @@ class TileCache:
 
         # Check to see is this is a partial cutout if so pad the space
         if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
-          cuboid = np.zeros ( (cubdedata.shape[0],zdim,settings.TILESIZE,settings.TILESIZE), dtype=cubedata.dtype)
+          cuboid = np.zeros ( (cubedata.shape[0],zdim,settings.TILESIZE,settings.TILESIZE), dtype=cubedata.dtype)
           cuboid[:,0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
         else:
           cuboid = cubedata
@@ -234,7 +234,7 @@ class TileCache:
   def channels2WebPNG ( self, chantile ):
     """generate a false color image from multiple channels"""
 
-    chanlist = map(int, self.channels.split(','))
+    chanlist = self.channels.split(',')
 
     combined_img = np.zeros ((chantile.shape[1], chantile.shape[2]), dtype=np.uint32 )
 
@@ -268,15 +268,12 @@ class TileCache:
         combined_img +=  data32
       # Fourth is Red
       elif i == 3:
-        data32 = np.array ( cb.data * scaleby, dtype=np.uint32 )
         combined_img +=  data32
       # Fifth is Green
       elif i == 4:
-        data32 = np.array ( cb.data * scaleby, dtype=np.uint32 )
         combined_img += np.left_shift(data32,8)
       # Sixth is Blue
       elif i == 5:
-        data32 = np.array ( cb.data * scaleby, dtype=np.uint32 )
         combined_img +=  np.left_shift(data32,16)
       else:
         assert 0  #RBTODO good error
