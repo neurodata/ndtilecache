@@ -234,6 +234,8 @@ class TileCache:
   def channels2WebPNG ( self, chantile ):
     """generate a false color image from multiple channels"""
 
+    chanlist = map(int, self.channels.split(','))
+
     combined_img = np.zeros ((chantile.shape[1], chantile.shape[2]), dtype=np.uint32 )
 
         # reduction factor
@@ -245,6 +247,10 @@ class TileCache:
       assert 0 #RBTODO error
 
     for i in range(chantile.shape[0]):
+
+      # don't add the zero channels
+      if chanlist[i] == 0:
+        continue
     
       data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
 
