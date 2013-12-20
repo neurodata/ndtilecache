@@ -59,7 +59,7 @@ class Tile:
   
     # TODO call projinfo to get all the configuration information (use the JSON version)
     self.zdim = self.tc.info['dataset']['cube_dimension']['{}'.format(self.res)][2]
-
+    
     # get max values for the cutout
     self.ximagesize, self.yimagesize = self.tc.info['dataset']['imagesize']['{}'.format(self.res)]
     self.zoffset = self.tc.info['dataset']['slicerange'][0]
