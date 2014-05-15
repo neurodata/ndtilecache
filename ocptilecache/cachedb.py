@@ -203,6 +203,54 @@ class CacheDB:
     self.decrease ( numitems )
     self.conn.commit()
 
+
+  def removeProject ( self, prefix ):
+    """Remove all cache entries for a given project"""
+
+    cursor = self.conn.cursor()
+
+    sql = "SELECT highkey, lowkey, filename FROM contents WHERE filename LIKE '{}%'".format(prefix)
+    try:
+      cursor.execute ( sql )
+    except MySQLdb.Error, e:
+      logger.warning ("Failed to query cache for token %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
+      raise
+
+    result = cursor.fetchall()
+    tilekeys = [(int(item[0]),int(item[1])) for item in result]
+    files = [item[2] for item in result]
+
+    # only process if there are things to do
+    if not files:
+      return
+
+    # how many items are we removing
+    numitems = len(files)
+
+    # Delete the files
+    for fname in files:
+      # remove the file but don't quit
+      try:
+        os.remove ( fname )
+      except Exception, e:
+        logger.error("Failed to remove file %s. Error %s" % ( fname, e ))
+
+    import pdb; pdb.set_trace()
+
+
+    sql = "DELETE FROM contents WHERE (highkey,lowkey) IN (%s)"
+    in_p=', '.join(map(lambda x: str(x), tilekeys))
+    sql = sql % in_p
+    try:
+      cursor.execute ( sql )
+    except MySQLdb.Error, e:
+      logger.warning ("Failed to remove items from cache %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
+      raise
+
+    self.decrease ( numitems )
+    self.conn.commit()
+
+
   def getDatasetKey ( self, token ):
 
     cursor = self.conn.cursor()
@@ -222,9 +270,9 @@ class CacheDB:
     else:
       return r[0]
 
+
   def addDataset ( self, token ):
     """Add a dataset to the list of cacheable datasets"""
-
     
     cursor = self.conn.cursor()
 
