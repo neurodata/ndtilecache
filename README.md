@@ -1,7 +1,9 @@
 ocpcatmaid
 ==========
 
-Caching gateway to connect a CATMAID server to the Open Connectome Project Web Services
+Caching gateway to connect a CATMAID server to the Open Connectome Project Web Services.
+
+This repository can be cited using DOI http://dx.doi.org/10.5281/zenodo.9992
 
   ** setup **
   
