@@ -29,6 +29,7 @@ import cachedb
 import tilekey
 
 from ocpca_cy import recolor_cy
+from windowcutout import windowCutout
 
 import logging
 logger=logging.getLogger("ocpcatmaid")
@@ -207,6 +208,13 @@ class TileCache:
     else:
       numtiles = cuboid.shape[1]
 
+    # get the dataset window range
+    startwindow, endwindow = self.info['dataset']['windowrange']
+
+    # windodcutout function if window is non-zero
+    if endwindow !=0:
+        windowCutout ( cuboid, (startwindow,endwindow) )
+
     # add each image slice to memcache
     for z in range(numtiles):
 
@@ -249,14 +257,19 @@ class TileCache:
     """generate a false color image from multiple channels"""
 
     chanlist = self.channels.split(',')
+    
+    # get the dataset window range
+    startwindow, endwindow = self.info['dataset']['windowrange']
 
     combined_img = np.zeros ((chantile.shape[1], chantile.shape[2]), dtype=np.uint32 )
 
-        # reduction factor
+    # reduction factor
     if chantile.dtype == np.uint8:
       scaleby = 1
-    elif chantile.dtype == np.uint16:
+    elif chantile.dtype == np.uint16 and ( startwindow==0 and endwindow==0 ):
       scaleby = 1.0/256 
+    elif chantile.dtype == np.uint16 and ( endwindow!=0 ):
+      scaleby = 1 
     else:
       assert 0 #RBTODO error
 
@@ -295,9 +308,10 @@ class TileCache:
     outimage =  Image.frombuffer ( 'RGBA', combined_img.shape, combined_img.flatten(), 'raw', 'RGBA', 0, 1 )
 
     # Enhance the image
-    from PIL import ImageEnhance
-    enhancer = ImageEnhance.Brightness(outimage)
-    outimage = enhancer.enhance(4.0)
+    if startwindow==0 and endwindow==0:
+        from PIL import ImageEnhance
+        enhancer = ImageEnhance.Brightness(outimage)
+        outimage = enhancer.enhance(4.0)
 
     return outimage
 
