@@ -305,6 +305,9 @@ class TileCache:
       else:
         assert 0  #RBTODO good error
     
+    # Set the alpha channel only for non-zero pixels
+    combined_img = np.where ( combined_img > 0, combined_img + 0xFF000000, 0 )
+
     outimage =  Image.frombuffer ( 'RGBA', combined_img.shape, combined_img.flatten(), 'raw', 'RGBA', 0, 1 )
 
     # Enhance the image
