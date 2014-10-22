@@ -118,6 +118,7 @@ class Tile:
       # call the celery process to fetch the url
       from ocptilecache.tasks import fetchurl
       fetchurl.delay ( self.token, self.channels, self.cuboidurl )
+      #fetchurl ( self.token, self.channels, self.cuboidurl )
 
       logger.warning("CATMAID tile fetch {}".format(self.tileurl))
       try:

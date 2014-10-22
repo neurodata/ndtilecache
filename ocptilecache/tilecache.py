@@ -253,14 +253,16 @@ class TileCache:
       outimage = outimage.point(lambda i:i*(1./256)).convert('L')
       return outimage
 
+
   def channels2WebPNG ( self, chantile ):
     """generate a false color image from multiple channels"""
 
     chanlist = self.channels.split(',')
+    chanlist = self.channelsToInt ( chanlist )
     
     # get the dataset window range
     startwindow, endwindow = self.info['dataset']['windowrange']
-
+    
     combined_img = np.zeros ((chantile.shape[1], chantile.shape[2]), dtype=np.uint32 )
 
     # reduction factor
@@ -279,28 +281,31 @@ class TileCache:
       if chanlist[i] == 0:
         continue
     
-      data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
+      #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
 
       # First channel is cyan
       if i == 0:
-        combined_img = 0xFF000000 + np.left_shift(data32,8) + np.left_shift(data32,16)
+        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
+        combined_img = np.left_shift(data32,8) + np.left_shift(data32,16)
       # Second is Magenta
       elif i == 1:
+        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
         combined_img +=  np.left_shift(data32,16) + data32
-      # Thirs is yellow
+      # Third is yellow
       elif i == 2:
+        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
         combined_img +=  np.left_shift(data32,8) + data32
       # Fourth is Red
       elif i == 3:
-        combined_img +=  data32
-      # Fourth is Red
-      elif i == 3:
+        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
         combined_img +=  data32
       # Fifth is Green
       elif i == 4:
+        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
         combined_img += np.left_shift(data32,8)
       # Sixth is Blue
       elif i == 5:
+        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
         combined_img +=  np.left_shift(data32,16)
       else:
         assert 0  #RBTODO good error
@@ -338,3 +343,19 @@ class TileCache:
 
     else:
       logger.warning ( "Not harvesting cache of {} tiles.  Capacity {}.".format(numtiles,cachesize/512/512))
+  
+
+  def channelsToInt ( self, chanlist ):
+    """ Go through the list of channels and rewrite all names to integer identifiers """
+
+    outchannels = []
+
+    for chan in chanlist:
+      # integers are kept
+      if re.match ('^\d+$', chan):
+        outchannels.append( int(chan) )
+      # Anything else rewritten
+      else:
+        outchannels.append( self.info['channels'].get(chan) )
+
+    return outchannels
