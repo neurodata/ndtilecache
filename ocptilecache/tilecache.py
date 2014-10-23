@@ -27,6 +27,7 @@ from django.conf import settings
 
 import cachedb
 import tilekey
+import dbtype
 
 from ocpca_cy import recolor_cy
 from windowcutout import windowCutout
@@ -62,6 +63,7 @@ class TileCache:
       raise
 
     self.info = json.loads ( f.read() )
+    self.dbtype = self.info['project'].get('projecttype')
 
 
   def loadData (self, cuboidurl):
@@ -243,15 +245,20 @@ class TileCache:
     """Create PNG Images and write to cache for the specified tile"""
 
     # write it as a png file
-    if tile.dtype==np.uint8:
+    if self.dbtype == dbtype.IMAGES_8bit :
       return Image.frombuffer ( 'L', [settings.TILESIZE,settings.TILESIZE], tile.flatten(), 'raw', 'L', 0, 1 )
-    elif tile.dtype==np.uint32:
+    elif self.dbtype == dbtype.ANNOTATIONS :
       recolor_cy (tile, tile)
       return Image.frombuffer ( 'RGBA', [settings.TILESIZE,settings.TILESIZE], tile.flatten(), 'raw', 'RGBA', 0, 1 )
-    elif tile.dtype==np.uint16:
+    elif self.dbtype == dbtype.IMAGES_16bit :
       outimage = Image.frombuffer ( 'I;16', [settings.TILESIZE,settings.TILESIZE], tile.flatten(), 'raw', 'I;16', 0, 1)
       outimage = outimage.point(lambda i:i*(1./256)).convert('L')
-      return outimage
+    elif self.dbtype == dbtype.RGB_32bit :
+      outimage = Image.fromarray( tile, 'RGBA')
+    else :
+      logger.warning ( "Datatype not yet supported".format(self.dbtype) )
+
+    return outimage
 
 
   def channels2WebPNG ( self, chantile ):
