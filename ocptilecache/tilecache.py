@@ -39,10 +39,11 @@ from ocptilecache.models import ProjectServer
 
 class TileCache:
 
-  def __init__ (self, token,channels):
+  def __init__ (self, token, slicetype, channels):
     """Setup the state for this cache request"""
 
     self.token = token
+    self.slicetype = slicetype
     self.channels = channels
 
     self.db = cachedb.CacheDB (  )
@@ -115,33 +116,60 @@ class TileCache:
       zimagesize = self.info['dataset']['slicerange'][1]+1
 
       # cube at a time
-      zdim = self.info['dataset']['cube_dimension']['{}'.format(res)][2]
+      ( xdim,ydim,zdim ) = self.info['dataset']['cube_dimension']['{}'.format(res)]
 
-      # 3d cutout if not a channel database
-      if self.channels == None:
+      if self.slicetype == 'xy':
 
-        # Check to see is this is a partial cutout if so pad the space
-        if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
-          cuboid = np.zeros ( (zdim,settings.TILESIZE,settings.TILESIZE), dtype=cubedata.dtype)
-          cuboid[0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
+        # 3d cutout if not a channel database
+        if self.channels == None:
+
+          # Check to see is this is a partial cutout if so pad the space
+          if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
+            cuboid = np.zeros ( (zdim,settings.TILESIZE,settings.TILESIZE), dtype=cubedata.dtype)
+            cuboid[0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
+          else:
+            cuboid = cubedata
+
+        # multi-channel cutout.  turn into false color
         else:
-          cuboid = cubedata
 
-      # multi-channel cutout.  turn into false color
-      else:
+          # Check to see is this is a partial cutout if so pad the space
+          if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
+            cuboid = np.zeros ( (cubedata.shape[0],zdim,settings.TILESIZE,settings.TILESIZE), dtype=cubedata.dtype)
+            cuboid[:,0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
+          else:
+            cuboid = cubedata
 
-        # Check to see is this is a partial cutout if so pad the space
-        if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
-          cuboid = np.zeros ( (cubedata.shape[0],zdim,settings.TILESIZE,settings.TILESIZE), dtype=cubedata.dtype)
-          cuboid[:,0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
+        xtile = xmin / settings.TILESIZE
+        ytile = ymin / settings.TILESIZE
+
+        self.addXYCuboid ( cuboid, res, xtile, ytile, zmin, zdim )
+
+      elif self.slicetype == 'xz':
+
+        # 3d cutout if not a channel database
+        if self.channels == None:
+
+          # Check to see is this is a partial cutout if so pad the space
+          if (xmax==ximagesize or ymax==yimagesize or zmax==zimagesize):
+            cuboid = np.zeros ( (settings.TILESIZE,ydim,settings.TILESIZE), dtype=cubedata.dtype)
+            cuboid[0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
+          else:
+            cuboid = cubedata
+
         else:
-          cuboid = cubedata
+          # Check to see is this is a partial cutout if so pad the space
+          if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
+            cuboid = np.zeros ( (cubedata.shape[0],settings.TILESIZE,ydim,settings.TILESIZE), dtype=cubedata.dtype)
+            cuboid[:,0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
+          else:
+            cuboid = cubedata
 
-      xtile = xmin / settings.TILESIZE
-      ytile = ymin / settings.TILESIZE
+        xtile = xmin / settings.TILESIZE
+        ztile = zmin / settings.TILESIZE
 
-      self.addCuboid ( cuboid, res, xtile, ytile, zmin, zdim )
-
+        self.addXZCuboid ( cuboid, res, xtile, ztile, ymin, ydim )
+      
       logger.warning ("Load suceeded for %s" % (cuboidurl))
     
     finally:
@@ -154,9 +182,9 @@ class TileCache:
     """Ensure that the directories for caching exist"""
 
     if self.channels == None:
-      datasetname = self.token
+      datasetname = self.slicetype + self.token 
     else: 
-      datasetname = self.token + self.channels
+      datasetname = self.slicetype + self.token + self.channels
 
     try:
       os.stat ( settings.CACHE_DIR + "/" + datasetname )
@@ -178,9 +206,9 @@ class TileCache:
     """Ensure that the directories for caching exist"""
 
     if self.channels == None:
-      datasetname = self.token
+      datasetname = self.slicetype + self.token
     else:
-      datasetname = self.token + self.channels
+      datasetname = self.slicetype + self.token + self.channels
 
     try:
       os.stat ( settings.CACHE_DIR + "/" +  datasetname + "/r" + str(res) + '/z' + str(zslice) )
@@ -188,15 +216,28 @@ class TileCache:
       os.makedirs ( settings.CACHE_DIR + "/" +  datasetname + "/r" + str(res) + '/z' + str(zslice) )
 
 
+  def checkYDirHier ( self, res, yslice ):
+    """ Ensure that the directories for caching exist """
 
-  def addCuboid ( self, cuboid, res, xtile, ytile, zmin, zdim ):
+    if self.channels == None:
+      datasetname = self.slicetype + self.token
+    else:
+      datasetname = self.slicetype + self.token + self.channels
+
+    try:
+      os.stat ( settings.CACHE_DIR + "/" +  datasetname + "/r" + str(res) + '/y' + str(yslice) )
+    except:
+      os.makedirs ( settings.CACHE_DIR + "/" +  datasetname + "/r" + str(res) + '/y' + str(yslice) )
+
+
+  def addXYCuboid ( self, cuboid, res, xtile, ytile, zmin, zdim ):
     """Add the cutout to the cache"""
 
     # will create the dataset if it doesn't exist
     self.checkDirHier(res)
 
     # get the dataset id for this token
-    dsid = self.db.getDatasetKey ( self.token )
+    dsid = self.db.getDatasetKey ( self.slicetype + self.token )
 
     # counter of how many new tiles we get
     newtiles = 0
@@ -212,10 +253,10 @@ class TileCache:
 
       self.checkZDirHier(res,z+zmin)
       if self.channels == None:
-        tilefname = '{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,res,z+zmin,ytile,xtile)
+        tilefname = '{}/{}{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.slicetype,self.token,res,z+zmin,ytile,xtile)
         img = self.tile2WebPNG ( cuboid[z,:,:] )
       else:
-        tilefname = '{}/{}{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.channels,res,z+zmin,ytile,xtile)
+        tilefname = '{}/{}{}{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.slicetype,self.token,self.channels,res,z+zmin,ytile,xtile)
         img = self.channels2WebPNG ( cuboid[:,z,:,:] )
 
       fobj = open ( tilefname, "w" )
@@ -231,6 +272,48 @@ class TileCache:
     self.harvest()
 
 
+  def addXZCuboid ( self, cuboid, res, xtile, ztile, ymin, ydim ):
+    """ Add the cutout to the cache """
+
+    # will create the dataset if it doesn't exist
+    self.checkDirHier(res)
+
+    # get the dataset id for this token
+    dsid = self.db.getDatasetKey ( self.slicetype + self.token )
+
+    # counter of how many new tiles we get
+    newtiles = 0
+
+    # number of tiles
+    if self.channels == None:
+      numtiles = cuboid.shape[1]
+    else:
+      numtiles = cuboid.shape[2]
+
+    # add each image slice to memcache
+    for y in range(numtiles):
+
+      self.checkYDirHier(res,y+ymin)
+      if self.channels == None:
+        tilefname = '{}/{}{}/r{}/y{}/z{}x{}.png'.format(settings.CACHE_DIR,self.slicetype,self.token,res,y+ymin,ztile,xtile)
+        img = self.tile2WebPNG ( cuboid[:,y,:] )
+      else:
+        tilefname = '{}/{}{}{}/r{}/y{}/z{}x{}.png'.format(settings.CACHE_DIR,self.slicetype,self.token,self.channels,res,y+ymin,ztile,xtile)
+        img = self.channels2WebPNG ( cuboid[:,:,y,:] )
+
+      fobj = open ( tilefname, "w" )
+      img.save ( fobj, "PNG" )
+      try:
+        self.db.insert ( tilekey.tileKey(dsid,res,xtile,y+ymin,ztile), tilefname ) 
+        newtiles += 1 
+      except MySQLdb.Error, e: # ignore duplicate entries
+        if e.args[0] != 1062:  
+          raise
+
+    self.db.increase ( newtiles )
+    self.harvest()
+  
+  
   def tile2WebPNG ( self, tile ):
     """Create PNG Images and write to cache for the specified tile"""
 

@@ -26,42 +26,42 @@ from ocptilecache.models import ProjectServer
 class Tile:
   """Information specific to a given tile in the tilecache"""
 
-  def __init__(self, token, res, xtile, ytile, zslice, channels):
+  def __init__(self, token, slicetype, res, xvalue, yvalue, zvalue, channels):
 
     import cachedb
     # do the fetch in the background
     self.db = cachedb.CacheDB()
 
     self.token = token
+    self.slicetype = slicetype
     self.res = res
-    self.xtile = xtile
-    self.ytile = ytile
-    self.zslice = zslice
+    self.xvalue = xvalue
+    self.yvalue = yvalue
+    self.zvalue = zvalue
     self.channels = channels
 
     if self.channels == None:
-      self.filename = '{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.res,self.zslice,self.ytile,self.xtile)
+      self.filename = '{}/{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype, self.res,self.zvalue,self.yvalue,self.xvalue)
     else:
-      self.filename = '{}/{}{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.channels,self.res,self.zslice,self.ytile,self.xtile)
+      self.filename = '{}/{}{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.channels,self.slicetype,self.res,self.zvalue,self.yvalue,self.xvalue)
 
     # cutout a a tilesize region
-    self.xdim = settings.TILESIZE
-    self.ydim = settings.TILESIZE
+    self.tilesize = settings.TILESIZE
 
     # get the dataset is for this token
     if self.channels == None:
-      datasetname = self.token
+      datasetname = self.slicetype + self.token
     else: 
-      datasetname = self.token + self.channels
+      datasetname = self.slicetype + self.token + self.channels
     self.dsid = self.db.getDatasetKey ( datasetname )
-    self.tkey = tilekey.tileKey ( self.dsid, self.res, self.xtile, self.ytile, self.zslice )
+    self.tkey = tilekey.tileKey ( self.dsid, self.res, self.xvalue, self.yvalue, self.zvalue )
 
 
   def initForFetch ( self ):
     """Configure the database when you need to get data from remote site"""
 
     import tilecache
-    self.tc = tilecache.TileCache(self.token,self.channels)
+    self.tc = tilecache.TileCache(self.token, self.slicetype, self.channels)
 
     # Check for a server for this token
 # RB TODO you never implemented a different server per project
@@ -72,7 +72,7 @@ class Tile:
     server = settings.SERVER
   
     # TODO call projinfo to get all the configuration information (use the JSON version)
-    self.zdim = self.tc.info['dataset']['cube_dimension']['{}'.format(self.res)][2]
+    (self.xdim,self.ydim,self.zdim) = self.tc.info['dataset']['cube_dimension']['{}'.format(self.res)]
     
     # get max values for the cutout
     self.ximagesize, self.yimagesize = self.tc.info['dataset']['imagesize']['{}'.format(self.res)]
@@ -80,25 +80,35 @@ class Tile:
     self.zimagesize = self.tc.info['dataset']['slicerange'][1]+1
 
     # these are relative to the cuboids in the server
-    self.zslab = (self.zslice-self.zoffset)/self.zdim
-    self.zoff = (self.zslice-self.zoffset)%self.zdim
 
-    self.xmin = self.xtile*self.xdim
-    self.xmax = min ((self.xtile+1)*self.xdim,self.ximagesize)
-    self.ymin = self.ytile*self.ydim
-    self.ymax = min ((self.ytile+1)*self.ydim,self.yimagesize)
-    self.zmin = (self.zslab)*self.zdim+self.zoffset
-    self.zmax = min ((self.zslab+1)*self.zdim+self.zoffset,self.zimagesize)
+    if self.slicetype == 'xy':
+      self.zslab = (self.zvalue-self.zoffset)/self.zdim
+      self.zoff = (self.zvalue-self.zoffset)%self.zdim
+      self.xmin = self.xvalue*self.tilesize
+      self.xmax = min ((self.xvalue+1)*self.tilesize,self.ximagesize)
+      self.ymin = self.yvalue*self.tilesize
+      self.ymax = min ((self.yvalue+1)*self.tilesize,self.yimagesize)
+      self.zmin = (self.zslab)*self.zdim+self.zoffset
+      self.zmax = min ((self.zslab+1)*self.zdim+self.zoffset,self.zimagesize)
+
+    elif self.slicetype == 'xz':
+      self.yslab = (self.yvalue)/self.ydim
+      self.xmin = self.xvalue*self.tilesize
+      self.xmax = min ((self.xvalue+1)*self.tilesize,self.ximagesize)
+      self.ymin = self.yslab*self.ydim
+      self.ymax = min ((self.yslab+1)*self.ydim,self.yimagesize)
+      self.zmin = (self.zvalue)*self.tilesize+self.zoffset
+      self.zmax = min ((self.zvalue+1)*self.tilesize+self.zoffset,self.zimagesize)
 
     # Build the URLs
     if self.channels == None:
       cutout = '{}/{},{}/{},{}/{},{}'.format(self.res,self.xmin,self.xmax,self.ymin,self.ymax,self.zmin,self.zmax)
       self.cuboidurl = "http://{}/ca/{}/npz/{}/".format(server,self.token,cutout)
-      self.tileurl = "http://{}/catmaid/{}/512/{}/{}/{}/{}/".format(server,self.token,self.res,self.xtile,self.ytile,self.zslice)
+      self.tileurl = "http://{}/catmaid/{}/{}/512/{}/{}/{}/{}/".format(server,self.token,self.slicetype,self.res,self.xvalue,self.yvalue,self.zvalue)
     else:
       cutout = '{}/{}/{},{}/{},{}/{},{}'.format(self.channels,self.res,self.xmin,self.xmax,self.ymin,self.ymax,self.zmin,self.zmax)
       self.cuboidurl = "http://{}/ca/{}/npz/{}/".format(server,self.token,cutout)
-      self.tileurl = "http://{}/catmaid/mcfc/{}/512/{}/{}/{}/{}/{}/".format(server,self.token,self.channels,self.res,self.xtile,self.ytile,self.zslice)
+      self.tileurl = "http://{}/catmaid/mcfc/{}/{}/512/{}/{}/{}/{}/{}/".format(server,self.token,self.slicetype,self.channels,self.res,self.xvalue,self.yvalue,self.zvalue)
 
 
   def fetch (self):
@@ -117,7 +127,8 @@ class Tile:
 
       # call the celery process to fetch the url
       from ocptilecache.tasks import fetchurl
-      fetchurl.delay ( self.token, self.channels, self.cuboidurl )
+      fetchurl.delay ( self.token, self.slicetype, self.channels, self.cuboidurl )
+      #fetchurl ( self.token, self.slicetype, self.channels, self.cuboidurl )
 
       logger.warning("CATMAID tile fetch {}".format(self.tileurl))
       try:

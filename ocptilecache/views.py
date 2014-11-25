@@ -23,19 +23,25 @@ def getTile ( request, webargs ):
   """Return a tile or load the cache"""
 
   # Parse the tile request and turn it into an OCP request
-#  p = re.compile("(\w+)/(\d+)/(\d+)_(\d+)_(\d+)\.png$")
-  p = re.compile("(\w+)/(?:([\w,-]+)/)?(\d+)/(\d+)_(\d+)_(\d+)\.png$")
+  #p = re.compile("(\w+)/(\d+)/(\d+)_(\d+)_(\d+)\.png$")
+  p = re.compile("(\w+)/(\w+)/(?:([\w,-]+)/)?(\d+)/(\d+)_(\d+)_(\d+)\.png$")
   m = p.match ( webargs )
 
-  token = m.group(1) 
-  channels = m.group(2)
-  zslice = int(m.group(3)) 
-  ytile = int(m.group(4)) 
-  xtile = int(m.group(5)) 
-  res = int(m.group(6))
+  token = m.group(1)
+  slicetype = m.group(2)
+  channels = m.group(3)
+  if slicetype == 'xy':
+    zvalue = int(m.group(4)) 
+    yvalue = int(m.group(5)) 
+    xvalue = int(m.group(6)) 
+  elif slicetype == 'xz':
+    yvalue = int(m.group(4))
+    zvalue = int(m.group(5)) 
+    xvalue = int(m.group(6)) 
+  res = int(m.group(7))
 
   try:
-    t = tile.Tile ( token, res, xtile, ytile, zslice, channels )
+    t = tile.Tile ( token, slicetype, res, xvalue, yvalue, zvalue, channels )
     tiledata = t.fetch()
     return django.http.HttpResponse(tiledata,mimetype='image/png')
   except Exception, e:
