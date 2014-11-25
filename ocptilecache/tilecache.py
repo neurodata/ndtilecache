@@ -27,8 +27,10 @@ from django.conf import settings
 
 import cachedb
 import tilekey
+import dbtype
 
 from ocpca_cy import recolor_cy
+from windowcutout import windowCutout
 
 import logging
 logger=logging.getLogger("ocpcatmaid")
@@ -62,6 +64,7 @@ class TileCache:
       raise
 
     self.info = json.loads ( f.read() )
+    self.dbtype = self.info['project'].get('projecttype')
 
 
   def loadData (self, cuboidurl):
@@ -248,6 +251,13 @@ class TileCache:
     else:
       numtiles = cuboid.shape[1]
 
+    # get the dataset window range
+    startwindow, endwindow = self.info['dataset']['windowrange']
+
+    # windodcutout function if window is non-zero
+    if endwindow !=0:
+        windowCutout ( cuboid, (startwindow,endwindow) )
+
     # add each image slice to memcache
     for z in range(numtiles):
 
@@ -318,28 +328,40 @@ class TileCache:
     """Create PNG Images and write to cache for the specified tile"""
 
     # write it as a png file
-    if tile.dtype==np.uint8:
+    if self.dbtype == dbtype.IMAGES_8bit :
       return Image.frombuffer ( 'L', [settings.TILESIZE,settings.TILESIZE], tile.flatten(), 'raw', 'L', 0, 1 )
-    elif tile.dtype==np.uint32:
+    elif self.dbtype == dbtype.ANNOTATIONS :
       recolor_cy (tile, tile)
       return Image.frombuffer ( 'RGBA', [settings.TILESIZE,settings.TILESIZE], tile.flatten(), 'raw', 'RGBA', 0, 1 )
-    elif tile.dtype==np.uint16:
+    elif self.dbtype == dbtype.IMAGES_16bit :
       outimage = Image.frombuffer ( 'I;16', [settings.TILESIZE,settings.TILESIZE], tile.flatten(), 'raw', 'I;16', 0, 1)
       outimage = outimage.point(lambda i:i*(1./256)).convert('L')
-      return outimage
+    elif self.dbtype == dbtype.RGB_32bit :
+      outimage = Image.fromarray( tile, 'RGBA')
+    else :
+      logger.warning ( "Datatype not yet supported".format(self.dbtype) )
+
+    return outimage
+
 
   def channels2WebPNG ( self, chantile ):
     """generate a false color image from multiple channels"""
 
     chanlist = self.channels.split(',')
-
+    chanlist = self.channelsToInt ( chanlist )
+    
+    # get the dataset window range
+    startwindow, endwindow = self.info['dataset']['windowrange']
+    
     combined_img = np.zeros ((chantile.shape[1], chantile.shape[2]), dtype=np.uint32 )
 
-        # reduction factor
+    # reduction factor
     if chantile.dtype == np.uint8:
       scaleby = 1
-    elif chantile.dtype == np.uint16:
+    elif chantile.dtype == np.uint16 and ( startwindow==0 and endwindow==0 ):
       scaleby = 1.0/256 
+    elif chantile.dtype == np.uint16 and ( endwindow!=0 ):
+      scaleby = 1 
     else:
       assert 0 #RBTODO error
 
@@ -349,38 +371,45 @@ class TileCache:
       if chanlist[i] == 0:
         continue
     
-      data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
+      #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
 
       # First channel is cyan
       if i == 0:
-        combined_img = 0xFF000000 + np.left_shift(data32,8) + np.left_shift(data32,16)
+        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
+        combined_img = np.left_shift(data32,8) + np.left_shift(data32,16)
       # Second is Magenta
       elif i == 1:
+        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
         combined_img +=  np.left_shift(data32,16) + data32
-      # Thirs is yellow
+      # Third is yellow
       elif i == 2:
+        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
         combined_img +=  np.left_shift(data32,8) + data32
       # Fourth is Red
       elif i == 3:
-        combined_img +=  data32
-      # Fourth is Red
-      elif i == 3:
+        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
         combined_img +=  data32
       # Fifth is Green
       elif i == 4:
+        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
         combined_img += np.left_shift(data32,8)
       # Sixth is Blue
       elif i == 5:
+        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
         combined_img +=  np.left_shift(data32,16)
       else:
         assert 0  #RBTODO good error
     
+    # Set the alpha channel only for non-zero pixels
+    combined_img = np.where ( combined_img > 0, combined_img + 0xFF000000, 0 )
+
     outimage =  Image.frombuffer ( 'RGBA', combined_img.shape, combined_img.flatten(), 'raw', 'RGBA', 0, 1 )
 
     # Enhance the image
-    from PIL import ImageEnhance
-    enhancer = ImageEnhance.Brightness(outimage)
-    outimage = enhancer.enhance(4.0)
+    if startwindow==0 and endwindow==0:
+        from PIL import ImageEnhance
+        enhancer = ImageEnhance.Brightness(outimage)
+        outimage = enhancer.enhance(4.0)
 
     return outimage
 
@@ -404,3 +433,19 @@ class TileCache:
 
     else:
       logger.warning ( "Not harvesting cache of {} tiles.  Capacity {}.".format(numtiles,cachesize/512/512))
+  
+
+  def channelsToInt ( self, chanlist ):
+    """ Go through the list of channels and rewrite all names to integer identifiers """
+
+    outchannels = []
+
+    for chan in chanlist:
+      # integers are kept
+      if re.match ('^\d+$', chan):
+        outchannels.append( int(chan) )
+      # Anything else rewritten
+      else:
+        outchannels.append( self.info['channels'].get(chan) )
+
+    return outchannels

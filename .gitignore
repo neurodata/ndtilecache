@@ -1,0 +1,10 @@
+# OCP Files
+settings_secret.py
+settings.py
+
+# Compiled Source
+.DS_Store
+*.pyc
+*.py~
+*.o
+*.so
