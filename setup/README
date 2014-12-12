@@ -7,3 +7,5 @@
   * supervisord: celery.ini and reclaim.ini go in /etc/supervisor/conf.d/
 
   * nginx: add the portions of default.nginx to /etc/nginx/sites-enabled/default
+
+  * apache: add the snippet to /etc/apache2/sites-enabled

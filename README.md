@@ -1,7 +1,9 @@
 ocpcatmaid
 ==========
 
-Caching gateway to connect a CATMAID server to the Open Connectome Project Web Services
+Caching gateway to connect a CATMAID server to the Open Connectome Project Web Services.
+
+This repository can be cited using DOI http://dx.doi.org/10.5281/zenodo.9992
 
   ** setup **
   
@@ -23,9 +25,10 @@ Caching gateway to connect a CATMAID server to the Open Connectome Project Web S
   Make directories for logging. It has to have permission for the Web server (www-data or your user for the development server)
 
     mkdir /var/log/ocpcatmaid
-    chown /var/log/ocpcatmaid www-data
+    chown www-data /var/log/ocpcatmaid 
     mkdir /var/log/celery
-    chown /var/log/celery www-data
+    chown www-data /var/log/celery 
+
 
   Starting the celery dev server.  The service uses two queues.  For testing you can start them together.  For deployments, we should have them running separately as daemons.
 

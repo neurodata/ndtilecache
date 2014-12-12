@@ -193,7 +193,7 @@ PASSWD = settings_secret.password
 TILESIZE = 512
 CACHE_DIR = '/data/cache'
 # CACHESIZE IN MB
-CACHE_SIZE = 256
+CACHE_SIZE = 1000000
 
 
 # Celery settings

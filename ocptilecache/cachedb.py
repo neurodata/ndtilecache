@@ -1,3 +1,17 @@
+# Copyright 2014 Open Connectome Project (http://openconnecto.me)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 from django.conf import settings
 
@@ -203,7 +217,6 @@ class CacheDB:
     self.decrease ( numitems )
     self.conn.commit()
 
-
   def removeProject ( self, prefix ):
     """Remove all cache entries for a given project"""
 
@@ -251,11 +264,11 @@ class CacheDB:
     self.conn.commit()
 
 
-  def getDatasetKey ( self, token ):
+  def getDatasetKey ( self, datasetname ):
 
     cursor = self.conn.cursor()
 
-    sql = "SELECT (datasetid) FROM datasets WHERE dataset='{}';".format(token)
+    sql = "SELECT (datasetid) FROM datasets WHERE dataset='{}';".format(datasetname)
     try:
       cursor.execute ( sql )
     except MySQLdb.Error, e:
@@ -271,20 +284,52 @@ class CacheDB:
       return r[0]
 
 
-  def addDataset ( self, token ):
+  def addDataset ( self, datasetname ):
     """Add a dataset to the list of cacheable datasets"""
     
     cursor = self.conn.cursor()
 
-# I would like to run this as a transaction, but can't get it to work
-# because `I can't figure out how to read the autoincrement value
-#    sql = "START TRANSACTION;"
     sql = ""
-    sql += "INSERT INTO datasets (dataset) VALUES ('{}');".format(token)
+    sql += "INSERT INTO datasets (dataset) VALUES ('{}');".format(datasetname)
     try:
       cursor.execute ( sql )
     except MySQLdb.Error, e:
       logger.warning ("Failed to insert dataset %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
       raise
 
+    self.conn.commit()
+
+
+  def removeDataset ( self, datasetname ):
+
+    cursor = self.conn.cursor()
+
+    sql = "SELECT highkey, lowkey FROM contents WHERE filename LIKE '{}/{}/%';".format(settings.CACHE_DIR,datasetname)
+
+    try:
+      cursor.execute ( sql )
+    except MySQLdb.Error, e:
+      logger.warning ("Failed to query cache for dataset. %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
+      raise
+
+    result = cursor.fetchall()
+
+    if result==():
+      logger.warning("Found no cache entries for dataset {}.".format(datasetname))
+      return
+
+    tilekeys = [(int(item[0]),int(item[1])) for item in result]
+
+    numitems = len(tilekeys)
+
+    sql = "DELETE FROM contents WHERE (highkey,lowkey) IN (%s)"
+    in_p=', '.join(map(lambda x: str(x), tilekeys))
+    sql = sql % in_p
+    try:
+      cursor.execute ( sql )
+    except MySQLdb.Error, e:
+      logger.warning ("Failed to remove items from cache %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
+      raise
+
+    self.decrease ( numitems )
     self.conn.commit()

@@ -1,0 +1,12 @@
+       WSGIDaemonProcess ocpcatmaiddaemon processes=2 threads=10
+       WSGIScriptAlias /ocpcatmaid /var/www/ocpcatmaid/ocpcatmaid/wsgi.py
+       <Location /ocpcatmaid>
+               WSGIProcessGroup ocpcatmaidaemon
+       </Location>
+
+       <Directory /var/www/ocpcatmaid/ocpcatmaid>
+         <Files wsgi.py>
+         Order deny,allow
+         Allow from all
+         </Files>
+       </Directory>
