@@ -123,7 +123,7 @@ class TileCache:
       # get the cutout data
       cubedata=np.load(pagefobj)
 
-      # image proporties
+      # image properties
       ximagesize, yimagesize = self.info['dataset']['imagesize']['{}'.format(res)]
       zimagesize = self.info['dataset']['slicerange'][1]+1
 
@@ -180,7 +180,7 @@ class TileCache:
         else:
           # Check to see is this is a partial cutout if so pad the space
           if xmax==ximagesize or ymax==yimagesize or cmzmax==zimagesize:
-            cuboid = np.zeros ((int(cubedata.shape[0]/scalefactor),settings.TILESIZE,ydim,settings.TILESIZE), dtype=cubedata.dtype)
+            cuboid = np.zeros((cubedata.shape[0],int(settings.TILESIZE/scalefactor),ydim,settings.TILESIZE), dtype=cubedata.dtype)
             cuboid[:,0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
           else:
             cuboid = cubedata
@@ -294,7 +294,7 @@ class TileCache:
       if self.channels == None:
         img = self.tile2WebPNG ( settings.TILESIZE, settings.TILESIZE, cuboid[z,:,:] )
       else:
-        img = self.channels2WebPNG ( cuboid[:,z,:,:] )
+        img = self.channels2WebPNG ( settings.TILESIZE, settings.TILESIZE, cuboid[:,z,:,:] )
 
       fobj = open ( tilefname, "w" )
       img.save ( fobj, "PNG" )
@@ -327,6 +327,12 @@ class TileCache:
     else:
       numtiles = cuboid.shape[2]
 
+    # get the dataset window range
+    startwindow, endwindow = self.info['dataset']['windowrange']
+
+    # windodcutout function if window is non-zero
+    if endwindow !=0:
+        windowCutout ( cuboid, (startwindow,endwindow) )
 
     # need to make channels take shape arguments
 
@@ -338,7 +344,8 @@ class TileCache:
       if self.channels == None:
         img = self.tile2WebPNG ( cuboid.shape[2], cuboid.shape[0], cuboid[:,y,:] )
       else:
-        img = self.channels2WebPNG ( cuboid[:,:,y,:] )
+        # looks good to here
+        img = self.channels2WebPNG ( cuboid.shape[3], cuboid.shape[1], cuboid[:,:,y,:] )
 
       # convert into a catmaid perspective tile.
       img = img.resize ( [settings.TILESIZE,settings.TILESIZE] )
@@ -375,8 +382,12 @@ class TileCache:
     else:
       numtiles = cuboid.shape[3]
 
+    # get the dataset window range
+    startwindow, endwindow = self.info['dataset']['windowrange']
 
-    # RBTODO need to make channels take shape arguments
+    # windodcutout function if window is non-zero
+    if endwindow !=0:
+        windowCutout ( cuboid, (startwindow,endwindow) )
 
     # add each image slice to memcache
     for x in range(numtiles):
@@ -386,7 +397,7 @@ class TileCache:
       if self.channels == None:
         img = self.tile2WebPNG ( cuboid.shape[1], cuboid.shape[0], cuboid[:,:,x] )
       else:
-        img = self.channels2WebPNG ( cuboid[:,:,:,x] )
+        img = self.channels2WebPNG ( cuboid.shape[2], cuboid.shape[1], cuboid[:,:,:,x] )
 
       # convert into a catmaid perspective tile.
       img = img.resize ( [settings.TILESIZE,settings.TILESIZE] )
@@ -425,7 +436,7 @@ class TileCache:
     return outimage
 
 
-  def channels2WebPNG ( self, chantile ):
+  def channels2WebPNG ( self, xdim, ydim, chantile ):
     """generate a false color image from multiple channels"""
 
     chanlist = self.channels.split(',')
@@ -434,7 +445,7 @@ class TileCache:
     # get the dataset window range
     startwindow, endwindow = self.info['dataset']['windowrange']
     
-    combined_img = np.zeros ((chantile.shape[1], chantile.shape[2]), dtype=np.uint32 )
+    combined_img = np.zeros ((ydim, xdim), dtype=np.uint32 )
 
     # reduction factor
     if chantile.dtype == np.uint8:
@@ -484,7 +495,7 @@ class TileCache:
     # Set the alpha channel only for non-zero pixels
     combined_img = np.where ( combined_img > 0, combined_img + 0xFF000000, 0 )
 
-    outimage =  Image.frombuffer ( 'RGBA', combined_img.shape, combined_img.flatten(), 'raw', 'RGBA', 0, 1 )
+    outimage =  Image.frombuffer ( 'RGBA', (xdim,ydim), combined_img.flatten(), 'raw', 'RGBA', 0, 1 )
 
     # Enhance the image
     if startwindow==0 and endwindow==0:

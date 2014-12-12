@@ -44,21 +44,21 @@ class Tile:
       if self.channels == None:
         self.filename = '{}/{}_{}/r{}/sl{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype, self.res,self.zvalue,self.yvalue,self.xvalue)
       else:
-        self.filename = '{}/{}_{}_{}/r{}/sl{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.channels,self.slicetype,self.res,self.zvalue,self.yvalue,self.xvalue)
+        self.filename = '{}/{}_{}_{}/r{}/sl{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype,self.channels,self.res,self.zvalue,self.yvalue,self.xvalue)
 
     elif self.slicetype=='xz':
 
       if self.channels == None:
-        self.filename = '{}/{}_{}/r{}/sl{}/z{}x{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype, self.res,self.yvalue,self.zvalue,self.xvalue)
+        self.filename = '{}/{}_{}/r{}/sl{}/z{}x{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype,self.res,self.yvalue,self.zvalue,self.xvalue)
       else:
-        self.filename = '{}/{}_{}_{}/sl{}/z{}x{}.png'.format(settings.CACHE_DIR,self.token,self.channels,self.slicetype,self.res,self.yvalue,self.zvalue,self.xvalue)
+        self.filename = '{}/{}_{}_{}/r{}/sl{}/z{}x{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype,self.channels,self.res,self.yvalue,self.zvalue,self.xvalue)
 
     elif self.slicetype=='yz':
 
       if self.channels == None:
         self.filename = '{}/{}_{}/r{}/sl{}/z{}y{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype, self.res,self.xvalue,self.zvalue,self.yvalue)
       else:
-        self.filename = '{}/{}_{}_{}/sl{}/z{}y{}.png'.format(settings.CACHE_DIR,self.token,self.channels,self.slicetype,self.res,self.xvalue,self.zvalue,self.yvalue)
+        self.filename = '{}/{}_{}_{}/sl{}/z{}y{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype,self.channels,self.res,self.xvalue,self.zvalue,self.yvalue)
 
 
     # cutout a a tilesize region
@@ -142,7 +142,7 @@ class Tile:
 
   def fetch (self):
     """Retrieve the tile from the cache or load the cache and return"""
- 
+
     try:
 
       # open file and return
