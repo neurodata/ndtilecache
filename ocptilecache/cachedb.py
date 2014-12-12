@@ -236,9 +236,9 @@ class CacheDB:
     else:
       return r[0]
 
+
   def addDataset ( self, datasetname ):
     """Add a dataset to the list of cacheable datasets"""
-
     
     cursor = self.conn.cursor()
 
@@ -274,9 +274,6 @@ class CacheDB:
     tilekeys = [(int(item[0]),int(item[1])) for item in result]
 
     numitems = len(tilekeys)
-
-    #files = [item[2] for item in result]
-    # don't need to delete the files.  will delete the entire directory.
 
     sql = "DELETE FROM contents WHERE (highkey,lowkey) IN (%s)"
     in_p=', '.join(map(lambda x: str(x), tilekeys))

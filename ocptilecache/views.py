@@ -38,6 +38,10 @@ def getTile ( request, webargs ):
     yvalue = int(m.group(4))
     zvalue = int(m.group(5)) 
     xvalue = int(m.group(6)) 
+  elif slicetype == 'yz':
+    yvalue = int(m.group(6))
+    zvalue = int(m.group(5)) 
+    xvalue = int(m.group(4)) 
   res = int(m.group(7))
 
   try:

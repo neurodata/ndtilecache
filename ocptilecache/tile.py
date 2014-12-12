@@ -1,4 +1,4 @@
-# Copyright 2014 Open Connectome Project (http://openconnecto.me)
+#, Copyright 2014 Open Connectome Project (http://openconnecto.me)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,10 +40,26 @@ class Tile:
     self.zvalue = zvalue
     self.channels = channels
 
-    if self.channels == None:
-      self.filename = '{}/{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype, self.res,self.zvalue,self.yvalue,self.xvalue)
-    else:
-      self.filename = '{}/{}{}/{}/r{}/z{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.channels,self.slicetype,self.res,self.zvalue,self.yvalue,self.xvalue)
+    if self.slicetype=='xy':
+      if self.channels == None:
+        self.filename = '{}/{}_{}/r{}/sl{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype, self.res,self.zvalue,self.yvalue,self.xvalue)
+      else:
+        self.filename = '{}/{}_{}_{}/r{}/sl{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.channels,self.slicetype,self.res,self.zvalue,self.yvalue,self.xvalue)
+
+    elif self.slicetype=='xz':
+
+      if self.channels == None:
+        self.filename = '{}/{}_{}/r{}/sl{}/z{}x{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype, self.res,self.yvalue,self.zvalue,self.xvalue)
+      else:
+        self.filename = '{}/{}_{}_{}/sl{}/z{}x{}.png'.format(settings.CACHE_DIR,self.token,self.channels,self.slicetype,self.res,self.yvalue,self.zvalue,self.xvalue)
+
+    elif self.slicetype=='yz':
+
+      if self.channels == None:
+        self.filename = '{}/{}_{}/r{}/sl{}/z{}y{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype, self.res,self.xvalue,self.zvalue,self.yvalue)
+      else:
+        self.filename = '{}/{}_{}_{}/sl{}/z{}y{}.png'.format(settings.CACHE_DIR,self.token,self.channels,self.slicetype,self.res,self.xvalue,self.zvalue,self.yvalue)
+
 
     # cutout a a tilesize region
     self.tilesize = settings.TILESIZE
@@ -97,8 +113,21 @@ class Tile:
       self.xmax = min ((self.xvalue+1)*self.tilesize,self.ximagesize)
       self.ymin = self.yslab*self.ydim
       self.ymax = min ((self.yslab+1)*self.ydim,self.yimagesize)
-      self.zmin = (self.zvalue)*self.tilesize+self.zoffset
-      self.zmax = min ((self.zvalue+1)*self.tilesize+self.zoffset,self.zimagesize)
+      scalefactor = self.tc.info['dataset']['zscale']['{}'.format(self.res)]
+      # scale the z cutout by the scalefactor
+      self.zmin = int((self.zvalue*self.tilesize)/scalefactor+self.zoffset)
+      self.zmax = min(int((self.zvalue+1)*self.tilesize/scalefactor+self.zoffset),self.zimagesize)
+
+    elif self.slicetype == 'yz':
+      self.xslab = (self.xvalue)/self.xdim
+      self.xmin = self.xslab*self.xdim
+      self.xmax = min ((self.xslab+1)*self.xdim,self.ximagesize)
+      self.ymin = self.yvalue*self.tilesize
+      self.ymax = min ((self.yvalue+1)*self.tilesize,self.yimagesize)
+      scalefactor = self.tc.info['dataset']['zscale']['{}'.format(self.res)]
+      # scale the z cutout by the scalefactor
+      self.zmin = int((self.zvalue*self.tilesize)/scalefactor+self.zoffset)
+      self.zmax = min(int((self.zvalue+1)*self.tilesize/scalefactor+self.zoffset),self.zimagesize)
 
     # Build the URLs
     if self.channels == None:
@@ -113,7 +142,7 @@ class Tile:
 
   def fetch (self):
     """Retrieve the tile from the cache or load the cache and return"""
-
+ 
     try:
 
       # open file and return
