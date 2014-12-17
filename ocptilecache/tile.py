@@ -13,15 +13,22 @@
 # limitations under the License.
 
 import urllib2
+import numpy as np
 from django.conf import settings
-import logging
-import tilekey
+import cStringIO
+from PIL import Image
 
+import tilekey
 import logging
 logger=logging.getLogger("ocpcatmaid")
 
 from django.db import models
+from django.conf import settings
 from ocptilecache.models import ProjectServer
+
+# Out of Bounds exception
+class OOBException(Exception):
+  pass
 
 class Tile:
   """Information specific to a given tile in the tilecache"""
@@ -29,9 +36,14 @@ class Tile:
   def __init__(self, token, slicetype, res, xvalue, yvalue, zvalue, channels):
 
     import cachedb
-    # do the fetch in the background
+
+    # load a cache
     self.db = cachedb.CacheDB()
 
+    # cutout a a tilesize region
+    self.tilesize = settings.TILESIZE
+
+    # take the arguments
     self.token = token
     self.slicetype = slicetype
     self.res = res
@@ -40,6 +52,25 @@ class Tile:
     self.zvalue = zvalue
     self.channels = channels
 
+    # get the dataset is for this token
+    # set the datasetname
+    if self.channels == None:
+      datasetname = self.token + "_" + self.slicetype 
+    else:
+      datasetname = self.token + "_" + self.slicetype + '_' + self.channels
+
+    # Try to get the data set
+    (self.dsid,self.ximagesize,self.yimagesize,self.zoffset,self.zmaxslice,self.zscale) = self.db.getDataset ( datasetname )
+
+    # if it's not there, you have to make it.
+    if self.dsid == None:
+      self.initForFetch()
+      try:
+        self.db.addDataset ( datasetname,self.ximagesize,self.yimagesize,self.zoffset,self.zmaxslice,self.zscale) 
+      except MySQLdb.Error, e:
+        logger.warning ("Failed to create dataset.  Already exists in database, but not cache. {}:{}.".format(e.args[0], e.args[1]))
+      (self.dsid,self.ximagesize,self.yimagesize,self.zoffset,self.zmaxslice,self.zscale) = self.db.getDataset ( datasetname )
+
     if self.slicetype=='xy':
       if self.channels == None:
         self.filename = '{}/{}_{}/r{}/sl{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype, self.res,self.zvalue,self.yvalue,self.xvalue)
@@ -47,29 +78,18 @@ class Tile:
         self.filename = '{}/{}_{}_{}/r{}/sl{}/y{}x{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype,self.channels,self.res,self.zvalue,self.yvalue,self.xvalue)
 
     elif self.slicetype=='xz':
-
       if self.channels == None:
         self.filename = '{}/{}_{}/r{}/sl{}/z{}x{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype,self.res,self.yvalue,self.zvalue,self.xvalue)
       else:
         self.filename = '{}/{}_{}_{}/r{}/sl{}/z{}x{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype,self.channels,self.res,self.yvalue,self.zvalue,self.xvalue)
-
     elif self.slicetype=='yz':
-
       if self.channels == None:
         self.filename = '{}/{}_{}/r{}/sl{}/z{}y{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype, self.res,self.xvalue,self.zvalue,self.yvalue)
       else:
         self.filename = '{}/{}_{}_{}/sl{}/z{}y{}.png'.format(settings.CACHE_DIR,self.token,self.slicetype,self.channels,self.res,self.xvalue,self.zvalue,self.yvalue)
 
 
-    # cutout a a tilesize region
-    self.tilesize = settings.TILESIZE
 
-    # get the dataset is for this token
-    if self.channels == None:
-      datasetname = self.slicetype + self.token
-    else: 
-      datasetname = self.slicetype + self.token + self.channels
-    self.dsid = self.db.getDatasetKey ( datasetname )
     self.tkey = tilekey.tileKey ( self.dsid, self.res, self.xvalue, self.yvalue, self.zvalue )
 
 
@@ -93,10 +113,10 @@ class Tile:
     # get max values for the cutout
     self.ximagesize, self.yimagesize = self.tc.info['dataset']['imagesize']['{}'.format(self.res)]
     self.zoffset = self.tc.info['dataset']['slicerange'][0]
-    self.zimagesize = self.tc.info['dataset']['slicerange'][1]+1
+    self.zmaxslice = self.tc.info['dataset']['slicerange'][1]
+    self.zscale = self.tc.info['dataset']['zscale']['0']
 
     # these are relative to the cuboids in the server
-
     if self.slicetype == 'xy':
       self.zslab = (self.zvalue-self.zoffset)/self.zdim
       self.zoff = (self.zvalue-self.zoffset)%self.zdim
@@ -105,7 +125,7 @@ class Tile:
       self.ymin = self.yvalue*self.tilesize
       self.ymax = min ((self.yvalue+1)*self.tilesize,self.yimagesize)
       self.zmin = (self.zslab)*self.zdim+self.zoffset
-      self.zmax = min ((self.zslab+1)*self.zdim+self.zoffset,self.zimagesize)
+      self.zmax = min ((self.zslab+1)*self.zdim+self.zoffset,self.zmaxslice+1)
 
     elif self.slicetype == 'xz':
       self.yslab = (self.yvalue)/self.ydim
@@ -116,7 +136,7 @@ class Tile:
       scalefactor = self.tc.info['dataset']['zscale']['{}'.format(self.res)]
       # scale the z cutout by the scalefactor
       self.zmin = int((self.zvalue*self.tilesize)/scalefactor+self.zoffset)
-      self.zmax = min(int((self.zvalue+1)*self.tilesize/scalefactor+self.zoffset),self.zimagesize)
+      self.zmax = min(int((self.zvalue+1)*self.tilesize/scalefactor+self.zoffset),self.zmaxslice+1)
 
     elif self.slicetype == 'yz':
       self.xslab = (self.xvalue)/self.xdim
@@ -127,7 +147,7 @@ class Tile:
       scalefactor = self.tc.info['dataset']['zscale']['{}'.format(self.res)]
       # scale the z cutout by the scalefactor
       self.zmin = int((self.zvalue*self.tilesize)/scalefactor+self.zoffset)
-      self.zmax = min(int((self.zvalue+1)*self.tilesize/scalefactor+self.zoffset),self.zimagesize)
+      self.zmax = min(int((self.zvalue+1)*self.tilesize/scalefactor+self.zoffset),self.zmaxslice+1)
 
     # Build the URLs
     if self.channels == None:
@@ -138,6 +158,10 @@ class Tile:
       cutout = '{}/{}/{},{}/{},{}/{},{}'.format(self.channels,self.res,self.xmin,self.xmax,self.ymin,self.ymax,self.zmin,self.zmax)
       self.cuboidurl = "http://{}/ca/{}/npz/{}/".format(server,self.token,cutout)
       self.tileurl = "http://{}/catmaid/mcfc/{}/{}/512/{}/{}/{}/{}/{}/".format(server,self.token,self.slicetype,self.channels,self.res,self.xvalue,self.yvalue,self.zvalue)
+
+
+    if self.zmin>=self.zmax or self.ymin>=self.ymax or self.xmin>=self.xmax:
+      raise OOBException("Out of bounds request")
 
 
   def fetch (self):
@@ -151,20 +175,31 @@ class Tile:
       return f.read()
 
     except IOError:
+      pass
 
+    try:
       self.initForFetch()
+    except OOBException:
+      logger.warning("OOB request.  Returning black tile.  url={}".format(self.tileurl))
+      img = Image.new("L", (512, 512))
+      fileobj = cStringIO.StringIO ( )
+      img.save ( fileobj, "PNG" )
+      fileobj.seek(0)
+      return fileobj.read()
 
-      # call the celery process to fetch the url
-      from ocptilecache.tasks import fetchurl
-      fetchurl.delay ( self.token, self.slicetype, self.channels, self.cuboidurl )
-      #fetchurl ( self.token, self.slicetype, self.channels, self.cuboidurl )
+    # call the celery process to fetch the url
+    from ocptilecache.tasks import fetchurl
+    fetchurl.delay ( self.token, self.slicetype, self.channels, self.cuboidurl )
+    #fetchurl ( self.token, self.slicetype, self.channels, self.cuboidurl )
 
-      logger.warning("CATMAID tile fetch {}".format(self.tileurl))
-      try:
-        f = urllib2.urlopen ( self.tileurl )
-      except urllib2.URLError, e:
-        raise
+    logger.warning("CATMAID tile fetch {}".format(self.tileurl))
+    try:
+      f = urllib2.urlopen ( self.tileurl )
+    except urllib2.URLError, e:
+      raise
 
-      return f.read()
+    return f.read()
 
+  def inRange ( self ):
+    """Determine if the requested tile is in the project domain"""
 

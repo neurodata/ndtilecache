@@ -248,8 +248,6 @@ class CacheDB:
       except Exception, e:
         logger.error("Failed to remove file %s. Error %s" % ( fname, e ))
 
-    import pdb; pdb.set_trace()
-
 
     sql = "DELETE FROM contents WHERE (highkey,lowkey) IN (%s)"
     in_p=', '.join(map(lambda x: str(x), tilekeys))
@@ -264,11 +262,11 @@ class CacheDB:
     self.conn.commit()
 
 
-  def getDatasetKey ( self, datasetname ):
+  def getDataset ( self, datasetname ):
 
     cursor = self.conn.cursor()
 
-    sql = "SELECT (datasetid) FROM datasets WHERE dataset='{}';".format(datasetname)
+    sql = "SELECT datasetid,ximagesz,yimagesz,zoffset,zmaxslice,zscale FROM datasets WHERE dataset='{}';".format(datasetname)
     try:
       cursor.execute ( sql )
     except MySQLdb.Error, e:
@@ -279,18 +277,19 @@ class CacheDB:
     # The dataset will get created on fetch.
     r = cursor.fetchone()
     if r == None:
-      return 0  
+      return (None,None,None,None,None,None)
     else:
-      return r[0]
+      (datasetid,ximagesz,yimagesz,zoffset,zmaxslice,zscale) = r
+      return (datasetid,ximagesz,yimagesz,zoffset,zmaxslice,zscale)
 
 
-  def addDataset ( self, datasetname ):
+  def addDataset ( self, datasetname, ximagesz, yimagesz, zoffset, zmaxslice, zscale ):
     """Add a dataset to the list of cacheable datasets"""
     
     cursor = self.conn.cursor()
 
     sql = ""
-    sql += "INSERT INTO datasets (dataset) VALUES ('{}');".format(datasetname)
+    sql += "INSERT INTO datasets (dataset, ximagesz, yimagesz, zoffset, zmaxslice, zscale) VALUES ('{}','{}','{}','{}','{}','{}');".format(datasetname,ximagesz,yimagesz,zoffset,zmaxslice,zscale)
     try:
       cursor.execute ( sql )
     except MySQLdb.Error, e:

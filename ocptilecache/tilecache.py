@@ -165,13 +165,13 @@ class TileCache:
         # round to the nearest tile size and scale 
         zoffset = self.info['dataset']['slicerange'][0]
         cmzmin = int(math.floor(((zmin-zoffset)*scalefactor+1)/settings.TILESIZE))*settings.TILESIZE
-        cmzmax = int(math.floor(((zmax-zoffset)*scalefactor+1)/settings.TILESIZE))*settings.TILESIZE
+        cmzmax = int(math.ceil(((zmax-zoffset)*scalefactor+1)/settings.TILESIZE))*settings.TILESIZE
 
         # 3d cutout if not a channel database
         if self.channels == None:
 
           # Check to see is this is a partial cutout if so pad the space
-          if (xmax==ximagesize or ymax==yimagesize or cmzmax==zimagesize):
+          if (xmax==ximagesize or ymax==yimagesize or zmax==zimagesize):
             cuboid = np.zeros ((int(settings.TILESIZE/scalefactor),ydim,settings.TILESIZE), dtype=cubedata.dtype)
             cuboid[0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
           else:
@@ -179,7 +179,7 @@ class TileCache:
 
         else:
           # Check to see is this is a partial cutout if so pad the space
-          if xmax==ximagesize or ymax==yimagesize or cmzmax==zimagesize:
+          if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
             cuboid = np.zeros((cubedata.shape[0],int(settings.TILESIZE/scalefactor),ydim,settings.TILESIZE), dtype=cubedata.dtype)
             cuboid[:,0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
           else:
@@ -204,7 +204,7 @@ class TileCache:
         if self.channels == None:
 
           # Check to see is this is a partial cutout if so pad the space
-          if (xmax==ximagesize or ymax==yimagesize or cmzmax==zimagesize):
+          if (xmax==ximagesize or ymax==yimagesize or zmax==zimagesize):
             cuboid = np.zeros ((int(settings.TILESIZE/scalefactor),settings.TILESIZE,xdim), dtype=cubedata.dtype)
             cuboid[0:(zmax-zmin),0:(ymax-ymin),0:(xmax-xmin)] = cubedata
           else:
@@ -212,7 +212,7 @@ class TileCache:
 
         else:
           # Check to see is this is a partial cutout if so pad the space
-          if xmax==ximagesize or ymax==yimagesize or cmzmax==zimagesize:
+          if xmax==ximagesize or ymax==yimagesize or zmax==zimagesize:
 
             assert(0) # RB below broke 4 dimensions in wrong place
             cuboid = np.zeros ((int(cubedata.shape[0]/scalefactor),settings.TILESIZE,ydim,settings.TILESIZE), dtype=cubedata.dtype)
@@ -241,10 +241,6 @@ class TileCache:
     except:
       os.makedirs ( settings.CACHE_DIR + "/" +  self.datasetname )
       # when making the directory, create a dataset
-      try:
-        self.db.addDataset ( self.datasetname )
-      except MySQLdb.Error, e:
-        logger.warning ("Failed to create dataset.  Already exists in database, but not cache. {}:{}.".format(e.args[0], e.args[1]))
 
     try:
       os.stat ( settings.CACHE_DIR + "/" +  self.datasetname + "/r" + str(res) )
@@ -268,7 +264,8 @@ class TileCache:
     self.checkDirHier(res)
 
     # get the dataset id for this token
-    dsid = self.db.getDatasetKey ( self.datasetname )
+    (dsidstr,ximagesz,yimagesz,zoffset,zmaxslice,zscale) = self.db.getDataset ( self.datasetname )
+    dsid = int(dsidstr)
 
     # counter of how many new tiles we get
     newtiles = 0
@@ -316,7 +313,8 @@ class TileCache:
     self.checkDirHier(res)
 
     # get the dataset id for this token
-    dsid = self.db.getDatasetKey ( self.datasetname )
+    (dsidstr,ximagesz,yimagesz,zoffset,zmaxslice,zscale) = self.db.getDataset ( self.datasetname )
+    dsid = int(dsidstr)
 
     # counter of how many new tiles we get
     newtiles = 0
@@ -371,7 +369,8 @@ class TileCache:
     self.checkDirHier(res)
 
     # get the dataset id for this token
-    dsid = self.db.getDatasetKey ( self.datasetname )
+    (dsidstr,ximagesz,yimagesz,zoffset,zmaxslice,zscale) = self.db.getDataset ( self.datasetname )
+    dsid = int(dsidstr)
 
     # counter of how many new tiles we get
     newtiles = 0
