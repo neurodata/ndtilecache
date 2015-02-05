@@ -1,10 +1,21 @@
-# OCP Files
+# OCP Files #
+#############
+
 settings_secret.py
 settings.py
 
-# Compiled Source
-.DS_Store
+# Compiled source #
+###################
 *.pyc
 *.py~
 *.o
 *.so
+*.out
+*.exe
+*.a
+*.log
+
+# OS Generated Files #
+######################
+.DS_Store
+*.swp
