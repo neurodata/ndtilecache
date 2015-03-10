@@ -17,6 +17,7 @@ import numpy as np
 from django.conf import settings
 import cStringIO
 from PIL import Image
+import MySQLdb
 
 import tilekey
 import logging
@@ -60,16 +61,16 @@ class Tile:
       datasetname = self.token + "_" + self.slicetype + '_' + self.channels
 
     # Try to get the data set
-    (self.dsid,self.ximagesize,self.yimagesize,self.zoffset,self.zmaxslice,self.zscale) = self.db.getDataset ( datasetname )
+    (self.dsid,self.ximagesize,self.yimagesize,self.zoffset,self.zimagesize,self.zscale) = self.db.getDataset ( datasetname )
 
     # if it's not there, you have to make it.
     if self.dsid == None:
       self.initForFetch()
       try:
-        self.db.addDataset ( datasetname,self.ximagesize,self.yimagesize,self.zoffset,self.zmaxslice,self.zscale) 
+        self.db.addDataset ( datasetname,self.ximagesize,self.yimagesize,self.zoffset,self.zimagesize,self.zscale) 
       except MySQLdb.Error, e:
         logger.warning ("Failed to create dataset.  Already exists in database, but not cache. {}:{}.".format(e.args[0], e.args[1]))
-      (self.dsid,self.ximagesize,self.yimagesize,self.zoffset,self.zmaxslice,self.zscale) = self.db.getDataset ( datasetname )
+      (self.dsid,self.ximagesize,self.yimagesize,self.zoffset,self.zimagesize,self.zscale) = self.db.getDataset ( datasetname )
 
     if self.slicetype=='xy':
       if self.channels == None:
@@ -107,14 +108,14 @@ class Tile:
 #    else:
     server = settings.SERVER
   
-    # TODO call projinfo to get all the configuration information (use the JSON version)
+    # Using projinfo to get all the configuration information (use the JSON version)
     (self.xdim,self.ydim,self.zdim) = self.tc.info['dataset']['cube_dimension']['{}'.format(self.res)]
     
     # get max values for the cutout
-    self.ximagesize, self.yimagesize = self.tc.info['dataset']['imagesize']['{}'.format(self.res)]
-    self.zoffset = self.tc.info['dataset']['slicerange'][0]
-    self.zmaxslice = self.tc.info['dataset']['slicerange'][1]
-    self.zscale = self.tc.info['dataset']['zscale']['0']
+    self.ximagesize, self.yimagesize, self.zimagesize = self.tc.info['dataset']['imagesize']['{}'.format(self.res)]
+    self.xoffset, self.yoffset, self.zoffset = self.tc.info['dataset']['offset']['{}'.format(self.res)]
+    self.xvoxel, self.yvoxel, self.zvoxel = self.tc.info['dataset']['voxelres']['{}'.format(self.res)]
+    self.zscale = self.zvoxel / self.xvoxel
 
     # these are relative to the cuboids in the server
     if self.slicetype == 'xy':
@@ -125,7 +126,7 @@ class Tile:
       self.ymin = self.yvalue*self.tilesize
       self.ymax = min ((self.yvalue+1)*self.tilesize,self.yimagesize)
       self.zmin = (self.zslab)*self.zdim+self.zoffset
-      self.zmax = min ((self.zslab+1)*self.zdim+self.zoffset,self.zmaxslice+1)
+      self.zmax = min ((self.zslab+1)*self.zdim+self.zoffset,self.zimagesize+1)
 
     elif self.slicetype == 'xz':
       self.yslab = (self.yvalue)/self.ydim
@@ -133,10 +134,10 @@ class Tile:
       self.xmax = min ((self.xvalue+1)*self.tilesize,self.ximagesize)
       self.ymin = self.yslab*self.ydim
       self.ymax = min ((self.yslab+1)*self.ydim,self.yimagesize)
-      scalefactor = self.tc.info['dataset']['zscale']['{}'.format(self.res)]
+      scalefactor = self.zvoxel / self.yvoxel
       # scale the z cutout by the scalefactor
       self.zmin = int((self.zvalue*self.tilesize)/scalefactor+self.zoffset)
-      self.zmax = min(int((self.zvalue+1)*self.tilesize/scalefactor+self.zoffset),self.zmaxslice+1)
+      self.zmax = min(int((self.zvalue+1)*self.tilesize/scalefactor+self.zoffset),self.zimagesize+1)
 
     elif self.slicetype == 'yz':
       self.xslab = (self.xvalue)/self.xdim
@@ -144,10 +145,10 @@ class Tile:
       self.xmax = min ((self.xslab+1)*self.xdim,self.ximagesize)
       self.ymin = self.yvalue*self.tilesize
       self.ymax = min ((self.yvalue+1)*self.tilesize,self.yimagesize)
-      scalefactor = self.tc.info['dataset']['zscale']['{}'.format(self.res)]
+      scalefactor = self.zvoxel / self.xvoxel
       # scale the z cutout by the scalefactor
       self.zmin = int((self.zvalue*self.tilesize)/scalefactor+self.zoffset)
-      self.zmax = min(int((self.zvalue+1)*self.tilesize/scalefactor+self.zoffset),self.zmaxslice+1)
+      self.zmax = min(int((self.zvalue+1)*self.tilesize/scalefactor+self.zoffset),self.zimagesize+1)
 
     # Build the URLs
     if self.channels == None:

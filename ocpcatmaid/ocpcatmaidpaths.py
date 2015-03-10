@@ -18,9 +18,8 @@
 
 import os, sys
 
-import pdb; pdb.set_trace()
 OCPCATMAID_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".." ))
-OCPCATMAID_OCPLIB_PATH = os.path.join(OCP_BASE_PATH, "ocplib" )
+OCPCATMAID_OCPLIB_PATH = os.path.join(OCPCATMAID_BASE_PATH, "ocplib" )
 
-sys.path += [ OCP_OCPLIB_PATH ]
+sys.path += [ OCPCATMAID_OCPLIB_PATH ]
 

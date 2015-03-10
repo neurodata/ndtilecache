@@ -31,7 +31,7 @@ from django.conf import settings
 import cachedb
 import tilekey
 import dbtype
-
+import ocplib
 from ocpca_cy import recolor_cy
 from windowcutout import windowCutout
 
@@ -124,8 +124,7 @@ class TileCache:
       cubedata=np.load(pagefobj)
 
       # image properties
-      ximagesize, yimagesize = self.info['dataset']['imagesize']['{}'.format(res)]
-      zimagesize = self.info['dataset']['slicerange'][1]+1
+      ximagesize, yimagesize, zimagesize = self.info['dataset']['imagesize']['{}'.format(res)]
 
       # cube at a time
       ( xdim,ydim,zdim ) = self.info['dataset']['cube_dimension']['{}'.format(res)]
@@ -160,10 +159,11 @@ class TileCache:
       elif self.slicetype == 'xz':
 
         # translate the cutout into catmaid space (based on scalefactor)
-        scalefactor = self.info['dataset']['zscale']['{}'.format(res)]
+        xvoxel, yvoxel, zvoxel = self.info['dataset']['voxelres']['{}'.format(res)]
+        scalefactor = zvoxel / xvoxel 
 
         # round to the nearest tile size and scale 
-        zoffset = self.info['dataset']['slicerange'][0]
+        xoffset, yoffset, zoffset = self.info['dataset']['offset'][0]
         cmzmin = int(math.floor(((zmin-zoffset)*scalefactor+1)/settings.TILESIZE))*settings.TILESIZE
         cmzmax = int(math.ceil(((zmax-zoffset)*scalefactor+1)/settings.TILESIZE))*settings.TILESIZE
 
@@ -193,10 +193,11 @@ class TileCache:
       elif self.slicetype == 'yz':
 
         # translate the cutout into catmaid space (based on scalefactor)
-        scalefactor = self.info['dataset']['zscale']['{}'.format(res)]
+        xvoxel, yvoxel, zvoxel = self.info['dataset']['voxelres']['{}'.format(res)]
+        scalefactor = zvoxel / yvoxel 
 
         # round to the nearest tile size and scale 
-        zoffset = self.info['dataset']['slicerange'][0]
+        xoffset, yoffset, zoffset = self.info['dataset']['offset'][0]
         cmzmin = int(math.floor(((zmin-zoffset)*scalefactor+1)/settings.TILESIZE))*settings.TILESIZE
         cmzmax = int(math.floor(((zmax-zoffset)*scalefactor+1)/settings.TILESIZE))*settings.TILESIZE
 
@@ -422,7 +423,8 @@ class TileCache:
     if self.dbtype == dbtype.IMAGES_8bit :
       return Image.frombuffer ( 'L', [xdim,ydim], tile.flatten(), 'raw', 'L', 0, 1 )
     elif self.dbtype == dbtype.ANNOTATIONS :
-      recolor_cy (tile, tile)
+      ocplb.recolor_ctype(tile,tile)
+      #recolor_cy (tile, tile)
       return Image.frombuffer ( 'RGBA', [xdim,ydim], tile.flatten(), 'raw', 'RGBA', 0, 1 )
     elif self.dbtype == dbtype.IMAGES_16bit :
       outimage = Image.frombuffer ( 'I;16', [xdim,ydim], tile.flatten(), 'raw', 'I;16', 0, 1)

@@ -16,10 +16,9 @@ import ctypes as cp
 import numpy as np
 import numpy.ctypeslib as npct
 import os
-import OCP.ocppaths
+import ocpcatmaid.ocpcatmaidpaths
 import rgbColor
 
-import pdb; pdb.set_trace()
 # Getting the directory path
 #ocpdlibpath = os.path.join(OCP.ocppaths.OCP_OCPCA_PATH,"../ocplib")
 # Load the shared C library using ctype mechanism
@@ -43,7 +42,7 @@ ocplib.locateCube.argtypes = [ array_2d_uint64, cp.c_int, array_2d_uint32, cp.c_
 ocplib.annotateCube.argtypes = [ array_1d_uint32, cp.c_int, cp.POINTER(cp.c_int), cp.c_int, array_1d_uint32, array_2d_uint32, cp.c_int, cp.c_char, array_2d_uint32 ]
 ocplib.XYZMorton.argtypes = [ array_1d_uint64 ]
 ocplib.MortonXYZ.argtypes = [ npct.ctypes.c_int64 , array_1d_uint64 ]
-ocplib.recolorCubeOMP.argtypes = [ array_2d_uint32, cp.c_int, cp.c_int, array_1d_uint32, array_1d_uint32 ]
+ocplib.recolorCubeOMP.argtypes = [ array_2d_uint32, cp.c_int, cp.c_int, array_2d_uint32, array_1d_uint32 ]
 ocplib.quicksort.argtypes = [ array_2d_uint64, cp.c_int ]
 ocplib.shaveCube.argtypes = [ array_1d_uint32, cp.c_int, cp.POINTER(cp.c_int), cp.c_int, array_1d_uint32, array_2d_uint32, cp.c_int, array_2d_uint32, cp.c_int, array_2d_uint32 ]
 ocplib.annotateEntityDense.argtypes = [ array_3d_uint32, cp.POINTER(cp.c_int), cp.c_int ]
@@ -170,11 +169,11 @@ def recolor_ctype ( cutout, imagemap ):
   """ Annotation recoloring function """
   
   xdim, ydim = cutout.shape
-  imagemap = imagemap.ravel()
-
+  if not cutout.flags['C_CONTIGUOUS']:
+    cutout = np.ascontiguousarray(cutout,dtype=np.uint32)
   # Calling the c native function
   ocplib.recolorCubeOMP ( cutout, cp.c_int(xdim), cp.c_int(ydim), imagemap, np.asarray( rgbColor.rgbcolor,dtype=np.uint32) )
-  return imagemap.reshape( (xdim,ydim) )
+  return imagemap
 
 def quicksort ( locs ):
   """ Sort the cube on Morton Id """
