@@ -12,26 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.i
 
- # dbtype enumerations
-IMAGES_8bit = 1
-ANNOTATIONS = 2
-CHANNELS_16bit = 3
-CHANNELS_8bit = 4
-PROBMAP_32bit = 5
-BITMASK = 6
-ANNOTATIONS_64bit = 7
-IMAGES_16bit = 8
-RGB_32bit = 9
-RGB_64bit = 10
-TIMESERIES_4d_8bit = 11
-TIMESERIES_4d_16bit = 12
+import numpy as np
 
-# dbtype groups
-CHANNEL_DATASETS = [ CHANNELS_8bit, CHANNELS_16bit ]
-TIMESERIES_DATASETS = [ TIMESERIES_4d_8bit, TIMESERIES_4d_16bit ]
-ANNOTATION_DATASETS = [ ANNOTATIONS, ANNOTATIONS_64bit ]
-RGB_DATASETS = [ RGB_32bit, RGB_64bit ]
-DATASETS_8bit = [ IMAGES_8bit, CHANNELS_8bit, TIMESERIES_4d_8bit ]
-DATASETS_16bit = [ IMAGES_8bit, CHANNELS_16bit, TIMESERIES_4d_16bit ]
-DATSETS_32bit = [ RGB_32bit, ANNOTATIONS, PROBMAP_32bit ]
-COMPOSITE_DATASETS = CHANNEL_DATASETS + TIMESERIES_DATASETS
+# OCP Version
+OCP_VERSION = '0.6'
+SCHEMA_VERSION = '0.6'
+
+OCP_channeltypes = {0:'image', 1:'annotation', 2:'probmap', 3:'timeseries'}
+
+# channeltype groups
+IMAGE_CHANNELS = ['image', 'probmap']
+TIMESERIES_CHANNELS = ['timeseries']
+ANNOTATION_CHANNELS = ['annotation']
+
+# datatype groups
+DTYPE_uint8 = ['uint8']
+DTYPE_uint16 = ['uint16']
+DTYPE_uint32 = ['rgb32','uint32']
+DTYPE_uint64 = ['rgb64']
+DTYPE_float32 = ['probability']
+OCP_dtypetonp = {'uint8':np.uint8, 'uint16':np.uint16, 'uint32':np.uint32, 'rgb32':np. uint32, 'rgb64':np.uint64, 'probability':np.float32}
+
+# SCALING OPTIONS
+ZSLICES = 0
+ISOTROPIC = 1
+OCP_scalingtoint = {'zslices':ZSLICES, 'xyz':ISOTROPIC}

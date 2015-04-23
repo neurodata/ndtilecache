@@ -18,6 +18,7 @@ from django.conf import settings
 import MySQLdb
 import os
 
+from ocpcatmaiderror import OCPCATMAIDError
 import logging
 logger=logging.getLogger("ocpcatmaid")
 
@@ -28,13 +29,10 @@ class CacheDB:
   def __init__(self):
 
     try:
-      self.conn = MySQLdb.connect (host = 'localhost',
-                            user = settings.USER,
-                            passwd = settings.PASSWD,
-                            db = settings.DBNAME )
+      self.conn = MySQLdb.connect (host = 'localhost', user = settings.USER, passwd = settings.PASSWD, db = settings.DBNAME )
     except MySQLdb.Error, e:
-      logger.error("Failed to connect to database: %s, %s" % (settings.DBNAME, e))
-      raise
+      logger.error("Failed to connect to database: {}, {}".format(settings.DBNAME, e))
+      raise OCPCATMAIDError("Failed to connect to database: {}, {}".format(settings.DBNAME, e))
 
 
 # Some technique to make sure we don't fetch the same thing twice concurrently?
@@ -262,58 +260,67 @@ class CacheDB:
     self.conn.commit()
 
 
-  def getDataset ( self, datasetname ):
+  def getDataset(self, ds):
 
     cursor = self.conn.cursor()
 
-    sql = "SELECT datasetid,ximagesz,yimagesz,zoffset,zmaxslice,zscale FROM datasets WHERE dataset='{}';".format(datasetname)
+    sql = "SELECT datasetid, ximagesz, yimagesz, zimagesz, xoffset, yoffset, zoffset, xvoxelres, yvoxelres, zvoxelres, scalingoption, scalinglevels FROM datasets WHERE dataset = '{}';".format(ds.dataset_name)
     try:
       cursor.execute ( sql )
     except MySQLdb.Error, e:
-      logger.warning ("Failed to insert dataset %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
-      raise
+      logger.warning ("Failed to fetch dataset {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      raise OCPCATMAIDError("Failed to fetch dataset {}: {}. sql={}".format(e.args[0], e.args[1], sql))
 
     # 0 is no dataset.  It will never match in the cache. 
     # The dataset will get created on fetch.
     r = cursor.fetchone()
-    if r == None:
-      return (None,None,None,None,None,None)
+    cursor.close()
+    if r is not None:
+      (ds.dsid, ds.ximagesz, ds.yimagesz, ds.zimagesz, ds.xoffset, ds.yoffset, ds.zoffset, ds.xvoxelres, ds.yvoxelres, ds.zvoxelres, ds.scalingoption, ds.scalinglevels) = r
     else:
-      (datasetid,ximagesz,yimagesz,zoffset,zmaxslice,zscale) = r
-      return (datasetid,ximagesz,yimagesz,zoffset,zmaxslice,zscale)
+      raise Exception("Dataset not found")
+    
 
 
-  def addDataset ( self, datasetname, ximagesz, yimagesz, zoffset, zmaxslice, zscale ):
+  def addDataset (self, ds):
     """Add a dataset to the list of cacheable datasets"""
     
     cursor = self.conn.cursor()
 
-    sql = ""
-    sql += "INSERT INTO datasets (dataset, ximagesz, yimagesz, zoffset, zmaxslice, zscale) VALUES ('{}','{}','{}','{}','{}','{}');".format(datasetname,ximagesz,yimagesz,zoffset,zmaxslice,zscale)
     try:
-      cursor.execute ( sql )
+      sql = "INSERT INTO datasets (dataset, ximagesz, yimagesz, zimagesz, xoffset, yoffset, zoffset, xvoxelres, yvoxelres, zvoxelres, scalingoption, scalinglevels) VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}');".format(ds.dataset_name, ds.ximagesz, ds.yimagesz, ds.zimagesz, ds.xoffset, ds.yoffset, ds.zoffset, ds.xvoxelres, ds.yvoxelres, ds.zvoxelres, ds.scalingoption, ds.scalinglevels)
+      cursor.execute (sql)
+
+      for ch in ds.channel_list:
+        sql = "INSERT INTO channels (channel_name, dataset, channel_type, channel_datatype, startwindow, endwindow) VALUES ('{}','{}','{}','{}','{}','{}');".format(ch.channel_name, ch.dataset, ch.channel_type, ch.channel_datatype, ch.startwindow, ch.endwindow)
+        cursor.execute (sql)
+
+      self.conn.commit()
+    
     except MySQLdb.Error, e:
-      logger.warning ("Failed to insert dataset %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
-      raise
+      logger.warning ("Failed to insert dataset/channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      raise OCPCATMAIDError("Failed to insert dataset/channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      self.conn.rollback()
+    
+    finally:
+      cursor.close()
 
-    self.conn.commit()
 
-
-  def removeDataset ( self, datasetname ):
+  def removeDataset(self, datasetname):
 
     cursor = self.conn.cursor()
 
     sql = "SELECT highkey, lowkey FROM contents WHERE filename LIKE '{}/{}/%';".format(settings.CACHE_DIR,datasetname)
 
     try:
-      cursor.execute ( sql )
+      cursor.execute(sql)
     except MySQLdb.Error, e:
       logger.warning ("Failed to query cache for dataset. %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
       raise
 
     result = cursor.fetchall()
 
-    if result==():
+    if result == ():
       logger.warning("Found no cache entries for dataset {}.".format(datasetname))
       return
 
@@ -325,10 +332,47 @@ class CacheDB:
     in_p=', '.join(map(lambda x: str(x), tilekeys))
     sql = sql % in_p
     try:
-      cursor.execute ( sql )
+      cursor.execute(sql)
     except MySQLdb.Error, e:
-      logger.warning ("Failed to remove items from cache %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
+      logger.warning ("Failed to remove items from cache {}: {}. sql={}".format(e.args[0], e.args[1], sql))
       raise
 
-    self.decrease ( numitems )
+    self.decrease(numitems)
     self.conn.commit()
+
+
+  def addChannel(self, ch):
+    """Add a channel to the channels table"""
+
+    cursor = self.conn.cursor()
+
+    sql = "INSERT INTO channels (channel_name, dataset, channel_type, channel_datatype, startwindow, endwindow) VALUES ('{}','{}','{}','{}','{}','{}');".format(ch.channel_name, ch.dataset, ch.channel_type, ch.channel_datatype, ch.startwindow, ch.endwindow)
+    
+    try:
+      cursor.execute (sql)
+    except MySQLdb.Error, e:
+      logger.warning ("Failed to insert channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      raise OCPCATMAIDError("Failed to insert channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+
+    self.conn.commit()
+    cursor.close()
+
+
+  def getChannel(self, ds):
+    """Get a channel from the channels table"""
+
+    cursor = self.conn.cursor()
+
+    sql = "SELECT channel_name, dataset, channel_type, channel_datatype, startwindow, endwindow FROM channels where dataset='{}';".format(ds.dataset_name)
+
+    try:
+      cursor.execute (sql)
+      from dataset import Channel
+      for row in cursor:
+        ds.channel_list.append(Channel(*row))
+
+    except MySQLdb.Error, e:
+      logger.warning ("Failed to fetch channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      raise OCPCATMAIDError("Failed to fetch channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+
+    cursor.close()

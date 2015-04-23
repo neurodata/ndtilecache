@@ -19,35 +19,43 @@ import django
 
 import tile
 
-def getTile ( request, webargs ):
+def getTile(request, webargs):
   """Return a tile or load the cache"""
 
-  # Parse the tile request and turn it into an OCP request
-  #p = re.compile("(\w+)/(\d+)/(\d+)_(\d+)_(\d+)\.png$")
-  p = re.compile("(\w+)/(\w+)/(?:([\w,-]+)/)?(\d+)/(\d+)_(\d+)_(\d+)\.png$")
-  m = p.match ( webargs )
+  import pdb; pdb.set_trace()
 
-  token = m.group(1)
-  slicetype = m.group(2)
-  channels = m.group(3)
-  if slicetype == 'xy':
-    zvalue = int(m.group(4)) 
-    yvalue = int(m.group(5)) 
-    xvalue = int(m.group(6)) 
-  elif slicetype == 'xz':
-    yvalue = int(m.group(4))
-    zvalue = int(m.group(5)) 
-    xvalue = int(m.group(6)) 
-  elif slicetype == 'yz':
-    yvalue = int(m.group(6))
-    zvalue = int(m.group(5)) 
-    xvalue = int(m.group(4)) 
-  res = int(m.group(7))
+  # Parse the tile request and turn it into an OCP request
+  #m = re.match("(\w+)/(\w+)/(?:([\w,-]+)/)?(\d+)/(\d+)_(\d+)_(\d+).png$", webargs)
+  m = re.match("(?P<mcfc>mcfc/)?(\w+)/(\w+)/(?:([\w,-]+)/)?(\d+)/(\d+)_(\d+)_(\d+).png$", webargs)
+  [mcfc, token, channels, slice_type] = [i for i in m.groups()[:4]]
+
+  if mcfc is not None:
+    import pdb; pdb.set_trace()
+    channels, colors = zip(*re.findall("(\w+)[:]?(\w)?", channels))
+    orginal_colors = ('C','M','Y','R','G','B')
+    # checking for a non-empty list
+    if not not filter(None, colors):
+      # if it is a mixed then replace the missing ones with the existing schema
+      colors = [ b if a is u'' else a for a,b in zip(colors, orignal_colors)]
+    else:
+      colors = orginal_colors
+  else:
+    channels = (channels,)
+    colors = None
+
+  if slice_type == 'xy':
+    [zvalue, yvalue, xvalue, res] = [int(i) for i in m.groups()[4:]]
+  elif slice_type == 'xz':
+    [yvalue, zvalue, xvalue, res] = [int(i) for i in m.groups()[4:]]
+  elif slice_type == 'yz':
+    [xvalue, zvalue, yvalue, res] = [int(i) for i in m.groups()[4:]]
 
   try:
-    t = tile.Tile ( token, slicetype, res, xvalue, yvalue, zvalue, channels )
+    t = tile.Tile(token, slice_type, res, xvalue, yvalue, zvalue, channels, colors)
     tiledata = t.fetch()
-    return django.http.HttpResponse(tiledata,mimetype='image/png')
+    import pdb; pdb.set_trace()
+    return django.http.HttpResponse(tiledata, content_type='image/png')
   except Exception, e:
     raise
-#    return django.http.HttpResponseNotFound(e)
+    return django.http.HttpResponseNotFound(e)
+

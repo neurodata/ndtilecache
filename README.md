@@ -16,7 +16,7 @@ This repository can be cited using DOI http://dx.doi.org/10.5281/zenodo.9992
     create database ocpcatmaid;
     use ocpcatmaid
     CREATE TABLE contents ( highkey BIGINT, lowkey BIGINT, filename varchar(255), reftime TIMESTAMP, PRIMARY KEY ( highkey, lowkey)); 
-    CREATE TABLE datasets ( dataset VARCHAR(255) PRIMARY KEY, datasetid INT UNIQUE AUTO_INCREMENT, ximagesz BIGINT, yimagesz BIGINT, zoffset BIGINT, zmaxslice BIGINT, zscale FLOAT );
+    CREATE TABLE datasets ( dataset VARCHAR(255) PRIMARY KEY, datasetid INT UNIQUE AUTO_INCREMENT, ximagesz INT, yimagesz INT, zimagesz INT, xoffset INT, yoffset INT, zoffset INT, xvoxelres DOUBLE, yvoxelres DOUBLE, zvoxelres DOUBLE, scalingoption INT, scalinglevels INT);
     CREATE TABLE metadata ( numtiles BIGINT);
     CREATE TABLE fetching ( url VARCHAR(255) PRIMARY KEY );
     INSERT INTO metadata (numtiles) VALUES (0);

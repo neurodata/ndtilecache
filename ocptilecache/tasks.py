@@ -26,7 +26,7 @@ logger=logging.getLogger("ocpcatmaid")
 
 celery = Celery('tasks', broker='amqp://guest@localhost//')
 
-@celery.task()
+#@celery.task()
 def fetchurl ( token, slicetype, channels, url ):
   """Fetch the requested url."""
 

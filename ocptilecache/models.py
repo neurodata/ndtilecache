@@ -14,6 +14,61 @@
 
 from django.db import models
 
+# Create your models here
 class ProjectServer ( models.Model ):
   project = models.CharField(max_length=255, primary_key=True)
   server = models.CharField(max_length=255)
+
+#class Datasets ( models.Model ):
+  #dataset_name = models.CharField(max_length=255, unique=True)
+  #dataset_id = models.AutoField(primary_key=True,unique=True)
+  #ximagesize = models.IntegerField()
+  #yimagesize = models.IntegerField()
+  #zimagesize = models.IntegerField()
+  #zoffset = models.IntegerField()
+  #zscale = models.FloatField(default=1.0)
+
+  #class Meta:
+    #""" Meta """
+    #db_table = u"datasets"
+    #managed = True
+
+  #def __unicode__(self):
+    #return self.dataset_id
+
+
+#class Fetching ( models.Model ):
+  #url = models.CharField(max_length=255, primary_key=True)
+
+  #class Meta:
+    #""" Meta """
+    #db_table = u"fetching"
+    #managed = True
+
+  #def __unicode__(self):
+    #return self.url
+
+  
+#class Metadata ( models.Model ):
+  #numtiles = models.IntegerField(primary_key=True)
+
+  #class Meta:
+    #""" Meta """
+    #db_table = u"metadata"
+    #managed = True
+
+  #def __unicode__(self):
+    #return self.numtiles
+
+#class Contents ( models.Model ):
+  #key = models.BigIntegerField(primary_key=True, default=0)
+  #filename = models.CharField(max_length=255)
+  #reftime = models.TimeField(auto_now=True,auto_now_add=True)
+
+  #class Meta:
+    #""" Meta """
+    #db_table = u"contents"
+    #managed = True
+
+  #def __unicode__(self):
+    #return self.key
