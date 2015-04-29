@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import urllib2
+import dbtype
 
 def getURL(url):
   """Get the url"""
@@ -32,3 +33,20 @@ def postURL(url):
     response = urllib2.urlopen(request)
   except urllib2.HTTPError, e:
     raise Exception(e)
+
+def window(data, ch, window_range=None):
+  """Performs a window transformation on the cutout area"""
+  
+  if window_range is None:
+    window_range = ch.getWindowRange()
+  
+  [startwindow, endwindow] = window_range
+  
+  if ch.getChannelType() in dbtype.IMAGE_CHANNELS and ch.getDataType() in dbtype.DTYPE_uint16:
+    if (startwindow == endwindow == 0):
+      return np.uint8(data * 1.0/256)
+    elif endwindow!=0:
+      windowCutout (data, window_range)
+      return np.uint8(data)
+  
+  return data

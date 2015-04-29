@@ -62,7 +62,6 @@ class Tile:
     self.colors = colors
     # set the datasetname
     dataset_name = "{}_{}_{}".format(self.token, ','.join(self.channels), self.slice_type)
-    import pdb; pdb.set_trace()
     # Load the data set. If it does not exist in the database then one is fetched and created.
     self.ds = Dataset(dataset_name)
     
@@ -125,8 +124,10 @@ class Tile:
 
     # Build the URLs
     self.cuboid_url = 'http://{}/ca/{}/{}/npz/{}/{},{}/{},{}/{},{}/'.format(self.server, self.token, ','.join(self.channels), self.res, self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax)
-    self.tile_url = "http://{}/catmaid/{}/{}/{}/{}/{}_{}_{}.png".format(self.server, self.token, ','.join(self.channels), self.slice_type, self.zvalue, self.yvalue, self.xvalue, self.res)
-    #self.tileurl = "http://{}/catmaid/mcfc/{}/{}/512/{}/{}/{}/{}/{}/".format(server,self.token,self.slicetype,self.channels,self.res,self.xvalue,self.yvalue,self.zvalue)
+    if self.colors is None:
+      self.tile_url = "http://{}/catmaid/{}/{}/{}/{}/{}_{}_{}.png".format(self.server, self.token, ','.join(self.channels), self.slice_type, self.zvalue, self.yvalue, self.xvalue, self.res)
+    else:
+      self.tile_url = "http://{}/catmaid/mcfc/{}/{}/{}/{}/{}_{}_{}.png".format(self.server, self.token, ','.join(['{}:{}'.format(a,b) for a,b in zip(self.channels,self.colors)]), self.slice_type, self.zvalue, self.yvalue, self.xvalue, self.res)
 
     if self.zmin >= self.zmax or self.ymin >= self.ymax or self.xmin >= self.xmax:
       raise OOBException("Out of bounds request")
@@ -136,7 +137,6 @@ class Tile:
     """Retrieve the tile from the cache or load the cache and return"""
 
     try:
-      import pdb; pdb.set_trace()
       # open file and return
       f = open(self.filename)
       self.db.touch (self.tkey)
@@ -160,7 +160,6 @@ class Tile:
     fetchurl(self.token, self.slice_type, self.channels, self.cuboid_url)
 
     logger.warning("CATMAID tile fetch {}".format(self.tile_url))
-    import pdb; pdb.set_trace()
     f = getURL(self.tile_url)
 
     return f.read()

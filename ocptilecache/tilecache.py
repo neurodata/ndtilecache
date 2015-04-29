@@ -30,7 +30,7 @@ from django.conf import settings
 
 from cachedb import CacheDB
 from dataset import Dataset
-from util import getURL
+from util import getURL, window
 import tilekey
 import dbtype
 import ocplib
@@ -188,10 +188,10 @@ class TileCache:
 
     # number of tiles
     numtiles = cuboid.shape[0]
-
-    # windodcutout function if window is non-zero
-    #if endwindow !=0:
-        #windowCutout ( cuboid, (startwindow,endwindow) )
+    
+    for index, channel_name in enumerate(self.channels):
+      ch = self.ds.getChannelObj(channel_name)
+      cuboid[index,:] = window(cuboid[index:], ch)
 
     # add each image slice to memcache
     for value in range(numtiles):
@@ -207,7 +207,6 @@ class TileCache:
       elif self.slice_type == 'yz':
         img = self.tile2WebPNG ( cuboid.shape[2], cuboid.shape[1], cuboid[:,:,:,value] )
 
-      import pdb; pdb.set_trace()
       fobj = open(tilefname, "w")
       img.save(fobj, "PNG")
       try:
@@ -383,7 +382,6 @@ class TileCache:
   def tile2WebPNG(self, xdim, ydim, tile):
     """Create PNG Images and write to cache for the specified tile"""
 
-    import pdb; pdb.set_trace()
     # Check if it is mcfc tile
     if self.colors is not None:
       return mcfcPNG(tile, self.colors, enhancement=4.0)
@@ -410,73 +408,73 @@ class TileCache:
         logger.warning ( "Datatype not yet supported".format(self.dbtype) )
 
 
-  def channels2WebPNG ( self, xdim, ydim, chantile ):
-    """generate a false color image from multiple channels"""
+  #def channels2WebPNG ( self, xdim, ydim, chantile ):
+    #"""generate a false color image from multiple channels"""
 
-    chanlist = self.channels.split(',')
-    chanlist = self.channelsToInt ( chanlist )
+    #chanlist = self.channels.split(',')
+    #chanlist = self.channelsToInt ( chanlist )
     
-    # get the dataset window range
-    startwindow, endwindow = self.info['dataset']['windowrange']
+    ## get the dataset window range
+    #startwindow, endwindow = self.info['dataset']['windowrange']
     
-    combined_img = np.zeros ((ydim, xdim), dtype=np.uint32 )
+    #combined_img = np.zeros ((ydim, xdim), dtype=np.uint32 )
 
-    # reduction factor
-    if chantile.dtype == np.uint8:
-      scaleby = 1
-    elif chantile.dtype == np.uint16 and ( startwindow==0 and endwindow==0 ):
-      scaleby = 1.0/256 
-    elif chantile.dtype == np.uint16 and ( endwindow!=0 ):
-      scaleby = 1 
-    else:
-      assert 0 #RBTODO error
+    ## reduction factor
+    #if chantile.dtype == np.uint8:
+      #scaleby = 1
+    #elif chantile.dtype == np.uint16 and ( startwindow==0 and endwindow==0 ):
+      #scaleby = 1.0/256 
+    #elif chantile.dtype == np.uint16 and ( endwindow!=0 ):
+      #scaleby = 1 
+    #else:
+      #assert 0 #RBTODO error
 
-    for i in range(chantile.shape[0]):
+    #for i in range(chantile.shape[0]):
 
-      # don't add the zero channels
-      if chanlist[i] == 0:
-        continue
+      ## don't add the zero channels
+      #if chanlist[i] == 0:
+        #continue
     
-      #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
+      ##data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
 
-      # First channel is cyan
-      if i == 0:
-        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
-        combined_img = np.left_shift(data32,8) + np.left_shift(data32,16)
-      # Second is Magenta
-      elif i == 1:
-        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
-        combined_img +=  np.left_shift(data32,16) + data32
-      # Third is yellow
-      elif i == 2:
-        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
-        combined_img +=  np.left_shift(data32,8) + data32
-      # Fourth is Red
-      elif i == 3:
-        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
-        combined_img +=  data32
-      # Fifth is Green
-      elif i == 4:
-        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
-        combined_img += np.left_shift(data32,8)
-      # Sixth is Blue
-      elif i == 5:
-        data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
-        combined_img +=  np.left_shift(data32,16)
-      else:
-        assert 0  #RBTODO good error
+      ## First channel is cyan
+      #if i == 0:
+        #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
+        #combined_img = np.left_shift(data32,8) + np.left_shift(data32,16)
+      ## Second is Magenta
+      #elif i == 1:
+        #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
+        #combined_img +=  np.left_shift(data32,16) + data32
+      ## Third is yellow
+      #elif i == 2:
+        #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
+        #combined_img +=  np.left_shift(data32,8) + data32
+      ## Fourth is Red
+      #elif i == 3:
+        #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
+        #combined_img +=  data32
+      ## Fifth is Green
+      #elif i == 4:
+        #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
+        #combined_img += np.left_shift(data32,8)
+      ## Sixth is Blue
+      #elif i == 5:
+        #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
+        #combined_img +=  np.left_shift(data32,16)
+      #else:
+        #assert 0  #RBTODO good error
     
-    # Set the alpha channel only for non-zero pixels
-    combined_img = np.where ( combined_img > 0, combined_img + 0xFF000000, 0 )
-    outimage =  Image.frombuffer ( 'RGBA', (xdim,ydim), combined_img.flatten(), 'raw', 'RGBA', 0, 1 )
+    ## Set the alpha channel only for non-zero pixels
+    #combined_img = np.where ( combined_img > 0, combined_img + 0xFF000000, 0 )
+    #outimage =  Image.frombuffer ( 'RGBA', (xdim,ydim), combined_img.flatten(), 'raw', 'RGBA', 0, 1 )
 
-    # Enhance the image
-    if startwindow==0 and endwindow==0:
-        from PIL import ImageEnhance
-        enhancer = ImageEnhance.Brightness(outimage)
-        outimage = enhancer.enhance(4.0)
+    ## Enhance the image
+    #if startwindow==0 and endwindow==0:
+        #from PIL import ImageEnhance
+        #enhancer = ImageEnhance.Brightness(outimage)
+        #outimage = enhancer.enhance(4.0)
 
-    return outimage
+    #return outimage
 
 
   def harvest ( self ):

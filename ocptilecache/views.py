@@ -22,15 +22,12 @@ import tile
 def getTile(request, webargs):
   """Return a tile or load the cache"""
 
-  import pdb; pdb.set_trace()
-
   # Parse the tile request and turn it into an OCP request
   #m = re.match("(\w+)/(\w+)/(?:([\w,-]+)/)?(\d+)/(\d+)_(\d+)_(\d+).png$", webargs)
   m = re.match("(?P<mcfc>mcfc/)?(\w+)/(\w+)/(?:([\w,-]+)/)?(\d+)/(\d+)_(\d+)_(\d+).png$", webargs)
   [mcfc, token, channels, slice_type] = [i for i in m.groups()[:4]]
 
   if mcfc is not None:
-    import pdb; pdb.set_trace()
     channels, colors = zip(*re.findall("(\w+)[:]?(\w)?", channels))
     orginal_colors = ('C','M','Y','R','G','B')
     # checking for a non-empty list
@@ -53,7 +50,6 @@ def getTile(request, webargs):
   try:
     t = tile.Tile(token, slice_type, res, xvalue, yvalue, zvalue, channels, colors)
     tiledata = t.fetch()
-    import pdb; pdb.set_trace()
     return django.http.HttpResponse(tiledata, content_type='image/png')
   except Exception, e:
     raise

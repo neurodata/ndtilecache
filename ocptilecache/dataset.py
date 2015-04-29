@@ -127,6 +127,17 @@ class Dataset:
         self.cubedim[i] = [128, 128, 16]
 
 
+  def getChannelObj(self, channel_name):
+    """Return a channel object"""
+
+    for ch in self.channel_list:
+      if ch.getChannelName() == channel_name:
+        return ch
+
+    logger.warning("Channel {} does not exist for the dataset {}".format(channel_name, self.dataset_name))
+    raise OCPCATMAIDError("Channel {} does not exist for the dataset {}".format(channel_name, self.dataset_name))
+
+
 class Channel:
 
   def __init__(self, channel_name, dataset, channel_type, channel_datatype, startwindow, endwindow):
@@ -138,3 +149,14 @@ class Channel:
     self.channel_datatype = channel_datatype
     self.startwindow = startwindow
     self.endwindow = endwindow
+
+  def getWindowRange(self):
+    return [self.startwindow, self.endwindow]
+  def getChannelType(self):
+    return self.channel_type
+  def getDataType(self):
+    return self.channel_datatype
+  def getChannelName(self):
+    return self.channel_name
+  def getDataset(self):
+    return self.dataset
