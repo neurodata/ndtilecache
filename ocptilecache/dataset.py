@@ -126,6 +126,15 @@ class Dataset:
         # RB what should we use as a cubedim?
         self.cubedim[i] = [128, 128, 16]
 
+  def removeDataset(self):
+    """Remove a dataset"""
+    self.db.removeDataset(self.dataset_name)
+    import shutil
+    try:
+      shutil.rmtree("{}/{}".format(settings.CACHE_DIR, self.dataset_name))
+    except Exception, e:
+      logger.warning ("Failed to remove dataset directories at {}. Error {}. Manual cleanup may be necessary.".format(self.dataset_name, e))
+
 
   def getChannelObj(self, channel_name):
     """Return a channel object"""

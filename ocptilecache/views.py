@@ -27,6 +27,7 @@ def getTile(request, webargs):
   """Return a tile or load the cache"""
 
   # Parse the tile request and turn it into an OCP request
+  import pdb; pdb.set_trace()
   try:
     # argument of format /mcfc(optional)/token/channel_list/slice_type/time(optional)/z/y_x_res.png
     m = re.match("(?P<mcfc>mcfc/)?(\w+)/([\w+,:]+)/(\w+)/(\d+)?/?(\d+)/(\d+)_(\d+)_(\d+).png$", webargs)
@@ -56,11 +57,11 @@ def getTile(request, webargs):
 
 
   if slice_type == 'xy':
-    [zvalue, yvalue, xvalue, res] = [int(i) for i in m.groups()[4:]]
+    [tvalue, zvalue, yvalue, xvalue, res] = [int(i) for i in m.groups()[4:]]
   elif slice_type == 'xz':
-    [yvalue, zvalue, xvalue, res] = [int(i) for i in m.groups()[4:]]
+    [tvalue, yvalue, zvalue, xvalue, res] = [int(i) for i in m.groups()[4:]]
   elif slice_type == 'yz':
-    [xvalue, zvalue, yvalue, res] = [int(i) for i in m.groups()[4:]]
+    [tvalue, xvalue, zvalue, yvalue, res] = [int(i) for i in m.groups()[4:]]
 
   try:
     t = tile.Tile(token, slice_type, res, xvalue, yvalue, zvalue, channels, colors)

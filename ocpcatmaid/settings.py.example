@@ -13,11 +13,11 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'ocpcatmaid_django',                      # Or path to database file if using sqlite3.
-        'USER': settings_secret.user,                      # Not used with sqlite3.
-        'PASSWORD': settings_secret.password,                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'NAME': 'ocptilecache_django', # Or path to database file if using sqlite3.
+        'USER': settings_secret.user, # Not used with sqlite3.
+        'PASSWORD': settings_secret.password, # Not used with sqlite3.
+        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '', # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -78,7 +78,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -88,7 +88,7 @@ SECRET_KEY = settings_secret.SECRET_KEY
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    #'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -98,7 +98,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
 ROOT_URLCONF = 'ocpcatmaid.urls'
@@ -127,7 +127,6 @@ INSTALLED_APPS = (
     'ocptilecache',
 )
 
-# RB 10/21/2013
 import djcelery
 djcelery.setup_loader()
 
@@ -155,7 +154,6 @@ LOGGING = {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
             'filename': "/var/log/ocpcatmaid" + "/ocpcatmaid.log",
-#            'filename': "/tmp" + "/emca.log",
             'maxBytes': 500000,
             'backupCount': 7,
             'formatter': 'standard',
@@ -184,10 +182,9 @@ LOGGING = {
     }
 }
 
-
 #RB ocpcatmaid specific settings
-SERVER = 'braingraph2.cs.jhu.edu/ocp'
-DBNAME = 'ocpcatmaid'
+SERVER = 'ocp.me/ocp'
+DBNAME = 'ocptilecache'
 USER = settings_secret.user
 PASSWD = settings_secret.password
 TILESIZE = 512
@@ -195,8 +192,6 @@ CACHE_DIR = '/data/cache'
 # CACHESIZE IN MB
 CACHE_SIZE = 1000000
 
-
 # Celery settings
-# only prefetch one message per worker.  fetches may take awhile
+# only prefetch one message per worker. fetches may take awhile
 CELERYD_PREFETCH_MULTIPLIER = 1
-

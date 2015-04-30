@@ -1,17 +1,17 @@
 
-# ocpcatmaid wsgi 
-upstream ocpcatmaid-wsgi {
-  server unix:///run/uwsgi/app/ocpcatmaid/socket;
+# ocptilecache wsgi 
+upstream ocptilecache-wsgi {
+  server unix:///run/uwsgi/app/ocptilecache/socket;
 }
 
 # place the following block in your server clause
 server {
 
-  location /ocpcatmaid/ {
+  location /ocptilecache/ {
     error_log /var/log/nginx/error.log notice;
     rewrite_log on;
-    rewrite /ocpcatmaid/(.*)$ /tilecache/$1 break;
-    uwsgi_pass  ocpcatmaid-wsgi;
+    rewrite /ocptilecache/(.*)$ /tilecache/$1 break;
+    uwsgi_pass  ocptilecache-wsgi;
     include     /etc/nginx/uwsgi_params;
   }
 

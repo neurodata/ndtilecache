@@ -32,7 +32,7 @@ from util import getURL, window
 import tilekey
 import dbtype
 import ocplib
-from util import getURL, postURL
+from util import getURL, postURL, getDatasetName
 from mcfc import mcfcPNG
 from windowcutout import windowCutout
 
@@ -54,7 +54,7 @@ class TileCache:
     self.channels = channels
     self.colors = colors
     self.server = settings.SERVER
-    self.dataset_name = etDatasetName(self.token, self.channels, self.colors, self.slice_type)
+    self.dataset_name = getDatasetName(self.token, self.channels, self.colors, self.slice_type)
     # set the datasetname
     self.ds = Dataset(self.dataset_name)
 

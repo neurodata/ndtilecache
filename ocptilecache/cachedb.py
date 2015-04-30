@@ -27,15 +27,14 @@ class CacheDB:
   """MySQL interface for cache management"""
 
   def __init__(self):
-
+    """Intialize the database connection"""
     try:
       self.conn = MySQLdb.connect (host = 'localhost', user = settings.USER, passwd = settings.PASSWD, db = settings.DBNAME )
     except MySQLdb.Error, e:
       logger.error("Failed to connect to database: {}, {}".format(settings.DBNAME, e))
       raise OCPCATMAIDError("Failed to connect to database: {}, {}".format(settings.DBNAME, e))
 
-
-# Some technique to make sure we don't fetch the same thing twice concurrently?
+  # Some technique to make sure we don't fetch the same thing twice concurrently?
   def fetchlock ( self, url ):
     """Indicate that we are actively fetching a url.  Raise an Exception if it is already happening"""
     cursor = self.conn.cursor()
@@ -71,12 +70,12 @@ class CacheDB:
     sql = "UPDATE contents SET reftime=NOW() WHERE highkey={} AND lowkey={}".format(tkey[0],tkey[1])
     try:
       cursor.execute ( sql )
+      self.conn.commit()
     except MySQLdb.Error, e:
       logger.warning ("Failed to touch tilekey %s.  Error %d: %s. sql=%s" % (tkey, e.args[0], e.args[1], sql))
       raise
-
-    self.conn.commit()
-
+    finally:
+      cursor.close()
 
   def insert(self, tkey, filename):
     """Add a tile to the cache contents.  Remove from prefetch queue.
@@ -87,15 +86,15 @@ class CacheDB:
     sql = "INSERT INTO contents (highkey,lowkey,filename,reftime) VALUES ({},{},'{}', NOW());".format(tkey[0],tkey[1],filename)
 
     try:
-      cursor.execute ( sql )
+      cursor.execute(sql)
+      self.conn.commit()
     except MySQLdb.Error, e:
       # ignore duplicate entries
       if e.args[0] != 1062:
-        logger.warning ("Failed to add tile to contents. key=%s. file=%s.  Error= %d: %s. sql=%s" % (tkey, filename, e.args[0], e.args[1], sql))
+        logger.warning("Failed to add tile to contents. key={}. file={}. Error= {}: {}. sql={}".format(tkey, filename, e.args[0], e.args[1], sql))
       raise
-
-    self.conn.commit()
-
+    finally:
+      cursor.close()
 
   def size ( self ):
     """Return the size of the cache in nunmber of tiles"""
@@ -105,31 +104,14 @@ class CacheDB:
     # determine the current cache size
     sql = "SELECT numtiles FROM metadata;"
     try:
-      cursor.execute ( sql )
+      cursor.execute(sql)
     except MySQLdb.Error, e:
       logger.warning ("Failed to query cache size %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
       raise
 
-    return int(cursor.fetchone()[0])
-
-#    # RB testing check against the number of tiles
-#
-#    metadatasize = int(cursor.fetchone()[0])
-#    
-#    sql = "SELECT count(*) FROM contents";
-#    try:
-#      cursor.execute ( sql )
-#    except MySQLdb.Error, e:
-#      logger.warning ("Failed to query cache size (count*) %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
-#      raise
-#
-#    countsize = int(cursor.fetchone()[0])
-#
-#    if countsize != metadatasize:
-#      logger.warning("Cache size and metadatasize not consistent.  {} v {}".format(countsize,metadatasize))
-#
-#    return countsize
-
+    value = int(cursor.fetchone()[0])
+    cursor.close()
+    return value
 
   def increase ( self, numtiles ):
     """Add tiles to the cache"""
@@ -140,12 +122,13 @@ class CacheDB:
     sql = "UPDATE metadata SET numtiles=numtiles+{}".format(numtiles)
     try:
       cursor.execute ( sql )
+      self.conn.commit()
     except MySQLdb.Error, e:
-      logger.warning ("Failed to query cache size %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
+      logger.warning ("Failed to query cache size {}: {}. sql={}".format(e.args[0], e.args[1], sql))
       raise
+    finally:
+      cursor.close()
    
-    self.conn.commit()
-
   def decrease ( self, numtiles ):
     """Remove tiles from the cache"""
 
@@ -154,13 +137,13 @@ class CacheDB:
     # determine the current cache size
     sql = "UPDATE metadata SET numtiles=numtiles-{}".format(numtiles)
     try:
-      cursor.execute ( sql )
+      cursor.execute(sql)
+      self.conn.commit()
     except MySQLdb.Error, e:
-      logger.warning ("Failed to query cache size %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
+      logger.warning ("Failed to query cache size {}: {}. sql={}".format(e.args[0], e.args[1], sql))
       raise
-   
-    self.conn.commit()
-
+    finally:
+      cursor.close()
 
   def reclaim ( self ):
     """Reduce the cache size to a target"""
@@ -199,23 +182,23 @@ class CacheDB:
     for fname in files:
       # remove the file but don't quit
       try:
-        os.remove ( fname )
+        os.remove(fname)
       except Exception, e:
-        logger.error("Failed to remove file %s. Error %s" % ( fname, e ))
+        logger.error("Failed to remove file {}. Error {}".format(fname, e))
 
     sql = "DELETE FROM contents WHERE (highkey,lowkey) IN (%s)"
     in_p=', '.join(map(lambda x: str(x), tilekeys))
     sql = sql % in_p
     try:
-      cursor.execute ( sql )
+      cursor.execute(sql)
     except MySQLdb.Error, e:
       logger.warning ("Failed to remove items from cache %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
       raise
 
-    self.decrease ( numitems )
+    self.decrease(numitems)
     self.conn.commit()
 
-  def removeProject ( self, prefix ):
+  def removeProject(self, prefix):
     """Remove all cache entries for a given project"""
 
     cursor = self.conn.cursor()
@@ -246,7 +229,6 @@ class CacheDB:
       except Exception, e:
         logger.error("Failed to remove file %s. Error %s" % ( fname, e ))
 
-
     sql = "DELETE FROM contents WHERE (highkey,lowkey) IN (%s)"
     in_p=', '.join(map(lambda x: str(x), tilekeys))
     sql = sql % in_p
@@ -258,7 +240,6 @@ class CacheDB:
 
     self.decrease ( numitems )
     self.conn.commit()
-
 
   def getDataset(self, ds):
 
@@ -279,8 +260,6 @@ class CacheDB:
       (ds.dsid, ds.ximagesz, ds.yimagesz, ds.zimagesz, ds.xoffset, ds.yoffset, ds.zoffset, ds.xvoxelres, ds.yvoxelres, ds.zvoxelres, ds.scalingoption, ds.scalinglevels) = r
     else:
       raise Exception("Dataset not found")
-    
-
 
   def addDataset (self, ds):
     """Add a dataset to the list of cacheable datasets"""
@@ -306,11 +285,11 @@ class CacheDB:
       cursor.close()
 
 
-  def removeDataset(self, datasetname):
+  def removeDataset(self, dataset_name):
 
     cursor = self.conn.cursor()
 
-    sql = "SELECT highkey, lowkey FROM contents WHERE filename LIKE '{}/{}/%';".format(settings.CACHE_DIR,datasetname)
+    sql = "SELECT highkey, lowkey FROM contents WHERE filename LIKE '{}/{}/%';".format(settings.CACHE_DIR, dataset_name)
 
     try:
       cursor.execute(sql)
@@ -321,11 +300,10 @@ class CacheDB:
     result = cursor.fetchall()
 
     if result == ():
-      logger.warning("Found no cache entries for dataset {}.".format(datasetname))
+      logger.warning("Found no cache entries for dataset {}.".format(dataset_name))
       return
 
     tilekeys = [(int(item[0]),int(item[1])) for item in result]
-
     numitems = len(tilekeys)
 
     sql = "DELETE FROM contents WHERE (highkey,lowkey) IN (%s)"
@@ -333,13 +311,13 @@ class CacheDB:
     sql = sql % in_p
     try:
       cursor.execute(sql)
+      self.decrease(numitems)
+      self.conn.commit()
     except MySQLdb.Error, e:
       logger.warning ("Failed to remove items from cache {}: {}. sql={}".format(e.args[0], e.args[1], sql))
       raise
-
-    self.decrease(numitems)
-    self.conn.commit()
-
+    finally:
+      cursor.close()
 
   def addChannel(self, ch):
     """Add a channel to the channels table"""
@@ -350,13 +328,12 @@ class CacheDB:
     
     try:
       cursor.execute (sql)
+      self.conn.commit()
     except MySQLdb.Error, e:
       logger.warning ("Failed to insert channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
       raise OCPCATMAIDError("Failed to insert channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-
-    self.conn.commit()
-    cursor.close()
-
+    finally:
+      cursor.close()
 
   def getChannel(self, ds):
     """Get a channel from the channels table"""
@@ -370,9 +347,8 @@ class CacheDB:
       from dataset import Channel
       for row in cursor:
         ds.channel_list.append(Channel(*row))
-
     except MySQLdb.Error, e:
       logger.warning ("Failed to fetch channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
       raise OCPCATMAIDError("Failed to fetch channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-
-    cursor.close()
+    finally:
+      cursor.close()
