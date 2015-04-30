@@ -18,7 +18,7 @@ import cStringIO
 from PIL import Image
 import MySQLdb
 
-from util import getURL
+from util import getURL, getDatasetName
 import tilekey
 from dataset import Dataset
 from cachedb import CacheDB
@@ -44,13 +44,10 @@ class Tile:
 
     # load a cache
     self.db = CacheDB()
-
     # cutout a a tilesize region
     self.tilesize = settings.TILESIZE
-    
     # setting the server name
     self.server = settings.SERVER
-    
     # take the arguments
     self.token = token
     self.slice_type = slice_type
@@ -60,10 +57,8 @@ class Tile:
     self.zvalue = zvalue
     self.channels = channels
     self.colors = colors
-    # set the datasetname
-    dataset_name = "{}_{}_{}".format(self.token, ','.join(self.channels), self.slice_type)
-    # Load the data set. If it does not exist in the database then one is fetched and created.
-    self.ds = Dataset(dataset_name)
+    # set the datasetname and load the data set. If it does not exist in the database then one is fetched and created.
+    self.ds = Dataset(getDatasetName(self.token, self.channels, self.colors, self.slice_type))
     
     if self.slice_type == 'xy':
         self.filename = '{}/{}_{}_{}/r{}/sl{}/y{}x{}.png'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.res, self.zvalue, self.yvalue, self.xvalue)
@@ -163,7 +158,3 @@ class Tile:
     f = getURL(self.tile_url)
 
     return f.read()
-
-  def inRange ( self ):
-    """Determine if the requested tile is in the project domain"""
-

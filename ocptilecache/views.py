@@ -19,26 +19,41 @@ import django
 
 import tile
 
+from ocpcatmaiderror import OCPCATMAIDError
+import logging
+logger=logging.getLogger("ocpcatmaid")
+
 def getTile(request, webargs):
   """Return a tile or load the cache"""
 
   # Parse the tile request and turn it into an OCP request
-  #m = re.match("(\w+)/(\w+)/(?:([\w,-]+)/)?(\d+)/(\d+)_(\d+)_(\d+).png$", webargs)
-  m = re.match("(?P<mcfc>mcfc/)?(\w+)/(\w+)/(?:([\w,-]+)/)?(\d+)/(\d+)_(\d+)_(\d+).png$", webargs)
-  [mcfc, token, channels, slice_type] = [i for i in m.groups()[:4]]
+  try:
+    # argument of format /mcfc(optional)/token/channel_list/slice_type/time(optional)/z/y_x_res.png
+    m = re.match("(?P<mcfc>mcfc/)?(\w+)/([\w+,:]+)/(\w+)/(\d+)?/?(\d+)/(\d+)_(\d+)_(\d+).png$", webargs)
+    [mcfc, token, channels, slice_type] = [i for i in m.groups()[:4]]
+  except Exception, e:
+    logger.warning("Incorrect arguments {}. {}".format(webargs, e))
+    raise OCPCATMAID("Incorrect arguments {}. {}".format(webargs, e))
 
   if mcfc is not None:
+    # arguments of the form channel:color,channel:color  OR channel,channel
     channels, colors = zip(*re.findall("(\w+)[:]?(\w)?", channels))
-    orginal_colors = ('C','M','Y','R','G','B')
+    orignal_colors = ('C','M','Y','R','G','B')
     # checking for a non-empty list
     if not not filter(None, colors):
       # if it is a mixed then replace the missing ones with the existing schema
       colors = [ b if a is u'' else a for a,b in zip(colors, orignal_colors)]
     else:
-      colors = orginal_colors
+      colors = orignal_colors
   else:
-    channels = (channels,)
-    colors = None
+    try:
+      # only a single channel if not mcfc cutout
+      channels = re.match("(\w+)$", channels).groups()
+      colors = None
+    except Exception, e:
+      logger.warning("Incorrect channel {} for simple cutout. {}".format(channels, e))
+      raise OCPCATMAID("Incorrect channel {} for simple cutout. {}".format(channels, e))
+
 
   if slice_type == 'xy':
     [zvalue, yvalue, xvalue, res] = [int(i) for i in m.groups()[4:]]

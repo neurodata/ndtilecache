@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#    from celery.contrib import rdb; rdb.set_trace()
-
 import os
 import zlib
 import cStringIO
@@ -45,33 +43,26 @@ logger=logging.getLogger("ocpcatmaid")
 from django.db import models
 from ocptilecache.models import ProjectServer
 
-
 class TileCache:
 
   def __init__ (self, token, slice_type, channels, colors=None):
     """Setup the state for this cache request"""
 
+    # set the arguments
     self.token = token
     self.slice_type = slice_type
     self.channels = channels
     self.colors = colors
-
-    ## Check for a server for this token
-    #projserver = ProjectServer.objects.filter(project=token)
-    ##if projserver.exists():
-    #  server = projserver[0].server
-    #else:
     self.server = settings.SERVER
-    
+    self.dataset_name = etDatasetName(self.token, self.channels, self.colors, self.slice_type)
     # set the datasetname
-    self.datasetname = "{}_{}_{}".format(self.token, ','.join(self.channels), self.slice_type)
-    self.ds = Dataset(self.datasetname)
-
+    self.ds = Dataset(self.dataset_name)
 
   def loadData (self, cuboidurl):
     """Load a cube of data into the cache"""
 
     try:
+      # argument of the form /ca/token/channel/npz/cutoutargs
       m = re.match("^http://.*/ca/\w+/(?:[\w+,]+/)?npz/(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+),(\d+)/$", cuboidurl)
       [res, xmin, xmax, ymin, ymax, zmin, zmax] = [int(i) for i in m.groups()]
     except Exception, e:
@@ -81,7 +72,7 @@ class TileCache:
     # otherwise load a cube
     logger.warning ("Loading cache for {}".format(cuboidurl))
 
-    # ensure only one requester of a cube at a time
+    # ensure only one request of a cube at a time
     try:
       self.ds.db.fetchlock(cuboidurl)
     except Exception, e:
@@ -108,9 +99,9 @@ class TileCache:
       cubedata = np.load(pagefobj)
 
       # properties
-      ximagesize, yimagesize, zimagesize = self.ds.imagesz[res]
+      [ximagesize, yimagesize, zimagesize] = self.ds.imagesz[res]
       (xdim, ydim, zdim) = self.ds.cubedim[res]
-      xoffset, yoffset, zoffset = self.ds.offset[res]
+      [xoffset, yoffset, zoffset] = self.ds.offset[res]
       scale = self.ds.scale[res][self.slice_type]
 
       if xmax == ximagesize or ymax == yimagesize or zmax == zimagesize:
@@ -159,24 +150,22 @@ class TileCache:
     """Ensure that the directories for caching exist"""
 
     try:
-      os.stat ( settings.CACHE_DIR + "/" + self.datasetname )
+      os.stat("{}/{}".format(settings.CACHE_DIR, self.dataset_name))
     except:
-      os.makedirs ( settings.CACHE_DIR + "/" +  self.datasetname )
-      # when making the directory, create a dataset
+      os.makedirs("{}/{}".format(settings.CACHE_DIR, self.dataset_name))
 
     try:
-      os.stat ( settings.CACHE_DIR + "/" +  self.datasetname + "/r" + str(res) )
+      os.stat("{}/{}/r{}".format(settings.CACHE_DIR, self.dataset_name, res))
     except:
-      os.makedirs ( settings.CACHE_DIR + "/" + self.datasetname + "/r" + str(res) )
+      os.makedirs("{}/{}/r{}".format(settings.CACHE_DIR, self.dataset_name, res))
 
-
-  def checkSliceDir ( self, res, sliceno ):
+  def checkSliceDir(self, res, slice_no):
     """Ensure that the directories for caching exist"""
 
     try:
-      os.stat ( settings.CACHE_DIR + "/" +  self.datasetname + "/r" + str(res) + '/sl' + str(sliceno) )
+      os.stat("{}/{}/r{}/sl{}".format(settings.CACHE_DIR, self.dataset_name, res,slice_no))
     except:
-      os.makedirs ( settings.CACHE_DIR + "/" +  self.datasetname + "/r" + str(res) + '/sl' + str(sliceno) )
+      os.makedirs("{}/{}/r{}/sl{}".format(settings.CACHE_DIR, self.dataset_name, res, slice_no))
 
 
   def addCuboid( self, cuboid, res, (tile1,tile2,mini,dim)):
@@ -191,7 +180,7 @@ class TileCache:
     
     for index, channel_name in enumerate(self.channels):
       ch = self.ds.getChannelObj(channel_name)
-      cuboid[index,:] = window(cuboid[index:], ch)
+      cuboid[index,:] = window(cuboid[index,:], ch)
 
     # add each image slice to memcache
     for value in range(numtiles):
@@ -200,10 +189,8 @@ class TileCache:
       tilefname = '{}/{}/r{}/sl{}/{}{}{}{}.png'.format(settings.CACHE_DIR, self.datasetname, res, value+mini,self.slice_type[1], tile2, self.slice_type[0], tile1)
       if self.slice_type == 'xy':
         img = self.tile2WebPNG ( settings.TILESIZE, settings.TILESIZE, cuboid[:,value,:,:] )
-
       elif self.slice_type == 'xz':
         img = self.tile2WebPNG ( cuboid.shape[3], cuboid.shape[1], cuboid[:,:,value,:] )
-      
       elif self.slice_type == 'yz':
         img = self.tile2WebPNG ( cuboid.shape[2], cuboid.shape[1], cuboid[:,:,:,value] )
 
@@ -219,165 +206,6 @@ class TileCache:
 
     self.ds.db.increase(newtiles)
     self.harvest()
-
-
-  #def addXYCuboid ( self, cuboid, res, xtile, ytile, zmin, zdim ):
-    #"""Add the cutout to the cache"""
-
-    ## will create the dataset if it doesn't exist
-    #self.checkDirHier(res)
-
-    ## get the dataset id for this token
-    #(dsidstr,ximagesz,yimagesz,zoffset,zmaxslice,zscale) = self.db.getDataset ( self.datasetname )
-    #dsid = int(dsidstr)
-
-    ## counter of how many new tiles we get
-    #newtiles = 0
-
-    ## number of tiles
-    #if self.channels == None:
-      #numtiles = cuboid.shape[0]
-    #else:
-      #numtiles = cuboid.shape[1]
-
-    ## get the dataset window range
-    #startwindow, endwindow = self.info['dataset']['windowrange']
-
-    ## windodcutout function if window is non-zero
-    #if endwindow !=0:
-        #windowCutout ( cuboid, (startwindow,endwindow) )
-
-    ## add each image slice to memcache
-    #for z in range(numtiles):
-
-      #self.checkSliceDir(res,z+zmin)
-      #tilefname = '{}/{}/r{}/sl{}/y{}x{}.png'.format(settings.CACHE_DIR,self.datasetname,res,z+zmin,ytile,xtile)
-      #if self.channels == None:
-        #img = self.tile2WebPNG ( settings.TILESIZE, settings.TILESIZE, cuboid[z,:,:] )
-      #else:
-        #img = self.channels2WebPNG ( settings.TILESIZE, settings.TILESIZE, cuboid[:,z,:,:] )
-
-      #fobj = open ( tilefname, "w" )
-      #img.save ( fobj, "PNG" )
-      #try:
-        #self.db.insert ( tilekey.tileKey(dsid,res,xtile,ytile,z+zmin), tilefname ) 
-        #newtiles += 1 
-      #except MySQLdb.Error, e: # ignore duplicate entries
-        #if e.args[0] != 1062:  
-          #raise
-
-    #self.db.increase ( newtiles )
-    #self.harvest()
-
-
-  #def addXZCuboid ( self, cuboid, res, xtile, ztile, ymin, ydim ):
-    #""" Add the cutout to the cache """
-
-    ## will create the dataset if it doesn't exist
-    #self.checkDirHier(res)
-
-    ## get the dataset id for this token
-    #(dsidstr,ximagesz,yimagesz,zoffset,zmaxslice,zscale) = self.db.getDataset ( self.datasetname )
-    #dsid = int(dsidstr)
-
-    ## counter of how many new tiles we get
-    #newtiles = 0
-
-    ## number of tiles
-    #if self.channels == None:
-      #numtiles = cuboid.shape[1]
-    #else:
-      #numtiles = cuboid.shape[2]
-
-    ## get the dataset window range
-    #startwindow, endwindow = self.info['dataset']['windowrange']
-
-    ## windodcutout function if window is non-zero
-    #if endwindow !=0:
-        #windowCutout ( cuboid, (startwindow,endwindow) )
-
-    ## need to make channels take shape arguments
-
-    ## add each image slice to memcache
-    #for y in range(numtiles):
-
-      #self.checkSliceDir(res,y+ymin)
-      #tilefname = '{}/{}/r{}/sl{}/z{}x{}.png'.format(settings.CACHE_DIR,self.datasetname,res,y+ymin,ztile,xtile)
-      #if self.channels == None:
-        #img = self.tile2WebPNG ( cuboid.shape[2], cuboid.shape[0], cuboid[:,y,:] )
-      #else:
-        ## looks good to here
-        #img = self.channels2WebPNG ( cuboid.shape[3], cuboid.shape[1], cuboid[:,:,y,:] )
-
-      ## convert into a catmaid perspective tile.
-      #img = img.resize ( [settings.TILESIZE,settings.TILESIZE] )
-
-      #fobj = open ( tilefname, "w" )
-      #img.save ( fobj, "PNG" )
-      #try:
-        #self.db.insert ( tilekey.tileKey(dsid,res,xtile,y+ymin,ztile), tilefname ) 
-        #newtiles += 1 
-      #except MySQLdb.Error, e: # ignore duplicate entries
-        #if e.args[0] != 1062:  
-          #raise
-
-    #self.db.increase ( newtiles )
-    #self.harvest()
-
-
-  #def addYZCuboid ( self, cuboid, res, ytile, ztile, xmin, xdim ):
-    #""" Add the cutout to the cache """
-
-
-    ## will create the dataset if it doesn't exist
-    #self.checkDirHier(res)
-
-    ## get the dataset id for this token
-    #(dsidstr,ximagesz,yimagesz,zoffset,zmaxslice,zscale) = self.db.getDataset ( self.datasetname )
-    #dsid = int(dsidstr)
-
-    ## counter of how many new tiles we get
-    #newtiles = 0
-
-    ## number of tiles
-    #if self.channels == None:
-      #numtiles = cuboid.shape[2]
-    #else:
-      #numtiles = cuboid.shape[3]
-
-    ## get the dataset window range
-    #startwindow, endwindow = self.info['dataset']['windowrange']
-
-    ## windodcutout function if window is non-zero
-    #if endwindow !=0:
-        #windowCutout ( cuboid, (startwindow,endwindow) )
-
-    ## add each image slice to memcache
-    #for x in range(numtiles):
-
-      #self.checkSliceDir(res,x+xmin)
-      #tilefname = '{}/{}/r{}/sl{}/z{}y{}.png'.format(settings.CACHE_DIR,self.datasetname,res,x+xmin,ztile,ytile)
-      #if self.channels == None:
-        #img = self.tile2WebPNG ( cuboid.shape[1], cuboid.shape[0], cuboid[:,:,x] )
-      #else:
-        #img = self.channels2WebPNG ( cuboid.shape[2], cuboid.shape[1], cuboid[:,:,:,x] )
-
-      ## convert into a catmaid perspective tile.
-      #img = img.resize ( [settings.TILESIZE,settings.TILESIZE] )
-
-      #fobj = open ( tilefname, "w" )
-      #img.save ( fobj, "PNG" )
-      #try:
-        #self.db.insert ( tilekey.tileKey(dsid,res,x+xmin,ytile,ztile), tilefname ) 
-        #newtiles += 1 
-      #except MySQLdb.Error, e: # ignore duplicate entries
-        #if e.args[0] != 1062:  
-          #raise
-
-    #self.db.increase ( newtiles )
-    #self.harvest()
-  
-  
   
   def tile2WebPNG(self, xdim, ydim, tile):
     """Create PNG Images and write to cache for the specified tile"""
@@ -407,76 +235,6 @@ class TileCache:
       else :
         logger.warning ( "Datatype not yet supported".format(self.dbtype) )
 
-
-  #def channels2WebPNG ( self, xdim, ydim, chantile ):
-    #"""generate a false color image from multiple channels"""
-
-    #chanlist = self.channels.split(',')
-    #chanlist = self.channelsToInt ( chanlist )
-    
-    ## get the dataset window range
-    #startwindow, endwindow = self.info['dataset']['windowrange']
-    
-    #combined_img = np.zeros ((ydim, xdim), dtype=np.uint32 )
-
-    ## reduction factor
-    #if chantile.dtype == np.uint8:
-      #scaleby = 1
-    #elif chantile.dtype == np.uint16 and ( startwindow==0 and endwindow==0 ):
-      #scaleby = 1.0/256 
-    #elif chantile.dtype == np.uint16 and ( endwindow!=0 ):
-      #scaleby = 1 
-    #else:
-      #assert 0 #RBTODO error
-
-    #for i in range(chantile.shape[0]):
-
-      ## don't add the zero channels
-      #if chanlist[i] == 0:
-        #continue
-    
-      ##data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
-
-      ## First channel is cyan
-      #if i == 0:
-        #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
-        #combined_img = np.left_shift(data32,8) + np.left_shift(data32,16)
-      ## Second is Magenta
-      #elif i == 1:
-        #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
-        #combined_img +=  np.left_shift(data32,16) + data32
-      ## Third is yellow
-      #elif i == 2:
-        #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
-        #combined_img +=  np.left_shift(data32,8) + data32
-      ## Fourth is Red
-      #elif i == 3:
-        #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
-        #combined_img +=  data32
-      ## Fifth is Green
-      #elif i == 4:
-        #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
-        #combined_img += np.left_shift(data32,8)
-      ## Sixth is Blue
-      #elif i == 5:
-        #data32 = np.array ( chantile[i] * scaleby, dtype=np.uint32 )
-        #combined_img +=  np.left_shift(data32,16)
-      #else:
-        #assert 0  #RBTODO good error
-    
-    ## Set the alpha channel only for non-zero pixels
-    #combined_img = np.where ( combined_img > 0, combined_img + 0xFF000000, 0 )
-    #outimage =  Image.frombuffer ( 'RGBA', (xdim,ydim), combined_img.flatten(), 'raw', 'RGBA', 0, 1 )
-
-    ## Enhance the image
-    #if startwindow==0 and endwindow==0:
-        #from PIL import ImageEnhance
-        #enhancer = ImageEnhance.Brightness(outimage)
-        #outimage = enhancer.enhance(4.0)
-
-    #return outimage
-
-
   def harvest ( self ):
     """Get rid of tiles to respect cache limits"""
 
@@ -484,15 +242,12 @@ class TileCache:
 
     # determine tht current cache size
     numtiles = self.ds.db.size()
-
     currentsize = numtiles * settings.TILESIZE * settings.TILESIZE 
 
     # if we are greater than 95% full.
     if (cachesize - currentsize)*20 < cachesize:
-
       # start a reclaim process
       from ocptilecache.tasks import reclaim
-      reclaim.delay ( )
-
+      reclaim.delay()
     else:
-      logger.warning ( "Not harvesting cache of {} tiles.  Capacity {}.".format(numtiles,cachesize/512/512))
+      logger.warning("Not harvesting cache of {} tiles. Capacity {}".format(numtiles,cachesize/512/512))
