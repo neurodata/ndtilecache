@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from django.conf import settings
-
 import MySQLdb
 import os
+from django.conf import settings
 
 from ocpcatmaiderror import OCPCATMAIDError
 import logging
@@ -227,37 +225,38 @@ class CacheDB:
       try:
         os.remove ( fname )
       except Exception, e:
-        logger.error("Failed to remove file %s. Error %s" % ( fname, e ))
+        logger.error("Failed to remove file {}. Error {}".format(fname, e))
 
     sql = "DELETE FROM contents WHERE (highkey,lowkey) IN (%s)"
     in_p=', '.join(map(lambda x: str(x), tilekeys))
     sql = sql % in_p
     try:
       cursor.execute ( sql )
+      self.decrease ( numitems )
+      self.conn.commit()
     except MySQLdb.Error, e:
       logger.warning ("Failed to remove items from cache %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
-      raise
+      raise OCPCATMAIDError("Failed to remove items from cache %d: %s. sql=%s" % (e. args[0], e.args[1], sql))
+    finally:
+      cursor.close()
 
-    self.decrease ( numitems )
-    self.conn.commit()
 
   def getDataset(self, ds):
 
     cursor = self.conn.cursor()
 
-    sql = "SELECT datasetid, ximagesz, yimagesz, zimagesz, xoffset, yoffset, zoffset, xvoxelres, yvoxelres, zvoxelres, scalingoption, scalinglevels FROM datasets WHERE dataset = '{}';".format(ds.dataset_name)
+    sql = "SELECT datasetid, ximagesz, yimagesz, zimagesz, xoffset, yoffset, zoffset, xvoxelres, yvoxelres, zvoxelres, scalingoption, scalinglevels, starttime, endtime FROM datasets WHERE dataset = '{}';".format(ds.dataset_name)
     try:
-      cursor.execute ( sql )
+      cursor.execute(sql)
+      r = cursor.fetchone()
     except MySQLdb.Error, e:
       logger.warning ("Failed to fetch dataset {}: {}. sql={}".format(e.args[0], e.args[1], sql))
       raise OCPCATMAIDError("Failed to fetch dataset {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+    finally:
+      cursor.close()
 
-    # 0 is no dataset.  It will never match in the cache. 
-    # The dataset will get created on fetch.
-    r = cursor.fetchone()
-    cursor.close()
     if r is not None:
-      (ds.dsid, ds.ximagesz, ds.yimagesz, ds.zimagesz, ds.xoffset, ds.yoffset, ds.zoffset, ds.xvoxelres, ds.yvoxelres, ds.zvoxelres, ds.scalingoption, ds.scalinglevels) = r
+      (ds.dsid, ds.ximagesz, ds.yimagesz, ds.zimagesz, ds.xoffset, ds.yoffset, ds.zoffset, ds.xvoxelres, ds.yvoxelres, ds.zvoxelres, ds.scalingoption, ds.scalinglevels, ds.starttime, ds.endtime) = r
     else:
       raise Exception("Dataset not found")
 
@@ -267,7 +266,7 @@ class CacheDB:
     cursor = self.conn.cursor()
 
     try:
-      sql = "INSERT INTO datasets (dataset, ximagesz, yimagesz, zimagesz, xoffset, yoffset, zoffset, xvoxelres, yvoxelres, zvoxelres, scalingoption, scalinglevels) VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}');".format(ds.dataset_name, ds.ximagesz, ds.yimagesz, ds.zimagesz, ds.xoffset, ds.yoffset, ds.zoffset, ds.xvoxelres, ds.yvoxelres, ds.zvoxelres, ds.scalingoption, ds.scalinglevels)
+      sql = "INSERT INTO datasets (dataset, ximagesz, yimagesz, zimagesz, xoffset, yoffset, zoffset, xvoxelres, yvoxelres, zvoxelres, scalingoption, scalinglevels, starttime, endtime) VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}', '{}', '{}');".format(ds.dataset_name, ds.ximagesz, ds.yimagesz, ds.zimagesz, ds.xoffset, ds.yoffset, ds.zoffset, ds.xvoxelres, ds.yvoxelres, ds.zvoxelres, ds.scalingoption, ds.scalinglevels, ds.startime, ds.endtime)
       cursor.execute (sql)
 
       for ch in ds.channel_list:
@@ -277,10 +276,9 @@ class CacheDB:
       self.conn.commit()
     
     except MySQLdb.Error, e:
+      self.conn.rollback()
       logger.warning ("Failed to insert dataset/channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
       raise OCPCATMAIDError("Failed to insert dataset/channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-      self.conn.rollback()
-    
     finally:
       cursor.close()
 
@@ -288,14 +286,13 @@ class CacheDB:
   def removeDataset(self, dataset_name):
 
     cursor = self.conn.cursor()
-
     sql = "SELECT highkey, lowkey FROM contents WHERE filename LIKE '{}/{}/%';".format(settings.CACHE_DIR, dataset_name)
 
     try:
       cursor.execute(sql)
     except MySQLdb.Error, e:
-      logger.warning ("Failed to query cache for dataset. %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
-      raise
+      logger.warning ("Failed to remove dataset {}. {}:{}. sql={}".format(dataset_nam, e.args[0], e.args[1], sql))
+      raise OCPCATMAIDError("Failed to remove dataset {}. {}:{}. sql={}".format(dataset_nam, e.args[0], e.args[1], sql)
 
     result = cursor.fetchall()
 
@@ -323,7 +320,6 @@ class CacheDB:
     """Add a channel to the channels table"""
 
     cursor = self.conn.cursor()
-
     sql = "INSERT INTO channels (channel_name, dataset, channel_type, channel_datatype, startwindow, endwindow) VALUES ('{}','{}','{}','{}','{}','{}');".format(ch.channel_name, ch.dataset, ch.channel_type, ch.channel_datatype, ch.startwindow, ch.endwindow)
     
     try:
@@ -339,7 +335,6 @@ class CacheDB:
     """Get a channel from the channels table"""
 
     cursor = self.conn.cursor()
-
     sql = "SELECT channel_name, dataset, channel_type, channel_datatype, startwindow, endwindow FROM channels where dataset='{}';".format(ds.dataset_name)
 
     try:
@@ -348,7 +343,7 @@ class CacheDB:
       for row in cursor:
         ds.channel_list.append(Channel(*row))
     except MySQLdb.Error, e:
-      logger.warning ("Failed to fetch channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-      raise OCPCATMAIDError("Failed to fetch channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      logger.warning ("Failed to fetch channel. {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      raise OCPCATMAIDError("Failed to fetch channel. {}: {}. sql={}".format(e.args[0], e.args[1], sql))
     finally:
       cursor.close()

@@ -56,6 +56,7 @@ class Dataset:
     self.xvoxelres, self.yvoxelres, self.zvoxelres = info['dataset']['voxelres']['0']
     self.scalinglevels = info['dataset']['scalinglevels']
     self.scalingoption = dbtype.OCP_scalingtoint[info['dataset']['scaling']]
+    self.starttime, self.endtime = info['dataset']['timerange']
 
     for channel_name in info['channels'].keys():
       self.channel_list.append(Channel(channel_name, self.dataset_name, info['channels'][channel_name]['channel_type'], info['channels'][channel_name]['datatype'], *info['channels'][channel_name]['windowrange']))
@@ -70,6 +71,7 @@ class Dataset:
     self.offset = {}
     self.voxelres = {}
     self.scale = {}
+    self.timerange = [self.starttime, self.endtime]
 
     if not self.channel_list:
       self.db.getChannel(self)

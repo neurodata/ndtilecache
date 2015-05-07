@@ -40,7 +40,7 @@ class OOBException(Exception):
 class Tile:
   """Information specific to a given tile in the tilecache"""
 
-  def __init__(self, token, slice_type, res, xvalue, yvalue, zvalue, channels, colors=None):
+  def __init__(self, token, slice_type, res, xvalue, yvalue, zvalue, tvalue, channels, colors=None):
 
     # load a cache
     self.db = CacheDB()
@@ -55,6 +55,7 @@ class Tile:
     self.xvalue = xvalue
     self.yvalue = yvalue
     self.zvalue = zvalue
+    self.tvalue = tvalue
     self.channels = channels
     self.colors = colors
     # set the datasetname and load the data set. If it does not exist in the database then one is fetched and created.
@@ -67,7 +68,7 @@ class Tile:
     elif self.slice_type=='yz':
         self.filename = '{}/{}_{}_{}/r{}/sl{}/z{}y{}.png'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.res, self.xvalue, self.zvalue, self.yvalue)
 
-    self.tkey = tilekey.tileKey(self.ds.dsid, self.res, self.xvalue, self.yvalue, self.zvalue)
+    self.tkey = tilekey.tileKey(self.ds.dsid, self.res, self.xvalue, self.yvalue, self.zvalue, self.tvalue)
 
 
   def initForFetch ( self ):

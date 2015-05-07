@@ -64,7 +64,7 @@ def getTile(request, webargs):
     [tvalue, xvalue, zvalue, yvalue, res] = [int(i) for i in m.groups()[4:]]
 
   try:
-    t = tile.Tile(token, slice_type, res, xvalue, yvalue, zvalue, channels, colors)
+    t = tile.Tile(token, slice_type, res, xvalue, yvalue, zvalue, tvalue, channels, colors)
     tiledata = t.fetch()
     return django.http.HttpResponse(tiledata, content_type='image/png')
   except Exception, e:
