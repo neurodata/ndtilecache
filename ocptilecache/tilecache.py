@@ -120,7 +120,7 @@ class TileCache:
       if self.slice_type == 'xy':
         xtile = xmin / settings.TILESIZE
         ytile = ymin / settings.TILESIZE
-        cuboid_args = (xtile, ytile, xmin, xdim)
+        cuboid_args = (xtile, ytile, zmin, zdim)
 
       elif self.slice_type == 'xz':
         # round to the nearest tile size and scale 
@@ -128,7 +128,7 @@ class TileCache:
         cmzmax = int(math.ceil(((zmax-zoffset)*scale+1)/settings.TILESIZE))*settings.TILESIZE
         xtile = xmin / settings.TILESIZE
         ztile = cmzmin / settings.TILESIZE
-        cuboid_args = (xtile, ztile, zmin, zdim)
+        cuboid_args = (xtile, ztile, ymin, ydim)
 
       elif self.slice_type == 'yz':
         # round to the nearest tile size and scale 
@@ -136,7 +136,7 @@ class TileCache:
         cmzmax = int(math.floor(((zmax-zoffset)*scale+1)/settings.TILESIZE))*settings.TILESIZE
         ytile = ymin / settings.TILESIZE
         ztile = cmzmin / settings.TILESIZE
-        cuboid_args = (ytile, ztile, ymin, ydim)
+        cuboid_args = (ytile, ztile, zmin, zdim)
       
       self.addCuboid(cuboid, res, cuboid_args)
       logger.warning ("Load suceeded for {}".format(cuboidurl))
@@ -176,7 +176,7 @@ class TileCache:
     newtiles = 0
 
     # number of tiles
-    numtiles = cuboid.shape[0]
+    numtiles = cuboid.shape[1]
     
     for index, channel_name in enumerate(self.channels):
       ch = self.ds.getChannelObj(channel_name)
@@ -186,7 +186,7 @@ class TileCache:
     for value in range(numtiles):
 
       self.checkSliceDir(res, value+mini)
-      tilefname = '{}/{}/r{}/sl{}/{}{}{}{}.png'.format(settings.CACHE_DIR, self.datasetname, res, value+mini,self.slice_type[1], tile2, self.slice_type[0], tile1)
+      tilefname = '{}/{}/r{}/sl{}/{}{}{}{}.png'.format(settings.CACHE_DIR, self.dataset_name, res, value+mini,self.slice_type[1], tile2, self.slice_type[0], tile1)
       if self.slice_type == 'xy':
         img = self.tile2WebPNG ( settings.TILESIZE, settings.TILESIZE, cuboid[:,value,:,:] )
       elif self.slice_type == 'xz':
@@ -216,7 +216,7 @@ class TileCache:
 
     # If it is not a mcfc tile
     else:
-      ch = self.ds.channel_list[0]
+      ch = self.ds.getChannelObj(self.channels[0])
       # write it as a png file
       if ch.channel_type in dbtype.IMAGE_CHANNELS:
 
@@ -228,12 +228,12 @@ class TileCache:
         elif ch.channel_datatype in dbtype.DTYPE_uint32 :
           return Image.fromarray( tile, 'RGBA')
 
-      elif ch.channel_datatype in dbtype.ANNOTATION_CHANNELS :
-        ocplb.recolor_ctype(tile,tile)
+      elif ch.channel_type in dbtype.ANNOTATION_CHANNELS:
+        ocplib.recolor_ctype(tile, tile)
         return Image.frombuffer ( 'RGBA', [xdim,ydim], tile.flatten(), 'raw', 'RGBA', 0, 1 )
 
       else :
-        logger.warning ( "Datatype not yet supported".format(self.dbtype) )
+        logger.warning("Datatype not yet supported".format(ch.channel_type))
 
   def harvest ( self ):
     """Get rid of tiles to respect cache limits"""

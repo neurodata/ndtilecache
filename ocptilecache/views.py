@@ -27,14 +27,13 @@ def getTile(request, webargs):
   """Return a tile or load the cache"""
 
   # Parse the tile request and turn it into an OCP request
-  import pdb; pdb.set_trace()
   try:
     # argument of format /mcfc(optional)/token/channel_list/slice_type/time(optional)/z/y_x_res.png
-    m = re.match("(?P<mcfc>mcfc/)?(\w+)/([\w+,:]+)/(\w+)/(\d+)?/?(\d+)/(\d+)_(\d+)_(\d+).png$", webargs)
+    m = re.match("(?P<mcfc>mcfc/)?(\w+)/([\w+,:]+)/(\w+)/(\d/)?(\d+)/(\d+)_(\d+)_(\d+).png$", webargs)
     [mcfc, token, channels, slice_type] = [i for i in m.groups()[:4]]
   except Exception, e:
     logger.warning("Incorrect arguments {}. {}".format(webargs, e))
-    raise OCPCATMAID("Incorrect arguments {}. {}".format(webargs, e))
+    raise OCPCATMAIDError("Incorrect arguments {}. {}".format(webargs, e))
 
   if mcfc is not None:
     # arguments of the form channel:color,channel:color  OR channel,channel
@@ -53,21 +52,20 @@ def getTile(request, webargs):
       colors = None
     except Exception, e:
       logger.warning("Incorrect channel {} for simple cutout. {}".format(channels, e))
-      raise OCPCATMAID("Incorrect channel {} for simple cutout. {}".format(channels, e))
-
+      raise OCPCATMAIDError("Incorrect channel {} for simple cutout. {}".format(channels, e))
 
   if slice_type == 'xy':
-    [tvalue, zvalue, yvalue, xvalue, res] = [int(i) for i in m.groups()[4:]]
+    [tvalue, zvalue, yvalue, xvalue, res] = [int(i.strip('/')) if i is not None else None for i in m.groups()[4:]]
   elif slice_type == 'xz':
-    [tvalue, yvalue, zvalue, xvalue, res] = [int(i) for i in m.groups()[4:]]
+    [tvalue, yvalue, zvalue, xvalue, res] = [int(i) if i is not None else None for i in m.groups()[4:]]
   elif slice_type == 'yz':
-    [tvalue, xvalue, zvalue, yvalue, res] = [int(i) for i in m.groups()[4:]]
+    [tvalue, xvalue, zvalue, yvalue, res] = [int(i) if i is not None else None for i in m.groups()[4:]]
 
   try:
     t = tile.Tile(token, slice_type, res, xvalue, yvalue, zvalue, tvalue, channels, colors)
+    import pdb; pdb.set_trace()
     tiledata = t.fetch()
     return django.http.HttpResponse(tiledata, content_type='image/png')
   except Exception, e:
     raise
     return django.http.HttpResponseNotFound(e)
-

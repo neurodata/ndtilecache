@@ -14,6 +14,7 @@
 
 import urllib2
 import dbtype
+import numpy as np
 
 def getURL(url):
   """Get the url"""

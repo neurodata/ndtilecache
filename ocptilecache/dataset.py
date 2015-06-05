@@ -81,8 +81,7 @@ class Dataset:
       # add this level to the resolutions
       self.resolutions.append( i )
 
-      # set the image size
-      #  the scaled down image rounded up to the nearest cube
+      # set the image size. the scaled down image rounded up to the nearest cube
       xpixels = ((self.ximagesz-1)/2**i)+1
       ypixels = ((self.yimagesz-1)/2**i)+1
       if self.scalingoption == ZSLICES:

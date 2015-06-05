@@ -15,7 +15,7 @@
 
 # key to make an integer index 
 
-def tileKey(dsid, r, x, y, z, t):
+def tileKey(dsid, r, x, y, z, t=None):
   """Make a 64 bit key from a tile"""
 
   # Adding time to res. this seems like a stop-gap measure to accomodate time

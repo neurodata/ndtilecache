@@ -60,16 +60,24 @@ class Tile:
     self.colors = colors
     # set the datasetname and load the data set. If it does not exist in the database then one is fetched and created.
     self.ds = Dataset(getDatasetName(self.token, self.channels, self.colors, self.slice_type))
-    
-    if self.slice_type == 'xy':
-        self.filename = '{}/{}_{}_{}/r{}/sl{}/y{}x{}.png'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.res, self.zvalue, self.yvalue, self.xvalue)
-    elif self.slice_type=='xz':
-        self.filename = '{}/{}_{}_{}/r{}/sl{}/z{}x{}.png'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.res, self.yvalue, self.zvalue, self.xvalue)
-    elif self.slice_type=='yz':
-        self.filename = '{}/{}_{}_{}/r{}/sl{}/z{}y{}.png'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.res, self.xvalue, self.zvalue, self.yvalue)
-
+    self.getFileName() 
     self.tkey = tilekey.tileKey(self.ds.dsid, self.res, self.xvalue, self.yvalue, self.zvalue, self.tvalue)
+  
+  def getFileName (self):
+    """Genarate the file name based on the values"""
 
+    if self.tvalue is None:
+      self.filename = '{}/{}_{}_{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.res)
+    else:
+      self.filename = '{}/{}_{}_{}/t{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.tvalue, self.res)
+      
+    if self.slice_type == 'xy':
+        self.filename += 'sl{}/y{}x{}.png'.format(self.zvalue, self.yvalue, self.xvalue)
+    elif self.slice_type == 'xz':
+        self.filename += 'sl{}/z{}x{}.png'.format(self.yvalue, self.zvalue, self.xvalue)
+    elif self.slice_type == 'yz':
+        self.filename += 'sl{}/z{}y{}.png'.format(self.xvalue, self.zvalue, self.yvalue)
+  
 
   def initForFetch ( self ):
     """Configure the database when you need to get data from remote site"""
@@ -119,7 +127,11 @@ class Tile:
       self.zmax = min(int((self.zvalue+1)*self.tilesize/scale + zoffset), zimagesize+1)
 
     # Build the URLs
-    self.cuboid_url = 'http://{}/ca/{}/{}/npz/{}/{},{}/{},{}/{},{}/'.format(self.server, self.token, ','.join(self.channels), self.res, self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax)
+    if self.tvalue is None:
+      self.cuboid_url = 'http://{}/ca/{}/{}/npz/{}/{},{}/{},{}/{},{}/'.format(self.server, self.token, ','.join(self.channels), self.res, self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax)
+    else:
+      self.cuboid_url = 'http://{}/ca/{}/{}/npz/{}/{},{}/{},{}/{},{}/{},{}/'.format(self.server, self.token, ','.join(self.channels), self.res, self.tmin, self.tmax, self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax)
+    #KL TODO add time support
     if self.colors is None:
       self.tile_url = "http://{}/catmaid/{}/{}/{}/{}/{}_{}_{}.png".format(self.server, self.token, ','.join(self.channels), self.slice_type, self.zvalue, self.yvalue, self.xvalue, self.res)
     else:
@@ -152,6 +164,7 @@ class Tile:
 
     # call the celery process to fetch the url
     from ocptilecache.tasks import fetchurl
+    import pdb; pdb.set_trace()
     #fetchurl.delay (self.token, self.slice_type, self.channels, self.cuboidurl)
     fetchurl(self.token, self.slice_type, self.channels, self.cuboid_url)
 

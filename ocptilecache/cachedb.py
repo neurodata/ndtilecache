@@ -266,7 +266,7 @@ class CacheDB:
     cursor = self.conn.cursor()
 
     try:
-      sql = "INSERT INTO datasets (dataset, ximagesz, yimagesz, zimagesz, xoffset, yoffset, zoffset, xvoxelres, yvoxelres, zvoxelres, scalingoption, scalinglevels, starttime, endtime) VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}', '{}', '{}');".format(ds.dataset_name, ds.ximagesz, ds.yimagesz, ds.zimagesz, ds.xoffset, ds.yoffset, ds.zoffset, ds.xvoxelres, ds.yvoxelres, ds.zvoxelres, ds.scalingoption, ds.scalinglevels, ds.startime, ds.endtime)
+      sql = "INSERT INTO datasets (dataset, ximagesz, yimagesz, zimagesz, xoffset, yoffset, zoffset, xvoxelres, yvoxelres, zvoxelres, scalingoption, scalinglevels, starttime, endtime) VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}', '{}', '{}');".format(ds.dataset_name, ds.ximagesz, ds.yimagesz, ds.zimagesz, ds.xoffset, ds.yoffset, ds.zoffset, ds.xvoxelres, ds.yvoxelres, ds.zvoxelres, ds.scalingoption, ds.scalinglevels, ds.starttime, ds.endtime)
       cursor.execute (sql)
 
       for ch in ds.channel_list:
@@ -292,8 +292,8 @@ class CacheDB:
       cursor.execute(sql)
     except MySQLdb.Error, e:
       logger.warning ("Failed to remove dataset {}. {}:{}. sql={}".format(dataset_nam, e.args[0], e.args[1], sql))
-      raise OCPCATMAIDError("Failed to remove dataset {}. {}:{}. sql={}".format(dataset_nam, e.args[0], e.args[1], sql)
-
+      raise OCPCATMAIDError("Failed to remove dataset {}. {}:{}. sql={}".format(dataset_nam, e.args[0], e.args[1], sql))
+          
     result = cursor.fetchall()
 
     if result == ():
