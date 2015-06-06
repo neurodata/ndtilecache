@@ -36,9 +36,9 @@ from util import getURL, postURL, getDatasetName
 from mcfc import mcfcPNG
 from windowcutout import windowCutout
 
-from ocpcatmaiderror import OCPCATMAIDError
+from ocptilecacheerror import OCPTILECACHEError
 import logging
-logger=logging.getLogger("ocpcatmaid")
+logger=logging.getLogger("ocptilecache")
 
 from django.db import models
 from ocptilecache.models import ProjectServer
@@ -67,7 +67,7 @@ class TileCache:
       [res, xmin, xmax, ymin, ymax, zmin, zmax] = [int(i) for i in m.groups()]
     except Exception, e:
       logger.error("Failed to parse url {}".format(cuboidurl))
-      raise OCPCATMAIDError("Failed to parse url {}".format(cuboidurl))
+      raise OCPTILECACHEError("Failed to parse url {}".format(cuboidurl))
 
     # otherwise load a cube
     logger.warning ("Loading cache for {}".format(cuboidurl))

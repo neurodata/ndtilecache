@@ -6,15 +6,13 @@ import argparse
 
 import cachedb
 
-
 # Make it so that you can get settings from django
 import os
 import sys
 sys.path += [os.path.abspath('..')]
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ocpcatmaid.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ocptilecache.settings'
 
 from django.conf import settings
-
 
 
 def main():
@@ -25,13 +23,8 @@ def main():
   result = parser.parse_args()
 
   db = cachedb.CacheDB()
-
   prefix = settings.CACHE_DIR + "/" +  result.token 
-
   db.removeProject ( prefix )
-
 
 if __name__ == "__main__":
       main()
-
-

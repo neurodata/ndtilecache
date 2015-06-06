@@ -18,8 +18,7 @@
 
 import os, sys
 
-OCPCATMAID_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".." ))
-OCPCATMAID_OCPLIB_PATH = os.path.join(OCPCATMAID_BASE_PATH, "ocplib" )
+OCPTILECACHE_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".." ))
+OCPTILECACHE_OCPLIB_PATH = os.path.join(OCPTILECACHE_BASE_PATH, "ocplib" )
 
-sys.path += [ OCPCATMAID_OCPLIB_PATH ]
-
+sys.path += [ OCPTILECACHE_OCPLIB_PATH ]

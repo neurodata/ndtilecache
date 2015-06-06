@@ -21,7 +21,7 @@ import tilecache
 import cachedb
 
 import logging
-logger=logging.getLogger("ocpcatmaid")
+logger=logging.getLogger("ocptilecache")
 
 
 celery = Celery('tasks', broker='amqp://guest@localhost//')

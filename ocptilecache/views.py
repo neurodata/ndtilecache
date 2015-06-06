@@ -19,9 +19,9 @@ import django
 
 import tile
 
-from ocpcatmaiderror import OCPCATMAIDError
+from ocptilecacheerror import OCPTILECACHEError
 import logging
-logger=logging.getLogger("ocpcatmaid")
+logger=logging.getLogger("ocptilecache")
 
 def getTile(request, webargs):
   """Return a tile or load the cache"""
@@ -33,7 +33,7 @@ def getTile(request, webargs):
     [mcfc, token, channels, slice_type] = [i for i in m.groups()[:4]]
   except Exception, e:
     logger.warning("Incorrect arguments {}. {}".format(webargs, e))
-    raise OCPCATMAIDError("Incorrect arguments {}. {}".format(webargs, e))
+    raise OCPTILECACHEError("Incorrect arguments {}. {}".format(webargs, e))
 
   if mcfc is not None:
     # arguments of the form channel:color,channel:color  OR channel,channel
@@ -52,7 +52,7 @@ def getTile(request, webargs):
       colors = None
     except Exception, e:
       logger.warning("Incorrect channel {} for simple cutout. {}".format(channels, e))
-      raise OCPCATMAIDError("Incorrect channel {} for simple cutout. {}".format(channels, e))
+      raise OCPTILECACHEError("Incorrect channel {} for simple cutout. {}".format(channels, e))
 
   if slice_type == 'xy':
     [tvalue, zvalue, yvalue, xvalue, res] = [int(i.strip('/')) if i is not None else None for i in m.groups()[4:]]
@@ -63,7 +63,6 @@ def getTile(request, webargs):
 
   try:
     t = tile.Tile(token, slice_type, res, xvalue, yvalue, zvalue, tvalue, channels, colors)
-    import pdb; pdb.set_trace()
     tiledata = t.fetch()
     return django.http.HttpResponse(tiledata, content_type='image/png')
   except Exception, e:

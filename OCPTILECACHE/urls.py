@@ -21,8 +21,8 @@ from django.conf.urls import patterns, include, url
 urlpatterns = patterns('',
     url(r'^tilecache/', include('ocptilecache.urls')),
     # Examples:
-    # url(r'^$', 'ocpcatmaid.views.home', name='home'),
-    # url(r'^ocpcatmaid/', include('ocpcatmaid.foo.urls')),
+    # url(r'^$', 'ocptilecache.views.home', name='home'),
+    # url(r'^ocptilecache/', include('ocptilecache.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

@@ -13,8 +13,6 @@
 # limitations under the License.
 
 
-# key to make an integer index 
-
 def tileKey(dsid, r, x, y, z, t=None):
   """Make a 64 bit key from a tile"""
 
@@ -24,4 +22,3 @@ def tileKey(dsid, r, x, y, z, t=None):
   highkey = (r & 0XFFFF) + (dsid << 16)
   lowkey = (x & 0XFFFFF) + ((y & 0xFFFFF) << 20) + ((z & 0xFFFFF) << 40) 
   return (highkey,lowkey)
-

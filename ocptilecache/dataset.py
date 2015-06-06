@@ -20,9 +20,9 @@ from dbtype import ZSLICES, ISOTROPIC
 from util import getURL
 import dbtype
 
-from ocpcatmaiderror import OCPCATMAIDError
+from ocptilecacheerror import OCPTILECACHEError
 import logging
-logger=logging.getLogger("ocpcatmaid")
+logger=logging.getLogger("ocptilecache")
 
 
 class Dataset:
@@ -145,7 +145,7 @@ class Dataset:
         return ch
 
     logger.warning("Channel {} does not exist for the dataset {}".format(channel_name, self.dataset_name))
-    raise OCPCATMAIDError("Channel {} does not exist for the dataset {}".format(channel_name, self.dataset_name))
+    raise OCPTILECACHEError("Channel {} does not exist for the dataset {}".format(channel_name, self.dataset_name))
 
 
 class Channel:

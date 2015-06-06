@@ -16,9 +16,9 @@ import MySQLdb
 import os
 from django.conf import settings
 
-from ocpcatmaiderror import OCPCATMAIDError
+from ocptilecacheerror import OCPTILECACHEError
 import logging
-logger=logging.getLogger("ocpcatmaid")
+logger=logging.getLogger("ocptilecache")
 
 
 class CacheDB:
@@ -30,7 +30,7 @@ class CacheDB:
       self.conn = MySQLdb.connect (host = 'localhost', user = settings.USER, passwd = settings.PASSWD, db = settings.DBNAME )
     except MySQLdb.Error, e:
       logger.error("Failed to connect to database: {}, {}".format(settings.DBNAME, e))
-      raise OCPCATMAIDError("Failed to connect to database: {}, {}".format(settings.DBNAME, e))
+      raise OCPTILECACHEError("Failed to connect to database: {}, {}".format(settings.DBNAME, e))
 
   # Some technique to make sure we don't fetch the same thing twice concurrently?
   def fetchlock ( self, url ):
@@ -236,7 +236,7 @@ class CacheDB:
       self.conn.commit()
     except MySQLdb.Error, e:
       logger.warning ("Failed to remove items from cache %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
-      raise OCPCATMAIDError("Failed to remove items from cache %d: %s. sql=%s" % (e. args[0], e.args[1], sql))
+      raise OCPTILECACHEError("Failed to remove items from cache %d: %s. sql=%s" % (e. args[0], e.args[1], sql))
     finally:
       cursor.close()
 
@@ -251,7 +251,7 @@ class CacheDB:
       r = cursor.fetchone()
     except MySQLdb.Error, e:
       logger.warning ("Failed to fetch dataset {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-      raise OCPCATMAIDError("Failed to fetch dataset {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      raise OCPTILECACHEError("Failed to fetch dataset {}: {}. sql={}".format(e.args[0], e.args[1], sql))
     finally:
       cursor.close()
 
@@ -278,7 +278,7 @@ class CacheDB:
     except MySQLdb.Error, e:
       self.conn.rollback()
       logger.warning ("Failed to insert dataset/channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-      raise OCPCATMAIDError("Failed to insert dataset/channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      raise OCPTILECACHEError("Failed to insert dataset/channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
     finally:
       cursor.close()
 
@@ -292,7 +292,7 @@ class CacheDB:
       cursor.execute(sql)
     except MySQLdb.Error, e:
       logger.warning ("Failed to remove dataset {}. {}:{}. sql={}".format(dataset_nam, e.args[0], e.args[1], sql))
-      raise OCPCATMAIDError("Failed to remove dataset {}. {}:{}. sql={}".format(dataset_nam, e.args[0], e.args[1], sql))
+      raise OCPTILECACHEError("Failed to remove dataset {}. {}:{}. sql={}".format(dataset_nam, e.args[0], e.args[1], sql))
           
     result = cursor.fetchall()
 
@@ -327,7 +327,7 @@ class CacheDB:
       self.conn.commit()
     except MySQLdb.Error, e:
       logger.warning ("Failed to insert channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-      raise OCPCATMAIDError("Failed to insert channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      raise OCPTILECACHEError("Failed to insert channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
     finally:
       cursor.close()
 
@@ -344,6 +344,6 @@ class CacheDB:
         ds.channel_list.append(Channel(*row))
     except MySQLdb.Error, e:
       logger.warning ("Failed to fetch channel. {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-      raise OCPCATMAIDError("Failed to fetch channel. {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      raise OCPTILECACHEError("Failed to fetch channel. {}: {}. sql={}".format(e.args[0], e.args[1], sql))
     finally:
       cursor.close()

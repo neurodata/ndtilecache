@@ -21,6 +21,7 @@ import numpy as np
 #   below minWindow = 0, above maxWindow = 255
 #   outputVal = (inputVal - minWin)* (255/(maxWin - minWin))
 #
+
 def windowCutout ( cutout, window ):
   """Window image cutouts for datasets that have low range of pixel values"""
   

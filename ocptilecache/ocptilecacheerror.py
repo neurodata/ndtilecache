@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class OCPCATMAIDError (Exception):
+class OCPTILECACHEError (Exception):
   """General Errors"""
 
   def __init__ (self, value):

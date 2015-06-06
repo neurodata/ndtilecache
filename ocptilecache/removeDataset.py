@@ -18,14 +18,14 @@ import argparse
 
 # Make it so that you can get settings from django
 sys.path += [os.path.abspath('../')]
-import ocpcatmaid.settings
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ocpcatmaid.settings'
+import OCPTILECACHE.settings
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ocptilecache.settings'
 from django.conf import settings
 
 from dataset import Dataset
 
 import logging
-logger=logging.getLogger("ocpcatmaid")
+logger=logging.getLogger("ocptilecache")
 
 def main():
 

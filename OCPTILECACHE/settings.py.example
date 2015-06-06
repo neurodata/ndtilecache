@@ -1,4 +1,4 @@
-# Django settings for ocpcatmaid project.
+# Django settings for ocptilecache project.
 import settings_secret 
 
 DEBUG = True
@@ -101,10 +101,10 @@ MIDDLEWARE_CLASSES = (
     #'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'ocpcatmaid.urls'
+ROOT_URLCONF = 'OCPTILECACHE.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'ocpcatmaid.wsgi.application'
+WSGI_APPLICATION = 'OCPTILECACHE.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -153,7 +153,7 @@ LOGGING = {
         'logfile': {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
-            'filename': "/var/log/ocpcatmaid" + "/ocpcatmaid.log",
+            'filename': "/var/log/ocptilecache" + "/ocptilecache.log",
             'maxBytes': 500000,
             'backupCount': 7,
             'formatter': 'standard',
@@ -175,14 +175,14 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
-        'ocpcatmaid': {
+        'ocptilecache': {
             'handlers': ['console', 'logfile'],
             'level': 'WARN',
         },
     }
 }
 
-#RB ocpcatmaid specific settings
+# ocptilecache specific settings
 SERVER = 'ocp.me/ocp'
 DBNAME = 'ocptilecache'
 USER = settings_secret.user

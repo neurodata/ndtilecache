@@ -24,9 +24,9 @@ from dataset import Dataset
 from cachedb import CacheDB
 from tilecache import TileCache
 
-from ocpcatmaiderror import OCPCATMAIDError
+from ocptilecacheerror import OCPTILECACHEError
 import logging
-logger=logging.getLogger("ocpcatmaid")
+logger=logging.getLogger("ocptilecache")
 
 from django.conf import settings
 from django.db import models
@@ -164,11 +164,10 @@ class Tile:
 
     # call the celery process to fetch the url
     from ocptilecache.tasks import fetchurl
-    import pdb; pdb.set_trace()
     #fetchurl.delay (self.token, self.slice_type, self.channels, self.cuboidurl)
     fetchurl(self.token, self.slice_type, self.channels, self.cuboid_url)
 
-    logger.warning("CATMAID tile fetch {}".format(self.tile_url))
+    logger.warning("Tile fetch {}".format(self.tile_url))
     f = getURL(self.tile_url)
 
     return f.read()

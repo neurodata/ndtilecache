@@ -13,18 +13,22 @@
 # limitations under the License.
 
 import pip
-from django.conf import settings
+import os
+import sys
 import MySQLdb
+
+sys.path += [os.path.abspath('../')]
+os.environ['DJANGO_SETTINGS_MODULE'] = 'OCPTILECACHE.settings'
+from django.conf import settings
+#from django.core.management import call_command
 
 class Installer:
 
   def __init__ (self):
-
     pass
 
-
   def createDatabase(self):
-    """Creating the database for ocpcatmaid"""
+    """Creating the database for ocptilecache"""
     
     try:
       self.conn = MySQLdb.connect (host = 'localhost', user = settings.USER, passwd = settings.PASSWD)
@@ -34,16 +38,16 @@ class Installer:
     try:
       cursor = self.conn.cursor()
       cursor.execute("CREATE DATABASE {};".format(settings.DBNAME))
-      cursor.execute("CREATE DATABASE {};".format(settings))
+      #cursor.execute("CREATE DATABASE {};".format(settings.DATABASES['default']['NAME']))
     except MySQLdb.Error, e:
-      raise Exception("Cannot create the database {}".format(settings.DBNAME))
+      raise Exception("Cannot create the database {}. {}".format(settings.DBNAME, e))
     finally:
       self.conn.close()
 
     try:
-      self.conn = MySQLdb.connect (host = 'localhost', user = settings.USER, passwd = settings.PASSWD)
+      self.conn = MySQLdb.connect (host = 'localhost', user = settings.USER, passwd = settings.PASSWD, db = settings.DBNAME)
     except MySQLdb.Error, e:
-      raise Exception("Cannot connect to the database {}".format(settings.DBNAME))
+      raise Exception("Cannot connect to the database {}. {}".format(settings.DBNAME, e))
 
     try:
       cursor = self.conn.cursor()
@@ -53,12 +57,13 @@ class Installer:
       cursor.execute("CREATE TABLE datasets (dataset VARCHAR(255) PRIMARY KEY, datasetid INT UNIQUE AUTO_INCREMENT, ximagesz INT, yimagesz INT, zimagesz INT, xoffset INT, yoffset INT, zoffset INT, xvoxelres DOUBLE, yvoxelres DOUBLE, zvoxelres DOUBLE, scalingoption INT, scalinglevels INT, starttime INT, endtime INT);")
       cursor.execute("CREATE TABLE channels (channel_name VARCHAR(255) ,dataset VARCHAR(255) REFERENCES datasets(dataset), PRIMARY KEY (channel_name,dataset), channel_type VARCHAR(255), channel_datatype VARCHAR(255), startwindow INT, endwindow INT);")
       cursor.execute("CREATE TABLE metadata (numtiles BIGINT);")
-      cursor.execute("CREATE TABLE metadata (numtiles BIGINT);")
       cursor.execute("CREATE TABLE fetching (url VARCHAR(255) PRIMARY KEY);")
       cursor.execute("INSERT INTO metadata (numtiles) VALUES (0);")
+      self.conn.commit()
     except MySQLdb.Error, e:
-      raise Exception("Cannot create the tables for the database {}".format(settings.DBNAME))
-
+      raise Exception("Cannot create the tables for the database {}, {}".format(settings.DBNAME, e))
+    finally:
+      self.conn.close()
     
     def pipInstall(self):
       """Installing all the pip packages"""
@@ -71,6 +76,7 @@ class Installer:
 def main():
   inst = Installer()
   inst.createDatabase()
+  #call_command('syncdb', interactive=False)
 
 if __name__ == '__main__':
   main()

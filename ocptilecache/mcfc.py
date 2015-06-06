@@ -15,7 +15,7 @@
 import numpy as np
 from PIL import Image
 
-from ocpcatmaiderror import OCPCATMAIDError
+from ocptilecacheerror import OCPTILECACHEError
 import logging
 logger=logging.getLogger("ocp")
 

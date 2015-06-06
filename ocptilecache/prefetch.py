@@ -21,10 +21,10 @@ import argparse
 import cachedb
 
 # Make it so that you can get settings from django
-import os
-import sys
-sys.path += [os.path.abspath('..')]
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ocpcatmaid.settings'
+#import os
+#import sys
+#sys.path += [os.path.abspath('..')]
+#os.environ['DJANGO_SETTINGS_MODULE'] = 'ocptilecache.settings'
 
 from django.conf import settings
 from django.db import models
