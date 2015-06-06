@@ -1,4 +1,6 @@
-### README for make file 
+### Make file instructions 
+
+* This folder contains ctype acclerations for the service
 
 * Copy over the appropiate make for your system
 

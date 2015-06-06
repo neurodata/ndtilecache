@@ -15,6 +15,10 @@
   create database ocptilecache_django;
   ```
 
+##### Ctype
+
+  * Read the instructions in the ocplib folder to install the ctype acclerations for this service
+
 ##### Logging
   
   * Make directories for logging. It has to have permission for the Web server (www-data or your user for the development server)
