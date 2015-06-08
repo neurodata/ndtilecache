@@ -5,13 +5,13 @@
   
   * Run the python script called install.py. This will install all the necessary tables for you.
 
-  ```mysql
+  ```shell
   python install.py
   ```
 
   * Create a database for django.
 
-  ```mysql
+  ```sql
   create database ocptilecache_django;
   ```
 
@@ -23,7 +23,7 @@
   
   * Make directories for logging. It has to have permission for the Web server (www-data or your user for the development server)
 
-  ```
+  ```shell
   mkdir /var/log/ocptilecache
   touch /var/log/ocptilecache/ocptilecache.log
   chown www-data:www-data -R /var/log/ocptilecache 
@@ -48,7 +48,7 @@
 
   * Starting the celery dev server.  The service uses two queues.  For testing you can start them together.  For deployments, we should have them running separately as daemons.
 
-  ```
+  ```shell
   python manage.py celery worker --loglevel=info -Q celery,reclaim
   ```
 
@@ -58,7 +58,7 @@
   
   * Restart all the services
   
-  ```
+  ```shell
   sudo /etc/init.d/uwsgi restart ocptilecache
   sudo /etc/init.d/supervisor restart 
   sudo /etc/init.d/nginx restart 
@@ -66,7 +66,7 @@
 
   * And check their status
 
-  ```
+  ```shell
   sudo /etc/init.d/uwsgi status ocptilecache
   sudo /etc/init.d/supervisor status 
   sudo /etc/init.d/nginx status 
