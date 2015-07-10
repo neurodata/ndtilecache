@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>OCPtilecache by openconnectome</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>OCPtilecache</h1>
+        <p>Caching gateway to connect a CATMAID (or other) server to the Open Connectome Project Web Services</p>
+
+        <p class="view"><a href="https://github.com/openconnectome/ocptilecache">View the Project on GitHub <small>openconnectome/ocptilecache</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/openconnectome/ocptilecache/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/openconnectome/ocptilecache/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/openconnectome/ocptilecache">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="ocpcatmaid" class="anchor" href="#ocpcatmaid" aria-hidden="true"><span class="octicon octicon-link"></span></a>ocpcatmaid</h1>
+
+<p><a href="https://gitter.im/openconnectome/ocpcatmaid?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img src="https://badges.gitter.im/Join%20Chat.svg" alt="Join the chat at https://gitter.im/openconnectome/ocpcatmaid"></a></p>
+
+<p>Caching gateway to connect a CATMAID server to the Open Connectome Project Web Services.</p>
+
+<p>This repository can be cited using DOI <a href="http://dx.doi.org/10.5281/zenodo.9992">http://dx.doi.org/10.5281/zenodo.9992</a></p>
+
+<p>** setup **</p>
+
+<p>Using mysql we need to creat the following tables.  The must be reabable by django, i.e. configure with the same database user used in django. </p>
+
+<pre><code># RBTODO add foreign key constratin on datasets/metadata
+
+create database ocpcatmaid;
+use ocpcatmaid
+CREATE TABLE contents ( highkey BIGINT, lowkey BIGINT, filename varchar(255), reftime TIMESTAMP, PRIMARY KEY ( highkey, lowkey)); 
+CREATE TABLE datasets ( dataset VARCHAR(255) PRIMARY KEY, datasetid INT UNIQUE AUTO_INCREMENT, ximagesz BIGINT, yimagesz BIGINT, zoffset BIGINT, zmaxslice BIGINT, zscale FLOAT );
+CREATE TABLE metadata ( numtiles BIGINT);
+CREATE TABLE fetching ( url VARCHAR(255) PRIMARY KEY );
+INSERT INTO metadata (numtiles) VALUES (0);
+
+# And a database for django
+create database ocpcatmaid_django;
+</code></pre>
+
+<p>Make directories for logging. It has to have permission for the Web server (www-data or your user for the development server)</p>
+
+<pre><code>mkdir /var/log/ocpcatmaid
+chown www-data /var/log/ocpcatmaid 
+mkdir /var/log/celery
+chown www-data /var/log/celery 
+</code></pre>
+
+<p>Starting the celery dev server.  The service uses two queues.  For testing you can start them together.  For deployments, we should have them running separately as daemons.</p>
+
+<pre><code>python manage.py celery worker --loglevel=info -Q celery,reclaim
+</code></pre>
+
+<p>If this works, stop the dev server.</p>
+
+<p>Follow all of the instructions in the ocpcatmaid/setup directory.  Then:</p>
+
+<p>Restart all the services</p>
+
+<pre><code>sudo /etc/init.d/uwsgi restart ocpcatmaid
+sudo /etc/init.d/supervisor restart 
+sudo /etc/init.d/nginx restart 
+</code></pre>
+
+<p>And check their status</p>
+
+<pre><code>sudo /etc/init.d/uwsgi status ocpcatmaid
+sudo /etc/init.d/supervisor status 
+sudo /etc/init.d/nginx status 
+</code></pre>
+
+<p>If all are running you should be good to go.</p>
+
+<p>** Configuring in CATMAID **</p>
+
+<p>Create a stack to a remote site.  It must have the following properties:
+    * Image base = http://localhost/ocpcatmaid/[token]/
+    * File extension = png
+    * Tile width = 512
+    * Tile height = 512</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/openconnectome">openconnectome</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
