@@ -163,7 +163,7 @@ class Tile:
       return fileobj.read()
 
     # call the celery process to fetch the url
-    from ocptilecache.tasks import fetchurl
+    from tasks import fetchurl
     #fetchurl.delay (self.token, self.slice_type, self.channels, self.cuboidurl)
     fetchurl(self.token, self.slice_type, self.channels, self.cuboid_url)
 

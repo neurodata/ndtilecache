@@ -18,7 +18,7 @@ import sys
 import MySQLdb
 
 sys.path += [os.path.abspath('../')]
-os.environ['DJANGO_SETTINGS_MODULE'] = 'OCPTILECACHE.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ocptilecache.settings'
 from django.conf import settings
 #from django.core.management import call_command
 

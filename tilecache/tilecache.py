@@ -40,8 +40,8 @@ from ocptilecacheerror import OCPTILECACHEError
 import logging
 logger=logging.getLogger("ocptilecache")
 
-from django.db import models
-from ocptilecache.models import ProjectServer
+#from django.db import models
+#from tilecache.models import ProjectServer
 
 class TileCache:
 
@@ -247,7 +247,7 @@ class TileCache:
     # if we are greater than 95% full.
     if (cachesize - currentsize)*20 < cachesize:
       # start a reclaim process
-      from ocptilecache.tasks import reclaim
+      from tasks import reclaim
       reclaim.delay()
     else:
       logger.warning("Not harvesting cache of {} tiles. Capacity {}".format(numtiles,cachesize/512/512))
