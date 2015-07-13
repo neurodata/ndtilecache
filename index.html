@@ -1,107 +1,244 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>OCPtilecache by openconnectome</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-light.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    <div class="wrapper">
-      <header>
-        <h1>OCPtilecache</h1>
-        <p>Caching gateway to connect a CATMAID (or other visualization) server to the Open Connectome Project Web Services</p>
-
-        <p class="view"><a href="https://github.com/openconnectome/ocptilecache">View the Project on GitHub <small>openconnectome/ocptilecache</small></a></p>
 
 
-        <ul>
-          <li><a href="https://github.com/openconnectome/ocptilecache/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/openconnectome/ocptilecache/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/openconnectome/ocptilecache">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>
-<a id="ocpcatmaid" class="anchor" href="#ocpcatmaid" aria-hidden="true"><span class="octicon octicon-link"></span></a>ocpcatmaid</h1>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta content="Official documentation for ocptilecache: Caching Gateway to connect a CATMAID server to Open Connectome Project Web Services" name="description" />
+<meta content="annotation, tracing, neuroscience, object detection" name="keywords" />
 
-<p><a href="https://gitter.im/openconnectome/ocpcatmaid?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img src="https://badges.gitter.im/Join%20Chat.svg" alt="Join the chat at https://gitter.im/openconnectome/ocpcatmaid"></a></p>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ocptilecache &mdash; open-connetome v0.7.0 documentation</title>
+  
 
-<p>Caching gateway to connect a CATMAID (or other visualization) server to the Open Connectome Project Web Services.</p>
+  
+  
+    <link rel="shortcut icon" href="_static/ocp_favicon.ico"/>
+  
 
-<p>This repository can be cited using DOI <a href="http://dx.doi.org/10.5281/zenodo.9992">http://dx.doi.org/10.5281/zenodo.9992</a></p>
+  
 
-<p>** setup **</p>
-
-<p>Using mysql we need to creat the following tables.  The must be reabable by django, i.e. configure with the same database user used in django. </p>
-
-<pre><code># RBTODO add foreign key constratin on datasets/metadata
-
-create database ocpcatmaid;
-use ocpcatmaid
-CREATE TABLE contents ( highkey BIGINT, lowkey BIGINT, filename varchar(255), reftime TIMESTAMP, PRIMARY KEY ( highkey, lowkey)); 
-CREATE TABLE datasets ( dataset VARCHAR(255) PRIMARY KEY, datasetid INT UNIQUE AUTO_INCREMENT, ximagesz BIGINT, yimagesz BIGINT, zoffset BIGINT, zmaxslice BIGINT, zscale FLOAT );
-CREATE TABLE metadata ( numtiles BIGINT);
-CREATE TABLE fetching ( url VARCHAR(255) PRIMARY KEY );
-INSERT INTO metadata (numtiles) VALUES (0);
-
-# And a database for django
-create database ocpcatmaid_django;
-</code></pre>
-
-<p>Make directories for logging. It has to have permission for the Web server (www-data or your user for the development server)</p>
-
-<pre><code>mkdir /var/log/ocpcatmaid
-chown www-data /var/log/ocpcatmaid 
-mkdir /var/log/celery
-chown www-data /var/log/celery 
-</code></pre>
-
-<p>Starting the celery dev server.  The service uses two queues.  For testing you can start them together.  For deployments, we should have them running separately as daemons.</p>
-
-<pre><code>python manage.py celery worker --loglevel=info -Q celery,reclaim
-</code></pre>
-
-<p>If this works, stop the dev server.</p>
-
-<p>Follow all of the instructions in the ocpcatmaid/setup directory.  Then:</p>
-
-<p>Restart all the services</p>
-
-<pre><code>sudo /etc/init.d/uwsgi restart ocpcatmaid
-sudo /etc/init.d/supervisor restart 
-sudo /etc/init.d/nginx restart 
-</code></pre>
-
-<p>And check their status</p>
-
-<pre><code>sudo /etc/init.d/uwsgi status ocpcatmaid
-sudo /etc/init.d/supervisor status 
-sudo /etc/init.d/nginx status 
-</code></pre>
-
-<p>If all are running you should be good to go.</p>
-
-<p>** Configuring in CATMAID **</p>
-
-<p>Create a stack to a remote site.  It must have the following properties:
-    * Image base = http://localhost/ocpcatmaid/[token]/
-    * File extension = png
-    * Tile width = 512
-    * Tile height = 512</p>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/openconnectome">openconnectome</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
+  
+  
     
-  </body>
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="open-connetome v0.7.0 documentation" href="#"/>
+        <link rel="next" title="Configuration" href="sphinx/config.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="#" class="icon icon-home"> open-connetome
+        
+
+        
+          
+          <img src="_static/ocp_main.png" class="logo" />
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <p class="caption"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sphinx/config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sphinx/faq.html">Frequently Asked Questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/ocp_types.html">OCP Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/ocp_types.html#channel-types">Channel Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/ocp_types.html#data-types">Data Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/ocp_types.html#propagated-values">Propagated Values</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/tilecache_api.html">Tilecache API&#8217;s</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/tilecache_api.html#getsimpletile">getSimpleTile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/tilecache_api.html#getmcfctile">getMcfcTile</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Further Reading</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/functions.html">open-connectome Functions</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://gitter.im/openconnectome/ocptilecache">Gitter chatroom</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://groups.google.com/forum/#!forum/ocp-support/">Mailing List</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/openconnectome/ocptilecache">Github repo</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/openconnectome/ocptilecache/releases/">Release Notes</a></li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">open-connetome</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Docs</a> &raquo;</li>
+      
+    <li>ocptilecache</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/index.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <h1>ocptilecache: Caching Gateway to connect a CATMAID server to Open Connectome Project Web Services</h1>
+<br><div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="_images/ocp_example.png"><img alt="Spatially Registered Databases in the Open Connectome Project." src="_images/ocp_example.png" style="width: 1000px; height: 500px;" /></a>
+<p class="caption"><span class="caption-text">Spatially Registered Databases in the Open Connectome Project</span></p>
+<div class="legend">
+Electron microscopy images of a mouse somatosensory cortex (left), a probability map output by a computer vision algorithm that detects membranes (center), and an annotation database that describes axons and dendrites (right).</div>
+</div>
+<div>
+  <img style="width:30px;height:30px;vertical-align:middle">
+  <span style=""></span>
+  <IMG SRC="_static/GitHub.png" height="50" width="50"> <a href="https://github.com/openconnectome/open-connectome/zipball/master"> [ZIP]   </a>
+  <a image="_static/GitHub.png" href="https://github.com/openconnectome/open-connectome/tarball/master">[TAR.GZ] </a></p>
+</div><div class="sidebar">
+<p class="first sidebar-title">OCP Contact Us</p>
+<p class="last">If you have questions about OCP, or have data to store, please let us know:  <a class="reference external" href="mailto:ocp-support&#37;&#52;&#48;googlegroups&#46;com">ocp-support<span>&#64;</span>googlegroups<span>&#46;</span>com</a></p>
+</div>
+<div class="toctree-wrapper compound" id="documentation">
+<p class="caption"><span class="caption-text">Documentation</span><a class="headerlink" href="#documentation" title="Permalink to this toctree">¶</a></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sphinx/config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sphinx/faq.html">Frequently Asked Questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/ocp_types.html">OCP Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/tilecache_api.html">Tilecache API&#8217;s</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound" id="further-reading">
+<p class="caption"><span class="caption-text">Further Reading</span><a class="headerlink" href="#further-reading" title="Permalink to this toctree">¶</a></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/functions.html">open-connectome Functions</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://gitter.im/openconnectome/ocptilecache">Gitter chatroom</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://groups.google.com/forum/#!forum/ocp-support/">Mailing List</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/openconnectome/ocptilecache">Github repo</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/openconnectome/ocptilecache/releases/">Release Notes</a></li>
+</ul>
+</div>
+<dl class="docutils">
+<dt>If you use OCP or its data derivatives, please cite:</dt>
+<dd>R Burns, K Lillaney, E Perlman, P Manavalan, JT Vogelstein (2015). ocp v0.7. Zenodo. 10.5281/zenodo.15974 <a class="reference external" href="https://zenodo.org/record/15974?ln=en#.VYyl-XUVhBc">zenodo</a> <a class="reference external" href="https://zenodo.org/record/15974?ln=en#.VYyjE3UVhBc">bibtex</a></dd>
+</dl>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sphinx/config.html" class="btn btn-neutral float-right" title="Configuration" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Open Connectome Project.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'v0.7.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>
