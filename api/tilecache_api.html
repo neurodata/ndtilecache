@@ -1,0 +1,282 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tilecache API’s &mdash; open-connetome v0.7.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/ocp_favicon.ico"/>
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="open-connetome v0.7.0 documentation" href="../index.html"/>
+        <link rel="next" title="open-connectome Functions" href="functions.html"/>
+        <link rel="prev" title="OCP Types" href="ocp_types.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> open-connetome
+        
+
+        
+          
+          <img src="../_static/ocp_main.png" class="logo" />
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <p class="caption"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../sphinx/config.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sphinx/faq.html">Frequently Asked Questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ocp_types.html">OCP Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ocp_types.html#channel-types">Channel Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ocp_types.html#data-types">Data Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ocp_types.html#propagated-values">Propagated Values</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Tilecache API&#8217;s</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#getsimpletile">getSimpleTile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getmcfctile">getMcfcTile</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Further Reading</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">open-connectome Functions</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://gitter.im/openconnectome/ocptilecache">Gitter chatroom</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://groups.google.com/forum/#!forum/ocp-support/">Mailing List</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/openconnectome/ocptilecache">Github repo</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/openconnectome/ocptilecache/releases/">Release Notes</a></li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">open-connetome</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>Tilecache API&#8217;s</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/tilecache_api.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="tilecache-api-s">
+<h1>Tilecache API&#8217;s<a class="headerlink" href="#tilecache-api-s" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="getsimpletile">
+<h2>getSimpleTile<a class="headerlink" href="#getsimpletile" title="Permalink to this headline">¶</a></h2>
+<dl class="get">
+<dt id="get-(string-server_name)-ocptilecache-tilecache-(string-token_name)-(string-channel_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png">
+<code class="descname">GET </code><code class="descname"></code><span class="sig-paren">(</span><em class="property">string: </em><em>server_name</em><span class="sig-paren">)</span><code class="descname">/ocptilecache/tilecache/</code><span class="sig-paren">(</span><em class="property">string: </em><em>token_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>channel_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>slice_type</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>time</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>zvalue</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>ytile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>xtile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>resolution</em><span class="sig-paren">)</span><code class="descname">.png</code><a class="headerlink" href="#get-(string-server_name)-ocptilecache-tilecache-(string-token_name)-(string-channel_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Synopsis:</th><td class="field-body"><p class="first">Get a 512x512 tile from the tilecache</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>server_name</strong> (<em>string</em>) &#8211; Server Name in OCP. In the general case this is ocp.me.</li>
+<li><strong>token_name</strong> (<em>string</em>) &#8211; Token Name in OCP.</li>
+<li><strong>channel_name</strong> (<em>string</em>) &#8211; Channel Name in OCP. <em>Optional</em>. If missing will use default channel for the token.</li>
+<li><strong>slice_type</strong> (<em>string</em>) &#8211; Type of Slice cutout. Can be xy/yz/xz</li>
+<li><strong>time</strong> (<em>int</em>) &#8211; Time value. <em>Optional</em>. Only possible in timeseries datasets.</li>
+<li><strong>zvalue</strong> (<em>int</em>) &#8211; Zslice value.</li>
+<li><strong>ytile</strong> (<em>int</em>) &#8211; Y-Tile value. Each tile is 512x512.</li>
+<li><strong>xtile</strong> (<em>int</em>) &#8211; X-Tile value. Each tile is 512x512.</li>
+<li><strong>resolution</strong> (<em>int</em>) &#8211; Resolution value.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> &#8211; No error</li>
+<li><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> &#8211; Error in the syntax or file format</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getmcfctile">
+<h2>getMcfcTile<a class="headerlink" href="#getmcfctile" title="Permalink to this headline">¶</a></h2>
+<dl class="get">
+<dt id="get-(string-server_name)-ocptilecache-tilecache-mcfc-(string-token_name)-(string-channel_name)-(string-color_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png">
+<code class="descname">GET </code><code class="descname"></code><span class="sig-paren">(</span><em class="property">string: </em><em>server_name</em><span class="sig-paren">)</span><code class="descname">/ocptilecache/tilecache/mcfc/</code><span class="sig-paren">(</span><em class="property">string: </em><em>token_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>channel_name</em><span class="sig-paren">)</span><code class="descname">:</code><span class="sig-paren">(</span><em class="property">string: </em><em>color_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>slice_type</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>time</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>zvalue</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>ytile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>xtile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>resolution</em><span class="sig-paren">)</span><code class="descname">.png</code><a class="headerlink" href="#get-(string-server_name)-ocptilecache-tilecache-mcfc-(string-token_name)-(string-channel_name)-(string-color_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Synopsis:</th><td class="field-body"><p class="first">Get a 512x512 tile from the tilecache</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>server_name</strong> (<em>string</em>) &#8211; Server Name in OCP. In the general case this is ocp.me.</li>
+<li><strong>token_name</strong> (<em>string</em>) &#8211; Token Name in OCP.</li>
+<li><strong>channel_name</strong> (<em>string</em>) &#8211; Channel Name in OCP. <em>Optional</em>. If missing will use default channel for the token.</li>
+<li><strong>color_name</strong> (<em>string</em>) &#8211; Color Name. Can be &#8216;C/M/Y/R/G/B&#8217;. <em>Optional</em> If Missing will default to &#8220;CMYRGB&#8221;.</li>
+<li><strong>slice_type</strong> (<em>string</em>) &#8211; Type of Slice cutout. Can be xy/yz/xz</li>
+<li><strong>time</strong> (<em>int</em>) &#8211; Time value. <em>Optional</em>. Only possible in timeseries datasets.</li>
+<li><strong>zvalue</strong> (<em>int</em>) &#8211; Zslice value.</li>
+<li><strong>ytile</strong> (<em>int</em>) &#8211; Y-Tile value. Each tile is 512x512.</li>
+<li><strong>xtile</strong> (<em>int</em>) &#8211; X-Tile value. Each tile is 512x512.</li>
+<li><strong>resolution</strong> (<em>int</em>) &#8211; Resolution value.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> &#8211; No error</li>
+<li><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> &#8211; Error in the syntax or file format</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="functions.html" class="btn btn-neutral float-right" title="open-connectome Functions" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="ocp_types.html" class="btn btn-neutral" title="OCP Types" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Open Connectome Project.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'v0.7.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
