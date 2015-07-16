@@ -85,11 +85,11 @@ class Tile:
     self.tc = TileCache(self.token, self.slice_type, self.channels, self.colors)
 
     # Check for a server for this token
-# RB TODO you never implemented a different server per project
-#    projserver = ProjectServer.objects.filter(project=token)
-#    if projserver.exists():
-#      server = projserver[0].server
-#    else:
+    # RB TODO you never implemented a different server per project
+    #    projserver = ProjectServer.objects.filter(project=token)
+    #    if projserver.exists():
+    #      server = projserver[0].server
+    #    else:
     xdim, ydim, zdim = self.ds.cubedim[self.res]
     xoffset, yoffset, zoffset = self.ds.offset[self.res]
     ximagesize, yimagesize, zimagesize = self.ds.imagesz[self.res]
@@ -105,6 +105,8 @@ class Tile:
       self.ymax = min ((self.yvalue+1)*self.tilesize, yimagesize)
       self.zmin = (self.zslab)*zdim + zoffset
       self.zmax = min ((self.zslab+1)*zdim + zoffset, zimagesize+1)
+      self.tmin = self.tvalue
+      self.tmax = self.tvalue + 1
 
     elif self.slice_type == 'xz':
       self.yslab = (self.yvalue) / ydim
@@ -115,6 +117,8 @@ class Tile:
       # scale the z cutout by the scalefactor
       self.zmin = int((self.zvalue*self.tilesize)/scale + zoffset)
       self.zmax = min(int((self.zvalue+1)*self.tilesize/scale + zoffset), zimagesize+1)
+      self.tmin = self.tvalue
+      self.tmax = self.tvalue + 1
 
     elif self.slice_type == 'yz':
       self.xslab = (self.xvalue) / xdim
@@ -125,17 +129,31 @@ class Tile:
       # scale the z cutout by the scalefactor
       self.zmin = int((self.zvalue*self.tilesize)/scale + zoffset)
       self.zmax = min(int((self.zvalue+1)*self.tilesize/scale + zoffset), zimagesize+1)
+      self.tmin = self.tvalue
+      self.tmax = self.tvalue + 1
 
     # Build the URLs
+    # Non time URLs
     if self.tvalue is None:
+      # Non time cuboid
       self.cuboid_url = 'http://{}/ca/{}/{}/npz/{}/{},{}/{},{}/{},{}/'.format(self.server, self.token, ','.join(self.channels), self.res, self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax)
+      # Simple Tile
+      if self.colors is None:
+        self.tile_url = "http://{}/catmaid/{}/{}/{}/{}/{}_{}_{}.png".format(self.server, self.token, ','.join(self.channels), self.slice_type, self.zvalue, self.yvalue, self.xvalue, self.res)
+      # Mcfc Tile
+      else:
+        self.tile_url = "http://{}/catmaid/mcfc/{}/{}/{}/{}/{}_{}_{}.png".format(self.server, self.token, ','.join(['{}:{}'.format(a,b) for a,b in zip(self.channels,self.colors)]), self.slice_type, self.zvalue, self.yvalue, self.xvalue, self.res)
+    
+    # Time URL's
     else:
-      self.cuboid_url = 'http://{}/ca/{}/{}/npz/{}/{},{}/{},{}/{},{}/{},{}/'.format(self.server, self.token, ','.join(self.channels), self.res, self.tmin, self.tmax, self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax)
-    #KL TODO add time support
-    if self.colors is None:
-      self.tile_url = "http://{}/catmaid/{}/{}/{}/{}/{}_{}_{}.png".format(self.server, self.token, ','.join(self.channels), self.slice_type, self.zvalue, self.yvalue, self.xvalue, self.res)
-    else:
-      self.tile_url = "http://{}/catmaid/mcfc/{}/{}/{}/{}/{}_{}_{}.png".format(self.server, self.token, ','.join(['{}:{}'.format(a,b) for a,b in zip(self.channels,self.colors)]), self.slice_type, self.zvalue, self.yvalue, self.xvalue, self.res)
+      self.cuboid_url = 'http://{}/ca/{}/{}/npz/{}/{},{}/{},{}/{},{}/{},{}/'.format(self.server, self.token, ','.join(self.channels), self.res, self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax, self.tmin, self.tmax)
+      # Simple Tile
+      if self.colors is None:
+        self.tile_url = "http://{}/catmaid/{}/{}/{}/{}/{}/{}_{}_{}.png".format(self.server, self.token, ','.join(self.channels), self.slice_type, self.tvalue, self.zvalue, self.yvalue, self.xvalue, self.res)
+      # Mcfc Tile
+      else:
+        print "Not yet supported"
+        raise
 
     if self.zmin >= self.zmax or self.ymin >= self.ymax or self.xmin >= self.xmax:
       raise OOBException("Out of bounds request")

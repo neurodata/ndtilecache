@@ -57,9 +57,9 @@ def getTile(request, webargs):
   if slice_type == 'xy':
     [tvalue, zvalue, yvalue, xvalue, res] = [int(i.strip('/')) if i is not None else None for i in m.groups()[4:]]
   elif slice_type == 'xz':
-    [tvalue, yvalue, zvalue, xvalue, res] = [int(i) if i is not None else None for i in m.groups()[4:]]
+    [tvalue, yvalue, zvalue, xvalue, res] = [int(i.strip('/')) if i is not None else None for i in m.groups()[4:]]
   elif slice_type == 'yz':
-    [tvalue, xvalue, zvalue, yvalue, res] = [int(i) if i is not None else None for i in m.groups()[4:]]
+    [tvalue, xvalue, zvalue, yvalue, res] = [int(i.strip('/')) if i is not None else None for i in m.groups()[4:]]
 
   try:
     t = tile.Tile(token, slice_type, res, xvalue, yvalue, zvalue, tvalue, channels, colors)

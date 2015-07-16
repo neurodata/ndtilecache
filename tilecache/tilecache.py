@@ -63,8 +63,8 @@ class TileCache:
 
     try:
       # argument of the form /ca/token/channel/npz/cutoutargs
-      m = re.match("^http://.*/ca/\w+/(?:[\w+,]+/)?npz/(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+),(\d+)/$", cuboidurl)
-      [res, xmin, xmax, ymin, ymax, zmin, zmax] = [int(i) for i in m.groups()]
+      m = re.match("^http://.*/ca/\w+/(?:[\w+,]+/)?npz/(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+)?,?(\d+)?/?$", cuboidurl)
+      [res, xmin, xmax, ymin, ymax, zmin, zmax, tmin, tmax] = [int(i) if i is not None else None for i in m.groups()]
     except Exception, e:
       logger.error("Failed to parse url {}".format(cuboidurl))
       raise OCPTILECACHEError("Failed to parse url {}".format(cuboidurl))
@@ -120,7 +120,7 @@ class TileCache:
       if self.slice_type == 'xy':
         xtile = xmin / settings.TILESIZE
         ytile = ymin / settings.TILESIZE
-        cuboid_args = (xtile, ytile, zmin, zdim)
+        cuboid_args = (xtile, ytile, zmin, zdim, tmin)
 
       elif self.slice_type == 'xz':
         # round to the nearest tile size and scale 
@@ -128,7 +128,7 @@ class TileCache:
         cmzmax = int(math.ceil(((zmax-zoffset)*scale+1)/settings.TILESIZE))*settings.TILESIZE
         xtile = xmin / settings.TILESIZE
         ztile = cmzmin / settings.TILESIZE
-        cuboid_args = (xtile, ztile, ymin, ydim)
+        cuboid_args = (xtile, ztile, ymin, ydim, tmin)
 
       elif self.slice_type == 'yz':
         # round to the nearest tile size and scale 
@@ -136,7 +136,7 @@ class TileCache:
         cmzmax = int(math.floor(((zmax-zoffset)*scale+1)/settings.TILESIZE))*settings.TILESIZE
         ytile = ymin / settings.TILESIZE
         ztile = cmzmin / settings.TILESIZE
-        cuboid_args = (ytile, ztile, zmin, zdim)
+        cuboid_args = (ytile, ztile, zmin, zdim, tmin)
       
       self.addCuboid(cuboid, res, cuboid_args)
       logger.warning ("Load suceeded for {}".format(cuboidurl))
@@ -146,7 +146,7 @@ class TileCache:
       self.ds.db.fetchrelease(cuboidurl)
 
 
-  def checkDirHier ( self, res ):
+  def checkDirHier(self, res, time=None):
     """Ensure that the directories for caching exist"""
 
     try:
@@ -154,55 +154,100 @@ class TileCache:
     except:
       os.makedirs("{}/{}".format(settings.CACHE_DIR, self.dataset_name))
 
-    try:
-      os.stat("{}/{}/r{}".format(settings.CACHE_DIR, self.dataset_name, res))
-    except:
-      os.makedirs("{}/{}/r{}".format(settings.CACHE_DIR, self.dataset_name, res))
+    if time is None:
+      try:
+        os.stat("{}/{}/r{}".format(settings.CACHE_DIR, self.dataset_name, res))
+      except:
+        os.makedirs("{}/{}/r{}".format(settings.CACHE_DIR, self.dataset_name, res))
+    else:
+      try:
+        os.stat("{}/{}/t{}/r{}".format(settings.CACHE_DIR, self.dataset_name, time, res))
+      except:
+        os.makedirs("{}/{}/t{}/r{}".format(settings.CACHE_DIR, self.dataset_name, time, res))
 
-  def checkSliceDir(self, res, slice_no):
+
+  def checkSliceDir(self, res, slice_no, time=None):
     """Ensure that the directories for caching exist"""
 
-    try:
-      os.stat("{}/{}/r{}/sl{}".format(settings.CACHE_DIR, self.dataset_name, res,slice_no))
-    except:
-      os.makedirs("{}/{}/r{}/sl{}".format(settings.CACHE_DIR, self.dataset_name, res, slice_no))
+    if time is None:
+      try:
+        os.stat("{}/{}/r{}/sl{}".format(settings.CACHE_DIR, self.dataset_name, res,slice_no))
+      except:
+        os.makedirs("{}/{}/r{}/sl{}".format(settings.CACHE_DIR, self.dataset_name, res, slice_no))
+    else:
+      try:
+        os.stat("{}/{}/t{}/r{}/sl{}".format(settings.CACHE_DIR, self.dataset_name, time, res,slice_no))
+      except:
+        os.makedirs("{}/{}/t{}/r{}/sl{}".format(settings.CACHE_DIR, self.dataset_name, time, res, slice_no))
 
 
-  def addCuboid( self, cuboid, res, (tile1,tile2,mini,dim)):
+  def addCuboid( self, cuboid, res, (tile1,tile2,mini,dim,time)):
     """Add the cutout to cache"""
 
-    self.checkDirHier(res)
+    self.checkDirHier(res, time=time)
     # counter of how many new tiles we get
     newtiles = 0
 
-    # number of tiles
-    numtiles = cuboid.shape[1]
+    if time is None:
+      # number of tiles
+      numtiles = cuboid.shape[1]
+      
+      for index, channel_name in enumerate(self.channels):
+        ch = self.ds.getChannelObj(channel_name)
+        cuboid[index,:] = window(cuboid[index,:], ch)
+
+      # add each image slice to memcache
+      for value in range(numtiles):
+
+        self.checkSliceDir(res, value+mini)
+        tilefname = '{}/{}/r{}/sl{}/{}{}{}{}.png'.format(settings.CACHE_DIR, self.dataset_name, res, value+mini,self.slice_type[1], tile2, self.slice_type[0], tile1)
+        if self.slice_type == 'xy':
+          img = self.tile2WebPNG ( settings.TILESIZE, settings.TILESIZE, cuboid[:,value,:,:] )
+        elif self.slice_type == 'xz':
+          img = self.tile2WebPNG ( cuboid.shape[3], cuboid.shape[1], cuboid[:,:,value,:] )
+        elif self.slice_type == 'yz':
+          img = self.tile2WebPNG ( cuboid.shape[2], cuboid.shape[1], cuboid[:,:,:,value] )
+
+        fobj = open(tilefname, "w")
+        img.save(fobj, "PNG")
+        try:
+          self.ds.db.insert(tilekey.tileKey(self.ds.dsid, res, tile1, tile2, value+mini), tilefname) 
+          newtiles += 1 
+        except MySQLdb.Error, e: 
+          # ignore duplicate entries
+          if e.args[0] != 1062:  
+            raise
     
-    for index, channel_name in enumerate(self.channels):
-      ch = self.ds.getChannelObj(channel_name)
-      cuboid[index,:] = window(cuboid[index,:], ch)
+    else: 
+      # number of tiles
+      numtiles = cuboid.shape[2]
+      
+      for index, channel_name in enumerate(self.channels):
+        ch = self.ds.getChannelObj(channel_name)
+        cuboid[index,:] = window(cuboid[index,:], ch)
 
-    # add each image slice to memcache
-    for value in range(numtiles):
+      # add each image slice to memcache
+      for value in range(numtiles):
 
-      self.checkSliceDir(res, value+mini)
-      tilefname = '{}/{}/r{}/sl{}/{}{}{}{}.png'.format(settings.CACHE_DIR, self.dataset_name, res, value+mini,self.slice_type[1], tile2, self.slice_type[0], tile1)
-      if self.slice_type == 'xy':
-        img = self.tile2WebPNG ( settings.TILESIZE, settings.TILESIZE, cuboid[:,value,:,:] )
-      elif self.slice_type == 'xz':
-        img = self.tile2WebPNG ( cuboid.shape[3], cuboid.shape[1], cuboid[:,:,value,:] )
-      elif self.slice_type == 'yz':
-        img = self.tile2WebPNG ( cuboid.shape[2], cuboid.shape[1], cuboid[:,:,:,value] )
+        self.checkSliceDir(res, value+mini, time=time)
+        tilefname = '{}/{}/t{}/r{}/sl{}/{}{}{}{}.png'.format(settings.CACHE_DIR, self.dataset_name, time, res, value+mini,self.slice_type[1], tile2, self.slice_type[0], tile1)
+        if self.slice_type == 'xy':
+          img = self.tile2WebPNG ( settings.TILESIZE, settings.TILESIZE, cuboid[:,:,value,:,:] )
+        elif self.slice_type == 'xz':
+          img = self.tile2WebPNG ( cuboid.shape[3], cuboid.shape[1], cuboid[:,:,:,value,:] )
+        elif self.slice_type == 'yz':
+          img = self.tile2WebPNG ( cuboid.shape[2], cuboid.shape[1], cuboid[:,:,:,:,value] )
 
-      fobj = open(tilefname, "w")
-      img.save(fobj, "PNG")
-      try:
-        self.ds.db.insert(tilekey.tileKey(self.ds.dsid, res, tile1, tile2, value+mini), tilefname) 
-        newtiles += 1 
-      except MySQLdb.Error, e: 
-        # ignore duplicate entries
-        if e.args[0] != 1062:  
-          raise
+        fobj = open(tilefname, "w")
+        img.save(fobj, "PNG")
+        try:
+          self.ds.db.insert(tilekey.tileKey(self.ds.dsid, res, tile1, tile2, value+mini), tilefname) 
+          newtiles += 1 
+        except MySQLdb.Error, e: 
+          # ignore duplicate entries
+          if e.args[0] != 1062:  
+            raise
+
 
     self.ds.db.increase(newtiles)
     self.harvest()
@@ -218,7 +263,7 @@ class TileCache:
     else:
       ch = self.ds.getChannelObj(self.channels[0])
       # write it as a png file
-      if ch.channel_type in dbtype.IMAGE_CHANNELS:
+      if ch.channel_type in dbtype.IMAGE_CHANNELS+dbtype.TIMESERIES_CHANNELS:
 
         if ch.channel_datatype in dbtype.DTYPE_uint8:
           return Image.frombuffer ( 'L', [xdim,ydim], tile.flatten(), 'raw', 'L', 0, 1 )
