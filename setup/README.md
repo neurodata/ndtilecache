@@ -5,7 +5,7 @@
   
   * Run the python script called install.py. This will install all the necessary tables for you.
 
-  ```shell
+  ```sh
   python install.py
   ```
 
@@ -23,7 +23,7 @@
   
   * Make directories for logging. It has to have permission for the Web server (www-data or your user for the development server)
 
-  ```shell
+  ```sh
   mkdir /var/log/ocptilecache
   touch /var/log/ocptilecache/ocptilecache.log
   chown www-data:www-data -R /var/log/ocptilecache 
@@ -48,7 +48,7 @@
 
   * Starting the celery dev server.  The service uses two queues.  For testing you can start them together.  For deployments, we should have them running separately as daemons.
 
-  ```shell
+  ```sh
   python manage.py celery worker --loglevel=info -Q celery,reclaim
   ```
 
@@ -58,7 +58,7 @@
   
   * Restart all the services
   
-  ```shell
+  ```sh
   sudo /etc/init.d/uwsgi restart ocptilecache
   sudo /etc/init.d/supervisor restart 
   sudo /etc/init.d/nginx restart 
@@ -66,7 +66,7 @@
 
   * And check their status
 
-  ```shell
+  ```sh
   sudo /etc/init.d/uwsgi status ocptilecache
   sudo /etc/init.d/supervisor status 
   sudo /etc/init.d/nginx status 
@@ -76,8 +76,8 @@
 
 ##### Configuring in CATMAID
 
-  * Create a stack to a remote site.  It must have the following properties:
-    * Image base = http://localhost/ocpcatmaid/[token]/
+  * Create a stack to a remote site. It must have the following properties:
+    * Image base = http://localhost/ocptilecache/[token]/
     * File extension = png
     * Tile width = 512
     * Tile height = 512
