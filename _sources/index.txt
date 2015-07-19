@@ -1,12 +1,12 @@
 .. meta::
-   :description: Official documentation for ocptilecache: Caching Gateway to connect a CATMAID server to Open Connectome Project Web Services
+   :description: Official documentation for ocptilecache: Caching Gateway to connect a Visualization(CATMAID) server to Open Connectome Project Web Services
    :keywords: annotation, tracing, neuroscience, object detection
 .. title::
    ocptilecache
 
 .. raw:: html
 
-	<h1>ocptilecache: Caching Gateway to connect a CATMAID server to Open Connectome Project Web Services</h1>
+	<h1>ocptilecache: Caching Gateway to connect a Visualization(CATMAID) server to Open Connectome Project Web Services</h1>
 	<br>
 
 
