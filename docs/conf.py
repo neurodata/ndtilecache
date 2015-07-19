@@ -25,7 +25,6 @@ import shlex
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
 
-#import pdb; pdb.set_trace()
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
@@ -57,7 +56,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'open-connetome'
+project = u'ocptilecache'
 copyright = u'2015, Open Connectome Project'
 author = u'OCP'
 
@@ -210,7 +209,7 @@ html_use_smartypants = True
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'open-connectomedoc'
+htmlhelp_basename = 'ocptilecache'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -232,7 +231,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'open-connectome.tex', u'open-connectome Documentation',
+  (master_doc, 'ocptilecache.tex', u'ocptilecache Documentation',
    u'OCP', 'manual'),
 ]
 
@@ -262,7 +261,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'open-connectome', u'open-connectome Documentation',
+    (master_doc, 'ocptilecache', u'ocptilecache Documentation',
      [author], 1)
 ]
 
@@ -276,8 +275,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'open-connectome', u'open-connectome Documentation',
-   author, 'open-connectome', 'One line description of project.',
+  (master_doc, 'ocptilecache', u'ocptilecache Documentation',
+   author, 'ocptilecache', 'One line description of project.',
    'Miscellaneous'),
 ]
 
