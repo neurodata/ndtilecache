@@ -105,8 +105,6 @@ class Tile:
       self.ymax = min ((self.yvalue+1)*self.tilesize, yimagesize)
       self.zmin = (self.zslab)*zdim + zoffset
       self.zmax = min ((self.zslab+1)*zdim + zoffset, zimagesize+1)
-      self.tmin = self.tvalue
-      self.tmax = self.tvalue + 1
 
     elif self.slice_type == 'xz':
       self.yslab = (self.yvalue) / ydim
@@ -117,8 +115,6 @@ class Tile:
       # scale the z cutout by the scalefactor
       self.zmin = int((self.zvalue*self.tilesize)/scale + zoffset)
       self.zmax = min(int((self.zvalue+1)*self.tilesize/scale + zoffset), zimagesize+1)
-      self.tmin = self.tvalue
-      self.tmax = self.tvalue + 1
 
     elif self.slice_type == 'yz':
       self.xslab = (self.xvalue) / xdim
@@ -129,8 +125,11 @@ class Tile:
       # scale the z cutout by the scalefactor
       self.zmin = int((self.zvalue*self.tilesize)/scale + zoffset)
       self.zmax = min(int((self.zvalue+1)*self.tilesize/scale + zoffset), zimagesize+1)
+
+    if self.tvalue is not None:
       self.tmin = self.tvalue
       self.tmax = self.tvalue + 1
+
 
     # Build the URLs
     # Non time URLs

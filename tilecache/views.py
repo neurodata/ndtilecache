@@ -25,7 +25,7 @@ logger=logging.getLogger("ocptilecache")
 
 def getTile(request, webargs):
   """Return a tile or load the cache"""
-
+  
   # Parse the tile request and turn it into an OCP request
   try:
     # argument of format /mcfc(optional)/token/channel_list/slice_type/time(optional)/z/y_x_res.png
