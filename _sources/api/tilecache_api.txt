@@ -12,7 +12,7 @@ getSimpleTile
    :type server_name: string
    :param token_name: Token Name in OCP.
    :type token_name: string
-   :param channel_name: Channel Name in OCP. *Optional*. If missing will use default channel for the token.
+   :param channel_name: Channel Name in OCP.
    :type channel_name: string
    :param slice_type: Type of Slice cutout. Can be xy/yz/xz
    :type slice_type: string
@@ -41,7 +41,7 @@ getMcfcTile
    :type server_name: string
    :param token_name: Token Name in OCP.
    :type token_name: string
-   :param channel_name: Channel Name in OCP. *Optional*. If missing will use default channel for the token.
+   :param channel_name: Channel Name in OCP.
    :type channel_name: string
    :param color_name: Color Name. Can be 'C/M/Y/R/G/B'. *Optional* If Missing will default to "CMYRGB".
    :type color_name: string
