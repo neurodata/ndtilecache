@@ -29,6 +29,25 @@ getSimpleTile
 
    :statuscode 200: No error
    :statuscode 404: Error in the syntax or file format
+   
+   **Example Request**:
+   
+   .. sourcecode:: http
+   
+      GET  /ocptilecache/tilecache/kasthuri11/image/xy/1/1_1_4.png HTTP/1.1
+      Host: ocp.me
+   
+   **Example Response**:
+   
+   .. sourcecode:: http 
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/png
+
+.. figure:: ../images/simple_image_tile.png
+    :align: center
+    :width: 512px
+    :height: 512px
 
 getMcfcTile
 -----------
