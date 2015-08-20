@@ -48,7 +48,7 @@ class Dataset:
   def fetchDataset (self):
     """Fetch a dataset to the list of cacheable datasets"""
 
-    token = self.dataset_name.split('_')[0]
+    token = self.dataset_name.split('-')[0]
     f = getURL('http://{}/ocpca/{}/info/'.format(settings.SERVER, token))
     info = json.loads(f.read())
     self.ximagesz, self.yimagesz, self.zimagesz = info['dataset']['imagesize']['0']

@@ -57,4 +57,4 @@ def getDatasetName(token, channel_list, colors, slice_type):
   
   if colors is not None:
     channel_list = ["{}:{}".format(a,b) for a,b in zip(channel_list, colors)]
-  return "{}_{}_{}".format(token, ','.join(channel_list), slice_type)
+  return "{}-{}-{}".format(token, ','.join(channel_list), slice_type)
