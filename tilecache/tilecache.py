@@ -274,6 +274,7 @@ class TileCache:
           return Image.fromarray( tile, 'RGBA')
 
       elif ch.channel_type in dbtype.ANNOTATION_CHANNELS:
+        tile = tile[0,:]
         ocplib.recolor_ctype(tile, tile)
         return Image.frombuffer ( 'RGBA', [xdim,ydim], tile.flatten(), 'raw', 'RGBA', 0, 1 )
 
