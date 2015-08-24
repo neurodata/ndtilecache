@@ -105,7 +105,7 @@ class TileCache:
       scale = self.ds.scale[res][self.slice_type]
 
       if xmax == ximagesize or ymax == yimagesize or zmax == zimagesize:
-        if self.mcfc:
+        if self.colors:
           # 3d cutout if not a channel database
           cuboid = np.zeros ((zdim,settings.TILESIZE, settings.TILESIZE), dtype = cubedata.dtype)
           cuboid[0:(zmax-zmin), 0:(ymax-ymin), 0:(xmax-xmin)] = cubedata
