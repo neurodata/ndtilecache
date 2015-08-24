@@ -27,7 +27,7 @@ class CacheDB:
   def __init__(self):
     """Intialize the database connection"""
     try:
-      self.conn = MySQLdb.connect (host = 'localhost', user = settings.USER, passwd = settings.PASSWD, db = settings.DBNAME )
+      self.conn = MySQLdb.connect (host = 'localhost', user = settings.DATABASES['default']['USER'], passwd = settings.DATABASES['default']['PASSWORD'], db = settings.DBNAME )
     except MySQLdb.Error, e:
       logger.error("Failed to connect to database: {}, {}".format(settings.DBNAME, e))
       raise OCPTILECACHEError("Failed to connect to database: {}, {}".format(settings.DBNAME, e))

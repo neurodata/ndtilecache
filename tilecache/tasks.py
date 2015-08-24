@@ -12,30 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from celery import Celery
-from django.conf import settings
+from __future__ import absolute_import
 import re
 import posix_ipc
 
-import tilecache
-import cachedb
+from celery import task
+from django.conf import settings
+
+from .tilecache import TileCache
 
 import logging
 logger=logging.getLogger("ocptilecache")
 
 
-celery = Celery('tasks', broker='amqp://guest@localhost//')
-
-#@celery.task()
+@task(queue='prefetch')
 def fetchurl ( token, slicetype, channels, url ):
   """Fetch the requested url."""
 
   logger.warning ("Fetching url {}".format(url))
-  tc = tilecache.TileCache ( token, slicetype, channels )
+  tc = TileCache ( token, slicetype, channels )
   tc.loadData(url)
 
 # automatic routing not working in django.  No big deal.  Specify the queue explicitly.
-@celery.task(queue='reclaim')
+@task(queue='reclaim')
 def reclaim ( ):
   """Reclaim space from the database"""
 
@@ -48,6 +47,7 @@ def reclaim ( ):
 
     try:
       # reclaim
+      import cachedb
       db = cachedb.CacheDB()
       db.reclaim ( )
     except Exception, e:
