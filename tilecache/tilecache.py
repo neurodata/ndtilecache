@@ -107,8 +107,8 @@ class TileCache:
       if xmax == ximagesize or ymax == yimagesize or zmax == zimagesize:
         if self.colors:
           # 3d cutout if not a channel database
-          cuboid = np.zeros ((zdim,settings.TILESIZE, settings.TILESIZE), dtype = cubedata.dtype)
-          cuboid[0:(zmax-zmin), 0:(ymax-ymin), 0:(xmax-xmin)] = cubedata
+          cuboid = np.zeros ((cubedata.shape[0], zdim, settings.TILESIZE, settings.TILESIZE), dtype = cubedata.dtype)
+          cuboid[:, 0:(zmax-zmin), 0:(ymax-ymin), 0:(xmax-xmin)] = cubedata
         else:
           # multi-channel cutout.  turn into false color
           # Check to see is this is a partial cutout if so pad the space

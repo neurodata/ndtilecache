@@ -26,11 +26,11 @@ logger=logging.getLogger("ocptilecache")
 
 
 @task(queue='prefetch')
-def fetchurl ( token, slicetype, channels, url ):
+def fetchurl ( token, slicetype, channels, colors, url ):
   """Fetch the requested url."""
 
   logger.warning ("Fetching url {}".format(url))
-  tc = TileCache ( token, slicetype, channels )
+  tc = TileCache(token, slicetype, channels, colors)
   tc.loadData(url)
 
 # automatic routing not working in django.  No big deal.  Specify the queue explicitly.

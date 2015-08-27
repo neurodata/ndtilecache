@@ -181,8 +181,8 @@ class Tile:
 
     # call the celery process to fetch the url
     from tasks import fetchurl
-    fetchurl.delay (self.token, self.slice_type, self.channels, self.cuboid_url)
-    #fetchurl(self.token, self.slice_type, self.channels, self.cuboid_url)
+    #fetchurl (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
+    fetchurl.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
 
     logger.warning("Tile fetch {}".format(self.tile_url))
     f = getURL(self.tile_url)
