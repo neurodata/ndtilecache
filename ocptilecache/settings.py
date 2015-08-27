@@ -158,7 +158,7 @@ LOGGING = {
 }
 
 # OCPTILECACHE Settings
-SERVER = 'localhost:8000'
+SERVER = 'openconnecto.me/ocp'
 DBNAME = 'ocptilecache'
 TILESIZE = 512
 CACHE_DIR = settings_secret.CACHE_DIR
