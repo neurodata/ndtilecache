@@ -84,7 +84,7 @@ getMcfcTile
    
    .. sourcecode:: http
    
-      GET  /ocp/catmaid/mcfc/Thy1eYFPBrain10/Grayscale/xy/500/0_0_3.png HTTP/1.1
+      GET  /ocptilecache/tilecache/mcfc/Thy1eYFPBrain10/Grayscale/xy/500/0_0_3.png HTTP/1.1
       Host: openconnecto.me
    
    **Example Response**:
