@@ -35,7 +35,7 @@ getSimpleTile
    .. sourcecode:: http
    
       GET  /ocptilecache/tilecache/kasthuri11/image/xy/1/1_1_4.png HTTP/1.1
-      Host: ocp.me
+      Host: openconnecto.me
    
    **Example Response**:
    
@@ -79,3 +79,22 @@ getMcfcTile
 
    :statuscode 200: No error
    :statuscode 404: Error in the syntax or file format
+
+   **Example Request**:
+   
+   .. sourcecode:: http
+   
+      GET  /ocp/catmaid/mcfc/Thy1eYFPBrain10/Grayscale/xy/500/0_0_3.png HTTP/1.1
+      Host: openconnecto.me
+   
+   **Example Response**:
+   
+   .. sourcecode:: http 
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/png
+
+.. figure:: ../images/mcfc_image_tile.png
+    :align: center
+    :width: 512px
+    :height: 512px
