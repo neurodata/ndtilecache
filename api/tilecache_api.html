@@ -173,7 +173,7 @@
 </table>
 <p><strong>Example Request</strong>:</p>
 <div class="highlight-http"><div class="highlight"><pre><span class="nf">GET</span>  <span class="nn">/ocptilecache/tilecache/kasthuri11/image/xy/1/1_1_4.png</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-<span class="na">Host</span><span class="o">:</span> <span class="l">ocp.me</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">openconnecto.me</span>
 </pre></div>
 </div>
 <p><strong>Example Response</strong>:</p>
@@ -192,89 +192,45 @@
 <dl class="get">
 <dt id="get-(string-server_name)-ocptilecache-tilecache-mcfc-(string-token_name)-(string-channel_name)-(string-color_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png">
 <code class="descname">GET </code><code class="descname"></code><span class="sig-paren">(</span><em class="property">string: </em><em>server_name</em><span class="sig-paren">)</span><code class="descname">/ocptilecache/tilecache/mcfc/</code><span class="sig-paren">(</span><em class="property">string: </em><em>token_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>channel_name</em><span class="sig-paren">)</span><code class="descname">:</code><span class="sig-paren">(</span><em class="property">string: </em><em>color_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>slice_type</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>time</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>zvalue</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>ytile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>xtile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>resolution</em><span class="sig-paren">)</span><code class="descname">.png</code><a class="headerlink" href="#get-(string-server_name)-ocptilecache-tilecache-mcfc-(string-token_name)-(string-channel_name)-(string-color_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png" title="Permalink to this definition">¶</a></dt>
-<dd><blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
+<dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">synopsis:</th><td class="field-body">Get a 512x512 tile from the tilecache</td>
+<tr class="field-odd field"><th class="field-name">Synopsis:</th><td class="field-body"><p class="first">Get a 512x512 tile from the tilecache</p>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">param server_name:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">Server Name in OCP. In the general case this is ocp.me.</td>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>server_name</strong> (<em>string</em>) &#8211; Server Name in OCP. In the general case this is ocp.me.</li>
+<li><strong>token_name</strong> (<em>string</em>) &#8211; Token Name in OCP.</li>
+<li><strong>channel_name</strong> (<em>string</em>) &#8211; Channel Name in OCP.</li>
+<li><strong>color_name</strong> (<em>string</em>) &#8211; Color Name. Can be &#8216;C/M/Y/R/G/B&#8217;. <em>Optional</em> If Missing will default to &#8220;CMYRGB&#8221;.</li>
+<li><strong>slice_type</strong> (<em>string</em>) &#8211; Type of Slice cutout. Can be xy/yz/xz</li>
+<li><strong>time</strong> (<em>int</em>) &#8211; Time value. <em>Optional</em>. Only possible in timeseries datasets.</li>
+<li><strong>zvalue</strong> (<em>int</em>) &#8211; Zslice value.</li>
+<li><strong>ytile</strong> (<em>int</em>) &#8211; Y-Tile value. Each tile is 512x512.</li>
+<li><strong>xtile</strong> (<em>int</em>) &#8211; X-Tile value. Each tile is 512x512.</li>
+<li><strong>resolution</strong> (<em>int</em>) &#8211; Resolution value.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">type server_name:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">string</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">param token_name:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">Token Name in OCP.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">type token_name:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">string</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">param channel_name:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">Channel Name in OCP.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">type channel_name:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">string</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">param color_name:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">Color Name. Can be &#8216;C/M/Y/R/G/B&#8217;. <em>Optional</em> If Missing will default to &#8220;CMYRGB&#8221;.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">type color_name:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">string</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">param slice_type:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">Type of Slice cutout. Can be xy/yz/xz</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">type slice_type:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">string</td>
-</tr>
-<tr class="field-even field"><th class="field-name">param time:</th><td class="field-body">Time value. <em>Optional</em>. Only possible in timeseries datasets.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">type time:</th><td class="field-body">int</td>
-</tr>
-<tr class="field-even field"><th class="field-name">param zvalue:</th><td class="field-body">Zslice value.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">type zvalue:</th><td class="field-body">int</td>
-</tr>
-<tr class="field-even field"><th class="field-name">param ytile:</th><td class="field-body">Y-Tile value. Each tile is 512x512.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">type ytile:</th><td class="field-body">int</td>
-</tr>
-<tr class="field-even field"><th class="field-name">param xtile:</th><td class="field-body">X-Tile value. Each tile is 512x512.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">type xtile:</th><td class="field-body">int</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">param resolution:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">Resolution value.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name" colspan="2">type resolution:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">int</td>
-</tr>
-<tr class="field-even field"><th class="field-name">statuscode 200:</th><td class="field-body">No error</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">statuscode 404:</th><td class="field-body">Error in the syntax or file format</td>
+<tr class="field-odd field"><th class="field-name">Status Codes:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.2.1">200 OK</a> &#8211; No error</li>
+<li><a class="reference external" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">404 Not Found</a> &#8211; Error in the syntax or file format</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
-</div></blockquote>
-<p><strong>Example URL</strong>:</p>
-<dl class="docutils">
-<dt>..sourcecode:: http</dt>
-<dd><blockquote class="first">
-<div><a class="reference external" href="http://openconnecto.me/ocp/catmaid/mcfc/Thy1eYFPBrain10/Grayscale/xy/500/0_0_3.png">http://openconnecto.me/ocp/catmaid/mcfc/Thy1eYFPBrain10/Grayscale/xy/500/0_0_3.png</a></div></blockquote>
 <p><strong>Example Request</strong>:</p>
 <div class="highlight-http"><div class="highlight"><pre><span class="nf">GET</span>  <span class="nn">/ocp/catmaid/mcfc/Thy1eYFPBrain10/Grayscale/xy/500/0_0_3.png</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">openconnecto.me</span>
 </pre></div>
 </div>
 <p><strong>Example Response</strong>:</p>
-<div class="last highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/png</span>
 </pre></div>
 </div>
-</dd>
-</dl>
 </dd></dl>
 
 <div class="figure align-center">
