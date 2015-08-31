@@ -20,6 +20,7 @@ import urllib2
 import django
 import numpy as np
 import json
+import blosc
 import re
 from PIL import Image
 import MySQLdb
@@ -62,8 +63,8 @@ class TileCache:
     """Load a cube of data into the cache"""
 
     try:
-      # argument of the form /ca/token/channel/npz/cutoutargs
-      m = re.match("^http://.*/ca/\w+/(?:[\w+,]+/)?npz/(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+)?,?(\d+)?/?$", cuboidurl)
+      # argument of the form /ca/token/channel/blosc/cutoutargs
+      m = re.match("^http://.*/ca/\w+/(?:[\w+,]+/)?blosc/(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+)?,?(\d+)?/?$", cuboidurl)
       [res, xmin, xmax, ymin, ymax, zmin, zmax, tmin, tmax] = [int(i) if i is not None else None for i in m.groups()]
     except Exception, e:
       logger.error("Failed to parse url {}".format(cuboidurl))
@@ -90,13 +91,8 @@ class TileCache:
         self.ds.db.fetchrelease(cuboidurl)
         raise
 
-      zdata = f.read()
-      # get the data out of the compressed blob
-      pagestr = zlib.decompress(zdata[:])
-      pagefobj = cStringIO.StringIO(pagestr)
-
       # get the cutout data
-      cubedata = np.load(pagefobj)
+      cubedata = blosc.unpack_array(f.read())
 
       # properties
       [ximagesize, yimagesize, zimagesize] = self.ds.imagesz[res]

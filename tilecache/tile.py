@@ -135,7 +135,7 @@ class Tile:
     # Non time URLs
     if self.tvalue is None:
       # Non time cuboid
-      self.cuboid_url = 'http://{}/ca/{}/{}/npz/{}/{},{}/{},{}/{},{}/'.format(self.server, self.token, ','.join(self.channels), self.res, self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax)
+      self.cuboid_url = 'http://{}/ca/{}/{}/blosc/{}/{},{}/{},{}/{},{}/'.format(self.server, self.token, ','.join(self.channels), self.res, self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax)
       # Simple Tile
       if self.colors is None:
         self.tile_url = "http://{}/catmaid/{}/{}/{}/{}/{}_{}_{}.png".format(self.server, self.token, ','.join(self.channels), self.slice_type, self.zvalue, self.yvalue, self.xvalue, self.res)
@@ -145,7 +145,7 @@ class Tile:
     
     # Time URL's
     else:
-      self.cuboid_url = 'http://{}/ca/{}/{}/npz/{}/{},{}/{},{}/{},{}/{},{}/'.format(self.server, self.token, ','.join(self.channels), self.res, self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax, self.tmin, self.tmax)
+      self.cuboid_url = 'http://{}/ca/{}/{}/blosc/{}/{},{}/{},{}/{},{}/{},{}/'.format(self.server, self.token, ','.join(self.channels), self.res, self.xmin, self.xmax, self.ymin, self.ymax, self.zmin, self.zmax, self.tmin, self.tmax)
       # Simple Tile
       if self.colors is None:
         self.tile_url = "http://{}/catmaid/{}/{}/{}/{}/{}/{}_{}_{}.png".format(self.server, self.token, ','.join(self.channels), self.slice_type, self.tvalue, self.zvalue, self.yvalue, self.xvalue, self.res)

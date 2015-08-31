@@ -86,7 +86,7 @@ def prefetch ( token, res, xmin, xmax, ymin, ymax, zmin, zmax ):
         
           # Build the URLs
           cutout = '{}/{},{}/{},{}/{},{}'.format(level,x,min(x+xdim,ximagesize),y,min(y+ydim,yimagesize),z,min(z+zdim,zimagesize))
-          cuboidurl = "http://{}/ocpca/{}/npz/{}/".format(settings.SERVER,token,cutout)
+          cuboidurl = "http://{}/ocpca/{}/blosc/{}/".format(settings.SERVER,token,cutout)
           print cuboidurl
 
           # call the celery process to fetch the url
