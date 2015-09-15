@@ -67,9 +67,9 @@ class Tile:
     """Genarate the file name based on the values"""
 
     if self.tvalue is None:
-      self.filename = '{}/{}_{}_{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.res)
+      self.filename = '{}/{}-{}-{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.res)
     else:
-      self.filename = '{}/{}_{}_{}/t{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.tvalue, self.res)
+      self.filename = '{}/{}-{}-{}/t{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.tvalue, self.res)
       
     if self.slice_type == 'xy':
         self.filename += 'sl{}/y{}x{}.png'.format(self.zvalue, self.yvalue, self.xvalue)
