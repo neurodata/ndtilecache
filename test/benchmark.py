@@ -19,7 +19,7 @@ import argparse
 def userExperienceTest(result):
   """2k frame rate test"""
   
-  for zvalue in range(1,10*16+1,16):
+  for zvalue in range(17,10*16+1,16):
     for i in range(0,16):
       range_args = (xvalue, yvalue, zvalue) = (i/4,i%4,zvalue)
       generateURL(result.host, result.token, result.channel, result.resolution, *range_args)
