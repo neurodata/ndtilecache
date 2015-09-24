@@ -39,7 +39,6 @@
 
    sphinx/config
    sphinx/faq
-   api/ocp_types
    api/tilecache_api
 
 .. toctree::
