@@ -1,7 +1,7 @@
 Tilecache API's
 ***************
 
-You can also view the `OCP Tile API's <http://docs.neurodata.io/open-connectome/api/tile_api.html>`_ which work similarly for `openconnectome<http://docs.neurodata.io/open-connectome/index.html>`_.
+You can also view the `OCP Tile API's <http://docs.neurodata.io/open-connectome/api/tile_api.html>`_ which work similarly for `openconnectome <http://docs.neurodata.io/open-connectome/index.html>`_.
 
 getSimpleTile
 -------------
