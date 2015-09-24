@@ -67,9 +67,9 @@ class Tile:
     """Genarate the file name based on the values"""
 
     if self.tvalue is None:
-      self.filename = '{}/{}_{}_{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.res)
+      self.filename = '{}/{}-{}-{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.res)
     else:
-      self.filename = '{}/{}_{}_{}/t{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.tvalue, self.res)
+      self.filename = '{}/{}-{}-{}/t{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.tvalue, self.res)
       
     if self.slice_type == 'xy':
         self.filename += 'sl{}/y{}x{}.png'.format(self.zvalue, self.yvalue, self.xvalue)
@@ -169,22 +169,22 @@ class Tile:
     except IOError:
       pass
 
-    try:
-      self.initForFetch()
-    except OOBException:
-      logger.warning("OOB request. Returning black tile. url={}".format(self.tile_url))
-      img = Image.new("L", (512, 512))
-      fileobj = cStringIO.StringIO()
-      img.save(fileobj, "PNG")
-      fileobj.seek(0)
-      return fileobj.read()
+      try:
+        self.initForFetch()
+      except OOBException:
+        logger.warning("OOB request. Returning black tile. url={}".format(self.tile_url))
+        img = Image.new("L", (512, 512))
+        fileobj = cStringIO.StringIO()
+        img.save(fileobj, "PNG")
+        fileobj.seek(0)
+        return fileobj.read()
 
-    # call the celery process to fetch the url
-    from tasks import fetchurl
-    #fetchurl (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
-    fetchurl.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
+      # call the celery process to fetch the url
+      from tasks import fetchurl
+      #fetchurl (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
+      fetchurl.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
 
-    logger.warning("Tile fetch {}".format(self.tile_url))
-    f = getURL(self.tile_url)
+      logger.warning("Tile fetch {}".format(self.tile_url))
+      f = getURL(self.tile_url)
 
-    return f.read()
+      return f.read()

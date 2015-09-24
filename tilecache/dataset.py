@@ -129,6 +129,7 @@ class Dataset:
 
   def removeDataset(self):
     """Remove a dataset"""
+    
     self.db.removeDataset(self.dataset_name)
     import shutil
     try:
