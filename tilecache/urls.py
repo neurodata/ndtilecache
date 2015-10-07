@@ -19,6 +19,8 @@ from django.conf.urls import patterns, include, url
 # admin.autodiscover()
 
 urlpatterns = patterns('tilecache.views',
-    # everything matches the tile cache
+    # viking tile in the cache
+    url(r'^viking/(?P<webargs>.*)$', 'getVikingTile'),
+    # everything else matches the tile cache
     url(r'^(?P<webargs>.*)$', 'getTile'),
 )

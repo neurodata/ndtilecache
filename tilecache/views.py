@@ -23,6 +23,25 @@ from ocptilecacheerror import OCPTILECACHEError
 import logging
 logger=logging.getLogger("ocptilecache")
 
+def getVikingTile(request, webargs):
+  """Return a viking tile"""
+
+  try:
+    # argument of format token/volume/channel/resolution/Xtile_Ytile_Ztile
+    m = re.match(r'(\w+)/volume/(\w+)/(\d+)/X(\d+)_Y(\d+)_Z(\d+).png$', webargs)
+    [token, channel, resolution, xtile, ytile, ztile] = [i for i in m.groups()]
+
+    # rewriting args here into catmaid format token/channel/slice_type/z/x_y_res.png
+    webargs = '{}/{}/xy/{}/{}_{}_{}.png'.format(token, channel, ztile, xtile, ytile, resolution)
+
+    response = getTile(request, webargs)
+    response['content-length'] = len(response.content)
+    return response
+  
+  except Exception, e:
+    raise
+    return django.http.HttpResponseNotFound(e)
+
 def getTile(request, webargs):
   """Return a tile or load the cache"""
   
