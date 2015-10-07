@@ -100,3 +100,48 @@ getMcfcTile
     :align: center
     :width: 512px
     :height: 512px
+
+
+getVikingTile
+-------------
+
+.. http:get:: (string:server_name)/ocptilecache/tilecache/viking/(string:token_name)/volume/(string:channel_name)/(int:resolution)/X(int:xtile)_Y(int:xtile)_Z(int:zvalue).png
+   
+   :synopsis: Get a 512x512 tile from the tilecache
+
+   :param server_name: Server Name in OCP. In the general case this is openconnecto.me.
+   :type server_name: string
+   :param token_name: Token Name in OCP.
+   :type token_name: string
+   :param channel_name: Channel Name in OCP.
+   :type channel_name: string
+   :param resolution: Resolution value.
+   :type resolution: int
+   :param xtile: X-Tile value. Each tile is 512x512.
+   :type xtile: int
+   :param ytile: Y-Tile value. Each tile is 512x512.
+   :type ytile: int
+   :param zvalue: Zslice value.
+   :type zvalue: int
+
+   :statuscode 200: No error
+   :statuscode 404: Error in the syntax or file format
+   
+   **Example Request**:
+   
+   .. sourcecode:: http
+   
+      GET  /ocptilecache/tilecache/viking/kasthuri11/volume/image/4/X1_Y1_Z10.png HTTP/1.1
+      Host: openconnecto.me
+   
+   **Example Response**:
+   
+   .. sourcecode:: http 
+      
+      HTTP/1.1 200 OK
+      Content-Type: application/png
+
+.. figure:: ../images/viking_image_tile.png
+    :align: center
+    :width: 512px
+    :height: 512px
