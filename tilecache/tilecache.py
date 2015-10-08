@@ -250,7 +250,7 @@ class TileCache:
   
   def tile2WebPNG(self, xdim, ydim, tile):
     """Create PNG Images and write to cache for the specified tile"""
-
+    
     # Check if it is mcfc tile
     if self.colors is not None:
       return mcfcPNG(tile, self.colors, enhancement=4.0)
@@ -267,7 +267,7 @@ class TileCache:
           outimage = Image.frombuffer ( 'I;16', [xdim,ydim], tile.flatten(), 'raw', 'I;16', 0, 1)
           return outimage.point(lambda i:i*(1./256)).convert('L')
         elif ch.channel_datatype in dbtype.DTYPE_uint32 :
-          return Image.fromarray( tile, 'RGBA')
+          return Image.fromarray( tile[0,:,:], 'RGBA')
 
       elif ch.channel_type in dbtype.ANNOTATION_CHANNELS:
         tile = tile[0,:]

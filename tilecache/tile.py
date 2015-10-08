@@ -100,11 +100,11 @@ class Tile:
       self.zslab = (self.zvalue - zoffset) / zdim
       self.zoff = (self.zvalue - zoffset) % zdim
       self.xmin = self.xvalue * self.tilesize
-      self.xmax = min ((self.xvalue+1)*self.tilesize, ximagesize)
+      self.xmax = min ((self.xvalue+1)*self.tilesize + xoffset, ximagesize+xoffset)
       self.ymin = self.yvalue * self.tilesize
-      self.ymax = min ((self.yvalue+1)*self.tilesize, yimagesize)
+      self.ymax = min ((self.yvalue+1)*self.tilesize + yoffset, yimagesize+yoffset)
       self.zmin = (self.zslab)*zdim + zoffset
-      self.zmax = min ((self.zslab+1)*zdim + zoffset, zimagesize+1)
+      self.zmax = min ((self.zslab+1)*zdim + zoffset, zimagesize+zoffset+1)
 
     elif self.slice_type == 'xz':
       self.yslab = (self.yvalue) / ydim
