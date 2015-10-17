@@ -31,7 +31,7 @@ class Installer:
     """Creating the database for ocptilecache"""
     
     try:
-      self.conn = MySQLdb.connect (host = 'localhost', user = settings.USER, passwd = settings.PASSWD)
+      self.conn = MySQLdb.connect (host = 'localhost', user = settings.DATABASES['default']['USER'], passwd = settings.DATABASES['default']['PASSWORD'])
     except MySQLdb.Error, e:
       raise Exception("Cannot connect to the MySQL server.")
 
@@ -45,7 +45,7 @@ class Installer:
       self.conn.close()
 
     try:
-      self.conn = MySQLdb.connect (host = 'localhost', user = settings.USER, passwd = settings.PASSWD, db = settings.DBNAME)
+      self.conn = MySQLdb.connect (host = 'localhost', user = settings.DATABASES['default']['USER'], passwd = settings.DATABASES['default']['PASSWORD'], db = settings.DBNAME)
     except MySQLdb.Error, e:
       raise Exception("Cannot connect to the database {}. {}".format(settings.DBNAME, e))
 
