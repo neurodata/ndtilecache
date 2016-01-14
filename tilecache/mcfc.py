@@ -15,7 +15,7 @@
 import numpy as np
 from PIL import Image
 
-from ocptilecacheerror import OCPTILECACHEError
+from ocptilecacheerror import NDTILECACHEError
 import logging
 logger=logging.getLogger("ocp")
 
@@ -54,7 +54,7 @@ def mcfcPNG (cutout, colors, enhancement=4.0):
       combined_cutout +=  np.left_shift(data32,16) 
     else:
       logger.warning ("Unsupported color requested: {}".format(color[i]))
-      raise OCPCAError ("Unsupported color requested: {}".format(color[i]))
+      raise NDCAError ("Unsupported color requested: {}".format(color[i]))
 
   # Set the alpha channel only for nonzero pixels
   combined_cutout = np.where (combined_cutout > 0, combined_cutout + 0xFF000000, 0)

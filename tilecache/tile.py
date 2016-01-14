@@ -24,7 +24,7 @@ from dataset import Dataset
 from cachedb import CacheDB
 from tilecache import TileCache
 
-from ocptilecacheerror import OCPTILECACHEError
+from ocptilecacheerror import NDTILECACHEError
 import logging
 logger=logging.getLogger("ocptilecache")
 

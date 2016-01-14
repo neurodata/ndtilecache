@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-class OCPTILECACHEError (Exception):
+class NDTILECACHEError (Exception):
   """General Errors"""
 
   def __init__ (self, value):

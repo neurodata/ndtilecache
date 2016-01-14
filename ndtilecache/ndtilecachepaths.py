@@ -18,7 +18,7 @@
 
 import os, sys
 
-OCPTILECACHE_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".." ))
-OCPTILECACHE_OCPLIB_PATH = os.path.join(OCPTILECACHE_BASE_PATH, "ocplib" )
+NDTILECACHE_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".." ))
+NDTILECACHE_NDLIB_PATH = os.path.join(NDTILECACHE_BASE_PATH, "ndlib" )
 
-sys.path += [ OCPTILECACHE_OCPLIB_PATH ]
+sys.path += [ NDTILECACHE_NDLIB_PATH ]

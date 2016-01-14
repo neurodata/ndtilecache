@@ -13,14 +13,14 @@
 # limitations under the License.
 
 import json
+import shutil
 from django.conf import settings
 
 from cachedb import CacheDB
-from dbtype import ZSLICES, ISOTROPIC
+from ndtype import ZSLICES, ISOTROPIC, ND_scalingtoint
 from util import getURL
-import dbtype
 
-from ocptilecacheerror import OCPTILECACHEError
+from ocptilecacheerror import NDTILECACHEError
 import logging
 logger=logging.getLogger("ocptilecache")
 
@@ -55,7 +55,7 @@ class Dataset:
     self.xoffset, self.yoffset, self.zoffset = info['dataset']['offset']['0']
     self.xvoxelres, self.yvoxelres, self.zvoxelres = info['dataset']['voxelres']['0']
     self.scalinglevels = info['dataset']['scalinglevels']
-    self.scalingoption = dbtype.OCP_scalingtoint[info['dataset']['scaling']]
+    self.scalingoption = ND_scalingtoint[info['dataset']['scaling']]
     self.starttime, self.endtime = info['dataset']['timerange']
 
     for channel_name in info['channels'].keys():
@@ -131,7 +131,6 @@ class Dataset:
     """Remove a dataset"""
     
     self.db.removeDataset(self.dataset_name)
-    import shutil
     try:
       shutil.rmtree("{}/{}".format(settings.CACHE_DIR, self.dataset_name))
     except Exception, e:
@@ -146,7 +145,7 @@ class Dataset:
         return ch
 
     logger.warning("Channel {} does not exist for the dataset {}".format(channel_name, self.dataset_name))
-    raise OCPTILECACHEError("Channel {} does not exist for the dataset {}".format(channel_name, self.dataset_name))
+    raise NDTILECACHEError("Channel {} does not exist for the dataset {}".format(channel_name, self.dataset_name))
 
 
 class Channel:

@@ -52,12 +52,12 @@ MIDDLEWARE_CLASSES = (
     #'django.middleware.security.SecurityMiddleware',
 )
 
-ROOT_URLCONF = 'ocptilecache.urls'
+ROOT_URLCONF = 'ndtilecache.urls'
 
 TEMPLATES = [
 ]
 
-WSGI_APPLICATION = 'ocptilecache.wsgi.application'
+WSGI_APPLICATION = 'ndtilecache.wsgi.application'
 
 
 # Database
@@ -66,7 +66,7 @@ WSGI_APPLICATION = 'ocptilecache.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ocptilecache_django',
+        'NAME': 'ndtilecache_django',
         'USER': settings_secret.USER,
         'PASSWORD': settings_secret.PASSWORD,
         'HOST': settings_secret.HOST,
@@ -128,7 +128,7 @@ LOGGING = {
     'logfile': {
       'level': 'DEBUG',
       'class': 'logging.handlers.RotatingFileHandler',
-      'filename': '/var/log/ocptilecache/ocptilecache.log',
+      'filename': '/var/log/ndtilecache/ndtilecache.log',
       'maxBytes': 500000,
       'backupCount' : 7,
       'formatter': 'standard',
@@ -150,16 +150,17 @@ LOGGING = {
       'level': 'DEBUG',
       'propagate': False,
     },
-    'ocptilecache': {
+    'ndtilecache': {
       'handlers': ['console', 'logfile'],
       'level': 'WARN',
     }
   },
 }
 
-# OCPTILECACHE Settings
-SERVER = 'openconnecto.me/ocp'
-DBNAME = 'ocptilecache'
+# NDTILECACHE Settings
+# SERVER = 'openconnecto.me/ocp'
+SERVER = 'localhost:8080'
+DBNAME = 'ndtilecache'
 TILESIZE = 512
 CACHE_DIR = settings_secret.CACHE_DIR
 CACHE_SIZE = 1000000 # In MB

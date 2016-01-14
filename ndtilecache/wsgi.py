@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-WSGI config for ocptilecache project.
+WSGI config for ndtilecache project.
 
 This module contains the WSGI application used by Django's development server
 and any production WSGI deployments. It should expose a module-level variable
@@ -32,7 +32,7 @@ import sys
 
 sys.path += [  os.path.abspath(os.path.join(os.path.dirname(__file__), ".." ))]
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ocptilecache.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ndtilecache.settings")
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION

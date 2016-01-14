@@ -31,13 +31,13 @@ from cachedb import CacheDB
 from dataset import Dataset
 from util import getURL, window
 import tilekey
-import dbtype
+from ndtype import IMAGE_CHANNELS, TIMESERIES_CHANNELS, ANNOTATION_CHANNELS, DTYPE_uint8, DTYPE_uint16, DTYPE_uint32 
 import ocplib
 from util import getURL, postURL, getDatasetName
 from mcfc import mcfcPNG
 from windowcutout import windowCutout
 
-from ocptilecacheerror import OCPTILECACHEError
+from ocptilecacheerror import NDTILECACHEError
 import logging
 logger=logging.getLogger("ocptilecache")
 
@@ -68,7 +68,7 @@ class TileCache:
       [res, xmin, xmax, ymin, ymax, zmin, zmax, tmin, tmax] = [int(i) if i is not None else None for i in m.groups()]
     except Exception, e:
       logger.error("Failed to parse url {}".format(cuboidurl))
-      raise OCPTILECACHEError("Failed to parse url {}".format(cuboidurl))
+      raise NDTILECACHEError("Failed to parse url {}".format(cuboidurl))
 
     # otherwise load a cube
     logger.warning ("Loading cache for {}".format(cuboidurl))
@@ -259,17 +259,17 @@ class TileCache:
     else:
       ch = self.ds.getChannelObj(self.channels[0])
       # write it as a png file
-      if ch.channel_type in dbtype.IMAGE_CHANNELS+dbtype.TIMESERIES_CHANNELS:
+      if ch.channel_type in IMAGE_CHANNELS+TIMESERIES_CHANNELS:
 
-        if ch.channel_datatype in dbtype.DTYPE_uint8:
+        if ch.channel_datatype in DTYPE_uint8:
           return Image.frombuffer ( 'L', [xdim,ydim], tile.flatten(), 'raw', 'L', 0, 1 )
-        elif ch.channel_datatype in dbtype.DTYPE_uint16:
+        elif ch.channel_datatype in DTYPE_uint16:
           outimage = Image.frombuffer ( 'I;16', [xdim,ydim], tile.flatten(), 'raw', 'I;16', 0, 1)
           return outimage.point(lambda i:i*(1./256)).convert('L')
-        elif ch.channel_datatype in dbtype.DTYPE_uint32 :
+        elif ch.channel_datatype in DTYPE_uint32 :
           return Image.fromarray( tile[0,:,:], 'RGBA')
 
-      elif ch.channel_type in dbtype.ANNOTATION_CHANNELS:
+      elif ch.channel_type in ANNOTATION_CHANNELS:
         tile = tile[0,:]
         ocplib.recolor_ctype(tile, tile)
         return Image.frombuffer ( 'RGBA', [xdim,ydim], tile.flatten(), 'raw', 'RGBA', 0, 1 )

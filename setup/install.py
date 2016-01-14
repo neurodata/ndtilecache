@@ -18,7 +18,7 @@ import sys
 import MySQLdb
 
 sys.path += [os.path.abspath('../')]
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ocptilecache.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ndtilecache.settings'
 from django.conf import settings
 #from django.core.management import call_command
 
@@ -28,7 +28,7 @@ class Installer:
     pass
 
   def createDatabase(self):
-    """Creating the database for ocptilecache"""
+    """Creating the database for ndtilecache"""
     
     try:
       self.conn = MySQLdb.connect (host = 'localhost', user = settings.DATABASES['default']['USER'], passwd = settings.DATABASES['default']['PASSWORD'])

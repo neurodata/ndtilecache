@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import urllib2
-import dbtype
+from ndtype import IMAGE_CHANNELS, DTYPE_uint16
 import numpy as np
 
 def getURL(url):
@@ -43,7 +43,7 @@ def window(data, ch, window_range=None):
   
   [startwindow, endwindow] = window_range
   
-  if ch.getChannelType() in dbtype.IMAGE_CHANNELS and ch.getDataType() in dbtype.DTYPE_uint16:
+  if ch.getChannelType() in IMAGE_CHANNELS and ch.getDataType() in DTYPE_uint16:
     if (startwindow == endwindow == 0):
       return np.uint8(data * 1.0/256)
     elif endwindow!=0:
