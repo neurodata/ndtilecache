@@ -24,14 +24,14 @@ from dataset import Dataset
 from cachedb import CacheDB
 from tilecache import TileCache
 
-from ocptilecacheerror import NDTILECACHEError
+from ndtilecacheerror import NDTILECACHEError
 import logging
-logger=logging.getLogger("ocptilecache")
+logger=logging.getLogger("ndtilecache")
 
 from django.conf import settings
 from django.db import models
 from django.conf import settings
-#from ocptilecache.models import ProjectServer
+#from ndtilecache.models import ProjectServer
 
 # Out of Bounds exception
 class OOBException(Exception):

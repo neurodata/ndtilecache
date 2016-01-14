@@ -19,9 +19,9 @@ import django
 
 import tile
 
-from ocptilecacheerror import OCPTILECACHEError
+from ndtilecacheerror import NDTILECACHEError
 import logging
-logger=logging.getLogger("ocptilecache")
+logger=logging.getLogger("ndtilecache")
 
 def getVikingTile(request, webargs):
   """Return a viking tile"""
@@ -45,14 +45,14 @@ def getVikingTile(request, webargs):
 def getTile(request, webargs):
   """Return a tile or load the cache"""
   
-  # Parse the tile request and turn it into an OCP request
+  # Parse the tile request and turn it into an nd request
   try:
     # argument of format /mcfc(optional)/token/channel_list/slice_type/time(optional)/z/y_x_res.png
     m = re.match("(?P<mcfc>mcfc/)?(\w+)/([\w+,:]+)/(\w+)/(\d/)?(\d+)/(\d+)_(\d+)_(\d+).png$", webargs)
     [mcfc, token, channels, slice_type] = [i for i in m.groups()[:4]]
   except Exception, e:
     logger.warning("Incorrect arguments {}. {}".format(webargs, e))
-    raise OCPTILECACHEError("Incorrect arguments {}. {}".format(webargs, e))
+    raise NDTILECACHEError("Incorrect arguments {}. {}".format(webargs, e))
 
   if mcfc is not None:
     # arguments of the form channel:color,channel:color  OR channel,channel
@@ -71,7 +71,7 @@ def getTile(request, webargs):
       colors = None
     except Exception, e:
       logger.warning("Incorrect channel {} for simple cutout. {}".format(channels, e))
-      raise OCPTILECACHEError("Incorrect channel {} for simple cutout. {}".format(channels, e))
+      raise NDTILECACHEError("Incorrect channel {} for simple cutout. {}".format(channels, e))
 
   if slice_type == 'xy':
     [tvalue, zvalue, yvalue, xvalue, res] = [int(i.strip('/')) if i is not None else None for i in m.groups()[4:]]

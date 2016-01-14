@@ -28,7 +28,7 @@ import cachedb
 
 from django.conf import settings
 from django.db import models
-from ocptilecache.models import ProjectServer
+# from ndtilecache.models import ProjectServer
 
 
 def prefetch ( token, res, xmin, xmax, ymin, ymax, zmin, zmax ):
@@ -90,7 +90,7 @@ def prefetch ( token, res, xmin, xmax, ymin, ymax, zmin, zmax ):
           print cuboidurl
 
           # call the celery process to fetch the url
-          from ocptilecache.tasks import fetchurl
+          from ndtilecache.tasks import fetchurl
           fetchurl.delay ( cuboidurl, info )
 
 def main():

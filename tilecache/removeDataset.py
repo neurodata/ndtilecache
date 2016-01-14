@@ -19,13 +19,13 @@ import argparse
 # Make it so that you can get settings from django
 sys.path += [os.path.abspath('../')]
 import ocptilecache.settings
-os.environ['DJANGO_SETTINGS_MODULE'] = 'ocptilecache.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ndtilecache.settings'
 from django.conf import settings
 
 from dataset import Dataset
 
 import logging
-logger=logging.getLogger("ocptilecache")
+logger=logging.getLogger("ndtilecache")
 
 def main():
 

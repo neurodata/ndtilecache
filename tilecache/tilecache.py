@@ -32,14 +32,14 @@ from dataset import Dataset
 from util import getURL, window
 import tilekey
 from ndtype import IMAGE_CHANNELS, TIMESERIES_CHANNELS, ANNOTATION_CHANNELS, DTYPE_uint8, DTYPE_uint16, DTYPE_uint32 
-import ocplib
+import ndlib
 from util import getURL, postURL, getDatasetName
 from mcfc import mcfcPNG
 from windowcutout import windowCutout
 
-from ocptilecacheerror import NDTILECACHEError
+from ndtilecacheerror import NDTILECACHEError
 import logging
-logger=logging.getLogger("ocptilecache")
+logger=logging.getLogger("ndtilecache")
 
 #from django.db import models
 #from tilecache.models import ProjectServer
@@ -271,7 +271,7 @@ class TileCache:
 
       elif ch.channel_type in ANNOTATION_CHANNELS:
         tile = tile[0,:]
-        ocplib.recolor_ctype(tile, tile)
+        ndlib.recolor_ctype(tile, tile)
         return Image.frombuffer ( 'RGBA', [xdim,ydim], tile.flatten(), 'raw', 'RGBA', 0, 1 )
 
       else :

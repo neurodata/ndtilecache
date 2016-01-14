@@ -20,9 +20,9 @@ from cachedb import CacheDB
 from ndtype import ZSLICES, ISOTROPIC, ND_scalingtoint
 from util import getURL
 
-from ocptilecacheerror import NDTILECACHEError
+from ndtilecacheerror import NDTILECACHEError
 import logging
-logger=logging.getLogger("ocptilecache")
+logger=logging.getLogger("ndtilecache")
 
 
 class Dataset:

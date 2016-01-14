@@ -15,9 +15,9 @@
 import numpy as np
 from PIL import Image
 
-from ocptilecacheerror import NDTILECACHEError
+from ndtilecacheerror import NDTILECACHEError
 import logging
-logger=logging.getLogger("ocp")
+logger=logging.getLogger("nd")
 
 def mcfcPNG (cutout, colors, enhancement=4.0):
   """False color a multichannel cutout.  Takes a 3-d array and returns a 2-d array 

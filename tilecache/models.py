@@ -15,9 +15,9 @@
 from django.db import models
 
 # Create your models here
-class ProjectServer ( models.Model ):
-  project = models.CharField(max_length=255, primary_key=True)
-  server = models.CharField(max_length=255)
+# class ProjectServer ( models.Model ):
+  # project = models.CharField(max_length=255, primary_key=True)
+  # server = models.CharField(max_length=255)
 
 #class Datasets ( models.Model ):
   #dataset_name = models.CharField(max_length=255, unique=True)
