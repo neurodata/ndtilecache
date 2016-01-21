@@ -16,6 +16,8 @@ import urllib2
 import dbtype
 import numpy as np
 
+from windowcutout import windowCutout 
+
 def getURL(url):
   """Get the url"""
 
