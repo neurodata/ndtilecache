@@ -16,6 +16,8 @@ import urllib2
 from ndtype import IMAGE_CHANNELS, DTYPE_uint16
 import numpy as np
 
+from windowcutout import windowCutout 
+
 def getURL(url):
   """Get the url"""
 
