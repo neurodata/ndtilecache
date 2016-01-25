@@ -18,7 +18,7 @@ import argparse
 
 # Make it so that you can get settings from django
 sys.path += [os.path.abspath('../')]
-import ocptilecache.settings
+import ndtilecache.settings
 os.environ['DJANGO_SETTINGS_MODULE'] = 'ndtilecache.settings'
 from django.conf import settings
 

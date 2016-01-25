@@ -24,7 +24,7 @@ import cachedb
 #import os
 #import sys
 #sys.path += [os.path.abspath('..')]
-#os.environ['DJANGO_SETTINGS_MODULE'] = 'ocptilecache.settings'
+#os.environ['DJANGO_SETTINGS_MODULE'] = 'ndtilecache.settings'
 
 from django.conf import settings
 from django.db import models

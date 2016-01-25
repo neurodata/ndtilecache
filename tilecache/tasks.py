@@ -22,7 +22,7 @@ from django.conf import settings
 from .tilecache import TileCache
 
 import logging
-logger=logging.getLogger("ocptilecache")
+logger=logging.getLogger("ndtilecache")
 
 
 @task(queue='prefetch')
@@ -40,7 +40,7 @@ def reclaim ( ):
 
   # only one reclaiming process at a time!
   # if a reclamation is in process, return
-  reclsem = posix_ipc.Semaphore ( "/ocp_reclaim", flags=posix_ipc.O_CREAT, initial_value=1 )
+  reclsem = posix_ipc.Semaphore ( "/nd_reclaim", flags=posix_ipc.O_CREAT, initial_value=1 )
   try:
     # get the semaphore right away.
     reclsem.acquire(0)
