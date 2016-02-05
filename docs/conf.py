@@ -56,7 +56,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'ocptilecache'
+project = u'ndtilecache'
 copyright = u'2015, Open Connectome Project'
 author = u'OCP'
 
@@ -209,7 +209,7 @@ html_use_smartypants = True
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'ocptilecache'
+htmlhelp_basename = 'ndtilecache'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -231,7 +231,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'ocptilecache.tex', u'ocptilecache Documentation',
+  (master_doc, 'ndtilecache.tex', u'ndtilecache Documentation',
    u'OCP', 'manual'),
 ]
 
@@ -261,7 +261,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'ocptilecache', u'ocptilecache Documentation',
+    (master_doc, 'ndtilecache', u'ndtilecache Documentation',
      [author], 1)
 ]
 
@@ -275,8 +275,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'ocptilecache', u'ocptilecache Documentation',
-   author, 'ocptilecache', 'One line description of project.',
+  (master_doc, 'ndtilecache', u'ndtilecache Documentation',
+   author, 'ndtilecache', 'One line description of project.',
    'Miscellaneous'),
 ]
 

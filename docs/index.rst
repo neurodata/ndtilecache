@@ -1,12 +1,12 @@
 .. meta::
-   :description: Official documentation for ocptilecache: Caching Gateway to connect a Visualization(e.g., CATMAID or ocpviz) server to Open Connectome Project Web Services
+   :description: Official documentation for ndtilecache: Caching Gateway to connect a Visualization(e.g., CATMAID or ocpviz) server to Open Connectome Project Web Services
    :keywords: annotation, tracing, neuroscience, object detection
 .. title::
-   ocptilecache
+   ndtilecache
 
 .. raw:: html
 
-	<h1>ocptilecache: Caching Gateway to connect a Visualization(e.g., CATMAID or ocpviz) server to Open Connectome Project Web Services</h1>
+	<h1>ndtilecache: Caching Gateway to connect a Visualization(e.g., CATMAID or ocpviz) server to Open Connectome Project Web Services</h1>
 	<br>
 
 
@@ -25,8 +25,8 @@
   <div>
     <img style="width:30px;height:30px;vertical-align:middle">
     <span style=""></span>
-    <IMG SRC="_static/GitHub.png" height="50" width="50"> <a href="https://github.com/openconnectome/ocptilecache/zipball/master"> [ZIP]   </a>  
-    <a image="_static/GitHub.png" href="https://github.com/openconnectome/ocptilecache/tarball/master">[TAR.GZ] </a></p>
+    <IMG SRC="_static/GitHub.png" height="50" width="50"> <a href="https://github.com/openconnectome/ndtilecache/zipball/master"> [ZIP]   </a>  
+    <a image="_static/GitHub.png" href="https://github.com/openconnectome/ndtilecache/tarball/master">[TAR.GZ] </a></p>
   </div>
 
 .. sidebar:: OCP Contact Us 
@@ -46,10 +46,10 @@
    :caption: Further Reading
 
    api/functions
-   Gitter chatroom <https://gitter.im/openconnectome/ocptilecache>
+   Gitter chatroom <https://gitter.im/openconnectome/ndtilecache>
    Mailing List <https://groups.google.com/forum/#!forum/ocp-support/> 
-   Github repo <https://github.com/openconnectome/ocptilecache>
-   Release Notes <https://github.com/openconnectome/ocptilecache/releases/>
+   Github repo <https://github.com/openconnectome/ndtilecache>
+   Release Notes <https://github.com/openconnectome/ndtilecache/releases/>
 
 If you use OCP or its data derivatives, please cite:
   R Burns, K Lillaney, E Perlman, P Manavalan, JT Vogelstein (2015). ocp v0.7. Zenodo. 10.5281/zenodo.15974 `zenodo <https://zenodo.org/record/15974?ln=en#.VYyl-XUVhBc>`_ `bibtex <https://zenodo.org/record/15974?ln=en#.VYyjE3UVhBc>`_
