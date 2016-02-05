@@ -24,6 +24,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = settings_secret.SECRET_KEY
 
+SITE_ID = 1
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -122,10 +124,10 @@ LOGGING = {
     },
   },
   'handlers': {
-    'null': {
-      'level': 'DEBUG',
-      'class': 'django.utils.log.NullHandler'
-    },
+    # 'null': {
+      # 'level': 'DEBUG',
+      # 'class': 'django.utils.log.NullHandler'
+    # },
     'logfile': {
       'level': 'DEBUG',
       'class': 'logging.handlers.RotatingFileHandler',
