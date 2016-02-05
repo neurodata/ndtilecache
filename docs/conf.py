@@ -56,9 +56,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'ocptilecache'
+project = u'ndtilecache'
 copyright = u'2015, Open Connectome Project'
-author = u'OCP'
+author = u'NeuroData'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -136,12 +136,12 @@ html_theme = 'sphinx_rtd_theme'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = 'images/ocp_main.png'
+html_logo = 'images/nd_main.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = 'images/ocp_favicon.ico'
+html_favicon = 'images/nd_favicon.ico'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -209,7 +209,7 @@ html_use_smartypants = True
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'ocptilecache'
+htmlhelp_basename = 'ndtilecache'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -231,8 +231,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'ocptilecache.tex', u'ocptilecache Documentation',
-   u'OCP', 'manual'),
+  (master_doc, 'ndtilecache.tex', u'ndtilecache Documentation',
+   u'NeuroData', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -261,7 +261,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'ocptilecache', u'ocptilecache Documentation',
+    (master_doc, 'ndtilecache', u'ndtilecache Documentation',
      [author], 1)
 ]
 
@@ -275,8 +275,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'ocptilecache', u'ocptilecache Documentation',
-   author, 'ocptilecache', 'One line description of project.',
+  (master_doc, 'ndtilecache', u'ndtilecache Documentation',
+   author, 'ndtilecache', 'One line description of project.',
    'Miscellaneous'),
 ]
 
