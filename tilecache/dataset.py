@@ -14,10 +14,11 @@
 
 import json
 import shutil
+from operator import mul
 from django.conf import settings
 
 from cachedb import CacheDB
-from ndtype import ZSLICES, ISOTROPIC, ND_scalingtoint
+from ndtype import ZSLICES, ISOTROPIC, ND_scalingtoint, SUPERCUBESIZE
 from util import getURL
 
 from ndtilecacheerror import NDTILECACHEError
@@ -67,6 +68,7 @@ class Dataset:
 
     self.resolutions = []
     self.cubedim = {}
+    self.supercubedim = {}
     self.imagesz = {}
     self.offset = {}
     self.voxelres = {}
@@ -119,6 +121,8 @@ class Dataset:
           self.cubedim[i] = [128, 128, 16]
         else:
           self.cubedim[i] = [64, 64, 64]
+      
+      self.supercubedim[i] = map(mul, self.cubedim[i], SUPERCUBESIZE)
 
       # Make an exception for bock11 data -- just an inconsistency in original ingest
       if self.ximagesz == 135424 and i == 5:
@@ -170,3 +174,5 @@ class Channel:
     return self.channel_name
   def getDataset(self):
     return self.dataset
+  def getProjectName(self):
+    return 'kasthuri11'

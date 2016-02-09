@@ -19,19 +19,20 @@ import posix_ipc
 from celery import task
 from django.conf import settings
 
+from .cachedb import CacheDB
 from .tilecache import TileCache
 
 import logging
 logger=logging.getLogger("ndtilecache")
 
 
-@task(queue='prefetch')
-def fetchurl ( token, slicetype, channels, colors, url ):
+# @task(queue='prefetch')
+def fetchcube ( token, slicetype, channels, colors, url ):
   """Fetch the requested url."""
 
   logger.warning ("Fetching url {}".format(url))
   tc = TileCache(token, slicetype, channels, colors)
-  tc.loadData(url)
+  tc.loadCube(url)
 
 # automatic routing not working in django.  No big deal.  Specify the queue explicitly.
 @task(queue='reclaim')
@@ -47,9 +48,8 @@ def reclaim ( ):
 
     try:
       # reclaim
-      import cachedb
-      db = cachedb.CacheDB()
-      db.reclaim ( )
+      db = CacheDB()
+      db.reclaim ()
     except Exception, e:
       logger.error("Error in reclamation {}".format(e))
 

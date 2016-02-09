@@ -180,9 +180,10 @@ class Tile:
         return fileobj.read()
 
       # call the celery process to fetch the url
-      from tasks import fetchurl
+      from tasks import fetchcube
       #fetchurl (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
-      fetchurl.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
+      # fetchcube.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
+      fetchcube (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
 
       logger.warning("Tile fetch {}".format(self.tile_url))
       f = getURL(self.tile_url)

@@ -58,8 +58,9 @@ class TileCache:
     self.dataset_name = getDatasetName(self.token, self.channels, self.colors, self.slice_type)
     # set the datasetname
     self.ds = Dataset(self.dataset_name)
+  
 
-  def loadData (self, cuboidurl):
+  def loadCube (self, cuboidurl):
     """Load a cube of data into the cache"""
 
     try:
@@ -85,31 +86,37 @@ class TileCache:
 
       try:
         # Get cube in question
-        f = getURL(cuboidurl)
+        # import pdb; pdb.set_trace()
+        import s3io
+        test = s3io.S3IO(self.ds, self.channels)
+        cubedata = test.getCutout(cuboidurl)
+        # f = getURL(cuboidurl)
       except urllib2.URLError, e:
         # release the fetch lock
         self.ds.db.fetchrelease(cuboidurl)
         raise
 
       # get the cutout data
-      cubedata = blosc.unpack_array(f.read())
+      # cubedata = blosc.unpack_array(f.read())
 
       # properties
       [ximagesize, yimagesize, zimagesize] = self.ds.imagesz[res]
       (xdim, ydim, zdim) = self.ds.cubedim[res]
+      (xsuperdim, ysuperdim, zsuperdim) = self.ds.supercubedim[res]
       [xoffset, yoffset, zoffset] = self.ds.offset[res]
       scale = self.ds.scale[res][self.slice_type]
 
       if xmax == ximagesize or ymax == yimagesize or zmax == zimagesize:
         if self.colors:
           # 3d cutout if not a channel database
+          # multi-channel cutout.  turn into false color
           cuboid = np.zeros ((cubedata.shape[0], zdim, settings.TILESIZE, settings.TILESIZE), dtype = cubedata.dtype)
           cuboid[:, 0:(zmax-zmin), 0:(ymax-ymin), 0:(xmax-xmin)] = cubedata
         else:
-          # multi-channel cutout.  turn into false color
           # Check to see is this is a partial cutout if so pad the space
-          cuboid = np.zeros((cubedata.shape[0], zdim, settings.TILESIZE, settings.TILESIZE), dtype=cubedata.dtype)
-          cuboid[:, 0:(zmax-zmin), 0:(ymax-ymin), 0:(xmax-xmin)] = cubedata
+          cuboid = np.zeros((cubedata.shape[0], zsuperdim, settings.TILESIZE, settings.TILESIZE), dtype=cubedata.dtype)
+          cuboid[:, 0:zsuperdim, 0:(ymax-ymin), 0:(xmax-xmin)] = cubedata[:, :, 0:(ymax-ymin), 0:(xmax-xmin)]
+          # cuboid[:, 0:(zmax-zmin), 0:(ymax-ymin), 0:(xmax-xmin)] = cubedata
       else:
         cuboid = cubedata
 
@@ -179,7 +186,7 @@ class TileCache:
 
   def addCuboid( self, cuboid, res, (tile1,tile2,mini,dim,time)):
     """Add the cutout to cache"""
-
+    
     self.checkDirHier(res, time=time)
     # counter of how many new tiles we get
     newtiles = 0
@@ -243,7 +250,6 @@ class TileCache:
           # ignore duplicate entries
           if e.args[0] != 1062:  
             raise
-
 
     self.ds.db.increase(newtiles)
     self.harvest()
