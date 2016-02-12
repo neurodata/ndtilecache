@@ -26,13 +26,13 @@ import logging
 logger=logging.getLogger("ndtilecache")
 
 
-# @task(queue='prefetch')
-def fetchcube ( token, slicetype, channels, colors, url ):
+@task(queue='prefetch')
+def fetchcube ( token, slicetype, channels, colors, url, cubedata ):
   """Fetch the requested url."""
 
   logger.warning ("Fetching url {}".format(url))
   tc = TileCache(token, slicetype, channels, colors)
-  tc.loadCube(url)
+  tc.loadCube(url, cubedata)
 
 # automatic routing not working in django.  No big deal.  Specify the queue explicitly.
 @task(queue='reclaim')

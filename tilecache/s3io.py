@@ -43,8 +43,8 @@ class S3IO:
       m = re.match("^http://.*/ca/\w+/(?:[\w+,]+/)?blosc/(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+)?,?(\d+)?/?$", cuboid_url)
       [res, xmin, xmax, ymin, ymax, zmin, zmax, tmin, tmax] = [int(i) if i is not None else None for i in m.groups()]
     except Exception, e:
-      logger.error("Failed to parse url {}".format(cuboidurl))
-      raise NDTILECACHEError("Failed to parse url {}".format(cuboidurl))
+      logger.error("Failed to parse url {}".format(cuboid_url))
+      raise NDTILECACHEError("Failed to parse url {}".format(cuboid_url))
     
 
     # get the size of the image and cube

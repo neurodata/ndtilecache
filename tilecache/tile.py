@@ -94,9 +94,12 @@ class Tile:
     xoffset, yoffset, zoffset = self.ds.offset[self.res]
     ximagesize, yimagesize, zimagesize = self.ds.imagesz[self.res]
     scale = self.ds.scale[self.res][self.slice_type]
+    xsuperdim, ysuperdim, zsuperdim = self.ds.supercubedim[self.res]
+
 
     # these are relative to the cuboids in the server
     if self.slice_type == 'xy':
+      self.zslab_offset = (self.zvalue - zoffset) % zdim
       self.zslab = (self.zvalue - zoffset) / zdim
       self.zoff = (self.zvalue - zoffset) % zdim
       self.xmin = self.xvalue * self.tilesize
@@ -183,9 +186,24 @@ class Tile:
       from tasks import fetchcube
       #fetchurl (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
       # fetchcube.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
-      fetchcube (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
+      # fetchcube (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
+      # logger.warning("Tile fetch {}".format(self.tile_url))
+      # f = getURL(self.tile_url)
 
-      logger.warning("Tile fetch {}".format(self.tile_url))
-      f = getURL(self.tile_url)
+      # return f.read()
+      
+      import s3io
+      import blosc
+      test = s3io.S3IO(self.ds, self.channels)
+      import time
+      start = time.time()
+      cubedata = test.getCutout(self.cuboid_url)
+      print time.time() - start
+      tiledata = cubedata[:, self.zslab_offset, : ,: ]
+      fetchcube.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url, cubedata)
+      img = Image.frombuffer ( 'L', [512,512], tiledata.flatten(), 'raw', 'L', 0, 1)
 
-      return f.read()
+      fileobj = cStringIO.StringIO ( )
+      img.save ( fileobj, "PNG" )
+      fileobj.seek(0)
+      return fileobj.read()

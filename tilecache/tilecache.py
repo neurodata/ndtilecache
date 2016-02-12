@@ -60,7 +60,7 @@ class TileCache:
     self.ds = Dataset(self.dataset_name)
   
 
-  def loadCube (self, cuboidurl):
+  def loadCube (self, cuboidurl, cubedata):
     """Load a cube of data into the cache"""
 
     try:
@@ -89,15 +89,18 @@ class TileCache:
         # import pdb; pdb.set_trace()
         import s3io
         test = s3io.S3IO(self.ds, self.channels)
-        cubedata = test.getCutout(cuboidurl)
+        import time
+        start = time.time()
+        # cubedata = test.getCutout(cuboidurl)
+        print time.time()-start
         # f = getURL(cuboidurl)
+        # cubedata = blosc.unpack_array(f.read())
       except urllib2.URLError, e:
         # release the fetch lock
         self.ds.db.fetchrelease(cuboidurl)
         raise
 
       # get the cutout data
-      # cubedata = blosc.unpack_array(f.read())
 
       # properties
       [ximagesize, yimagesize, zimagesize] = self.ds.imagesz[res]
