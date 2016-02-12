@@ -17,7 +17,7 @@
  
 RETVAL=0
 prog="supervisord"
-SUPERVISORD=/usr/share/ocp/virtualenvs/ocpcatmaid/bin/supervisord
+SUPERVISORD=/usr/share/nd/virtualenvs/ndcatmaid/bin/supervisord
 PID_FILE=/var/run/supervisord.pid
  
 start()

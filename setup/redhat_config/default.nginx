@@ -1,6 +1,6 @@
-# ocptilecache wsgi 
-upstream ocptilecache-wsgi {
-  server unix:///run/uwsgi/app/ocptilecache/socket;
+# ndtilecache wsgi 
+upstream ndtilecache-wsgi {
+  server unix:///run/uwsgi/app/ndtilecache/socket;
 }
 
 # place the following block in your server clause
@@ -8,11 +8,11 @@ server {
   
   ...
   
-  location /ocptilecache/ {
+  location /ndtilecache/ {
     error_log     /var/log/nginx/error.log notice;
     rewrite_log   on;
-    rewrite       /ocptilecache/(.*)$ /tilecache/$1 break;
-    uwsgi_pass    ocptilecache-wsgi;
+    rewrite       /ndtilecache/(.*)$ /tilecache/$1 break;
+    uwsgi_pass    ndtilecache-wsgi;
     include       /etc/nginx/uwsgi_params;
   }
 

@@ -18,6 +18,7 @@ import blosc
 import numpy as np
 from operator import add, sub, mul, div, mod
 
+from django.conf import settings
 import ndlib
 from ndtype import ND_dtypetonp
 
@@ -32,7 +33,7 @@ class S3IO:
     
     self.ds = ds
     self.channels = channels
-    self.client = boto3.client('s3')
+    self.client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
   
 
   def getCutout(self, cuboid_url):
