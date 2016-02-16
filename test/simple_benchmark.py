@@ -28,12 +28,16 @@ def main():
   parser.add_argument("--max", dest="max_slice", action="store", type=int, default=1850, help="Max Slice Number")
   
   result = parser.parse_args()
+  [min_x, max_x] = [0,1]
+  [min_y, max_y] = [0,1]
 
   for slice_number in range(result.min_slice, result.max_slice, 1):
-    req = urllib2.Request('http://{}/tilecache/{}/{}/xy/{}/0_0_{}.png'.format(result.server_name, result.token, result.channel_name, slice_number, result.resolution))
-    start = time.time()
-    resp = urllib2.urlopen(req)
-    print time.time()-start
+    for x_value in range(min_x, max_x+1, 1):
+      for y_value in range(min_y, max_y+1, 1):
+	req = urllib2.Request('http://{}/tilecache/{}/{}/xy/{}/{}_{}_{}.png'.format(result.server_name, result.token, result.channel_name, slice_number, x_value, y_value, result.resolution))
+    	start = time.time()
+    	resp = urllib2.urlopen(req)
+    	print time.time()-start
   
 if __name__ == '__main__':
   main()

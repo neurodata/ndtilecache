@@ -25,7 +25,9 @@ def getURL(url):
     resp = urllib2.urlopen(req)
     print time.time()-start
   except urllib2.URLError, e:
-    print "Failed URL {}. Error {}.".format(url, e)
+    #print "Failed URL {}. Error {}.".format(url, e)
+    print "Failed", time.time()-start
+    #pass
 
 
 def main():

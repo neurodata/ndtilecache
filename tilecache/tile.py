@@ -200,8 +200,10 @@ class Tile:
       cubedata = test.getCutout(self.cuboid_url)
       print time.time() - start
       tiledata = cubedata[:, self.zslab_offset, : ,: ]
+      [zdim, ydim, xdim] = tiledata.shape
       fetchcube.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url, cubedata)
-      img = Image.frombuffer ( 'L', [512,512], tiledata.flatten(), 'raw', 'L', 0, 1)
+      
+      img = Image.frombuffer ( 'L', [ydim,xdim], tiledata.flatten(), 'raw', 'L', 0, 1)
 
       fileobj = cStringIO.StringIO ( )
       img.save ( fileobj, "PNG" )

@@ -19,3 +19,15 @@ server {
   ...
 
 }
+
+worker_connections auto;
+multi_accept on;
+worker_processes 4;
+
+client_max_body_size 2048M;
+client_body_buffer_size 4M;
+
+uwsgi_send_timeout 480;
+uwsgi_read_timeout 480;
+
+keep_alive_timeout 180;
