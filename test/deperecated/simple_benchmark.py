@@ -26,18 +26,18 @@ def main():
   parser.add_argument("--server_name", dest="server_name", action="store", type=str, default="localhost/ndtilecache", help="Server Name")
   parser.add_argument("--min", dest="min_slice", action="store", type=int, default=1, help="Max Slice Number")
   parser.add_argument("--max", dest="max_slice", action="store", type=int, default=1850, help="Max Slice Number")
-  
+  parser.add_argument("--x", dest="xtile", nargs=2, action="store", type=int, metavar=('MIN_VAL','MAX_VAL'), default=[0,1], help="X Tile Range")
+  parser.add_argument("--y", dest="ytile", nargs=2, action="store", type=int, metavar=('MAX_VAL','MAX_VAL'), default=[0,1], help="Y Tile Range")
+
   result = parser.parse_args()
-  [min_x, max_x] = [0,1]
-  [min_y, max_y] = [0,1]
 
   for slice_number in range(result.min_slice, result.max_slice, 1):
-    for x_value in range(min_x, max_x+1, 1):
-      for y_value in range(min_y, max_y+1, 1):
-	req = urllib2.Request('http://{}/tilecache/{}/{}/xy/{}/{}_{}_{}.png'.format(result.server_name, result.token, result.channel_name, slice_number, x_value, y_value, result.resolution))
-    	start = time.time()
-    	resp = urllib2.urlopen(req)
-    	print time.time()-start
-  
+    for x_value in range(result.xtile[0], result.xtile[1]+1, 1):
+      for y_value in range(result.ytile[0], result.ytile[1]+1, 1):
+        req = urllib2.Request('http://{}/tilecache/{}/{}/xy/{}/{}_{}_{}.png'.format(result.server_name, result.token, result.channel_name, slice_number, x_value, y_value, result.resolution))
+        start = time.time()
+        resp = urllib2.urlopen(req)
+        print time.time()-start
+    
 if __name__ == '__main__':
   main()
