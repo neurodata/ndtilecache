@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# open-connectome documentation build configuration file, created by
+# ndtilecache documentation build configuration file, created by
 # sphinx-quickstart on Sun May 17 11:10:35 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -57,7 +57,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'ndtilecache'
-copyright = u'2015, Open Connectome Project'
+copyright = u'2015, NeuroData'
 author = u'NeuroData'
 
 # The version info for the project you're documenting, acts as replacement for

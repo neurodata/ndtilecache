@@ -14,16 +14,23 @@
 
 import time
 import urllib2
-
-fetch_list = []
-min_slice = 1
-max_slice = 1500
-server_name = 'localhost/ndtilecache'
+import argparse
 
 
 def main():
-  for slice_number in range(min_slice, max_slice, 1):
-    req = urllib2.Request('http://{}/tilecache/kasthuri11/image/xy/{}/0_0_5.png'.format(server_name, slice_number))
+
+  parser = argparse.ArgumentParser(description="Simple Benchmark Test")
+  parser.add_argument("token", action="store", type=str, help="Token")
+  parser.add_argument("channel_name", action="store", type=str, help="Token")
+  parser.add_argument("resolution", action="store", type=int, help="Resolution")
+  parser.add_argument("--server_name", dest="server_name", action="store", type=str, default="localhost/ndtilecache", help="Server Name")
+  parser.add_argument("--min", dest="min_slice", action="store", type=int, default=1, help="Max Slice Number")
+  parser.add_argument("--max", dest="max_slice", action="store", type=int, default=1850, help="Max Slice Number")
+  
+  result = parser.parse_args()
+
+  for slice_number in range(result.min_slice, result.max_slice, 1):
+    req = urllib2.Request('http://{}/tilecache/{}/{}/xy/{}/0_0_{}.png'.format(result.server_name, result.token, result.channel_name, slice_number, result.resolution))
     start = time.time()
     resp = urllib2.urlopen(req)
     print time.time()-start
