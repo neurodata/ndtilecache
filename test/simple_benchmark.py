@@ -18,7 +18,7 @@ import urllib2
 fetch_list = []
 min_slice = 1
 max_slice = 1500
-server_name = 'localhost:8000'
+server_name = 'localhost/ndtilecache'
 
 
 def main():

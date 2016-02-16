@@ -161,8 +161,8 @@ LOGGING = {
 }
 
 # NDTILECACHE Settings
-# SERVER = 'openconnecto.me/ocp'
-SERVER = 'localhost:8080'
+SERVER = 'openconnecto.me/ocp'
+#SERVER = 'localhost:8080'
 DBNAME = 'ndtilecache'
 TILESIZE = 512
 CACHE_DIR = settings_secret.CACHE_DIR
