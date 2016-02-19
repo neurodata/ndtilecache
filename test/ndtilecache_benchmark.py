@@ -31,10 +31,10 @@ def getURL(url):
 def main():
   
   parser = argparse.ArgumentParser(description="Simple Benchmark Test")
-  parser.add_argument("token", action="store", type=str, help="Token")
-  parser.add_argument("channel_name", action="store", type=str, help="Token")
-  parser.add_argument("resolution", action="store", type=int, help="Resolution")
-  parser.add_argument("--server_name", dest="server_name", action="store", type=str, default="localhost/ndtilecache", help="Server Name")
+  parser.add_argument("token_name", action="store", type=str, help="Token Name")
+  parser.add_argument("channel_name", action="store", type=str, help="Channel Name")
+  parser.add_argument("res_value", action="store", type=int, help="Resolution")
+  parser.add_argument("--server", dest="server_name", action="store", type=str, default="localhost/ndtilecache", help="Server Name")
   parser.add_argument("--min", dest="min_slice", action="store", type=int, default=1, help="Max Slice Number")
   parser.add_argument("--max", dest="max_slice", action="store", type=int, default=1850, help="Max Slice Number")
   parser.add_argument("--x", dest="xtile", nargs=2, action="store", type=int, metavar=('MIN_VAL','MAX_VAL'), default=[0,1], help="X Tile Range")
@@ -48,7 +48,7 @@ def main():
   for slice_number in range(result.min_slice, result.max_slice, 1):
     for x_value in range(result.xtile[0], result.xtile[1]+1, 1):
       for y_value in range(result.ytile[0], result.ytile[1]+1, 1):
-        fetch_list.append('http://{}/tilecache/{}/{}/xy/{}/{}_{}_{}.png'.format(result.server_name, result.token, result.channel_name, slice_number, x_value, y_value, result.resolution))
+        fetch_list.append('http://{}/tilecache/{}/{}/xy/{}/{}_{}_{}.png'.format(result.server_name, result.token_name, result.channel_name, slice_number, x_value, y_value, result.res_value))
   
   p = multiprocessing.Pool(result.number_of_processes)
   start = time.time()
