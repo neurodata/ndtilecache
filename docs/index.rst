@@ -10,9 +10,9 @@
 	<br>
 
 
-.. figure:: images/nd_example.png
+.. figure:: images/ndtilecache_cluster.png
     :height: 500px  
-    :width: 1000px
+    :width: 500px
     :align: center
     :alt: Spatially Registered Databases in NeuroData. 
     
