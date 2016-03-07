@@ -90,7 +90,7 @@ class TileCache:
         # release the fetch lock
         self.ds.db.fetchrelease(cuboidurl)
         raise
-
+      
       # get the cutout data
       cubedata = blosc.unpack_array(f.read())
 
@@ -179,7 +179,7 @@ class TileCache:
 
   def addCuboid( self, cuboid, res, (tile1,tile2,mini,dim,time)):
     """Add the cutout to cache"""
-
+    
     self.checkDirHier(res, time=time)
     # counter of how many new tiles we get
     newtiles = 0
@@ -259,13 +259,17 @@ class TileCache:
     else:
       ch = self.ds.getChannelObj(self.channels[0])
       # write it as a png file
-      if ch.channel_type in dbtype.IMAGE_CHANNELS+dbtype.TIMESERIES_CHANNELS:
+      if ch.channel_type in dbtype.IMAGE_CHANNELS + dbtype.TIMESERIES_CHANNELS:
 
         if ch.channel_datatype in dbtype.DTYPE_uint8:
           return Image.frombuffer ( 'L', [xdim,ydim], tile.flatten(), 'raw', 'L', 0, 1 )
         elif ch.channel_datatype in dbtype.DTYPE_uint16:
-          outimage = Image.frombuffer ( 'I;16', [xdim,ydim], tile.flatten(), 'raw', 'I;16', 0, 1)
-          return outimage.point(lambda i:i*(1./256)).convert('L')
+          if ch.getWindowRange() != [0,0]:
+            tile = np.uint8(tile)
+            return Image.frombuffer ( 'L', [xdim,ydim], tile.flatten(), 'raw', 'L', 0, 1 )
+          else:
+            outimage = Image.frombuffer ( 'I;16', [xdim,ydim], tile.flatten(), 'raw', 'I;16', 0, 1)
+            return outimage.point(lambda i:i*(1./256)).convert('L')
         elif ch.channel_datatype in dbtype.DTYPE_uint32 :
           return Image.fromarray( tile[0,:,:], 'RGBA')
 
