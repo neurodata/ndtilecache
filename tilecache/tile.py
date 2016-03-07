@@ -65,9 +65,12 @@ class Tile:
   
   def getFileName (self):
     """Genarate the file name based on the values"""
-
+    
     if self.tvalue is None:
-      self.filename = '{}/{}-{}-{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.res)
+      if self.colors:
+        self.filename = '{}/{}-{}-{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join([a+':'+b for a,b in zip(self.channels,self.colors)]), self.slice_type, self.res)
+      else:
+        self.filename = '{}/{}-{}-{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.res)
     else:
       self.filename = '{}/{}-{}-{}/t{}/r{}/'.format(settings.CACHE_DIR, self.token, ','.join(self.channels), self.slice_type, self.tvalue, self.res)
       

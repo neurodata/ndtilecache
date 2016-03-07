@@ -21,7 +21,7 @@ SCHEMA_VERSION = '0.6'
 OCP_channeltypes = {0:'image', 1:'annotation', 2:'probmap', 3:'timeseries'}
 
 # channeltype groups
-IMAGE_CHANNELS = ['image', 'probmap']
+IMAGE_CHANNELS = ['image', 'probmap', 'oldchannel']
 TIMESERIES_CHANNELS = ['timeseries']
 ANNOTATION_CHANNELS = ['annotation']
 
