@@ -21,7 +21,7 @@ import MySQLdb
 
 from util import getURL, getDatasetName
 import tilekey
-from dataset import Dataset
+from nddataset import NDDataset
 from cachedb import CacheDB
 from tilecache import TileCache
 
@@ -61,9 +61,9 @@ class Tile:
     self.channels = channels
     self.colors = colors
     # set the datasetname and load the data set. If it does not exist in the database then one is fetched and created.
-    self.ds = Dataset(getDatasetName(self.token, self.channels, self.colors, self.slice_type))
+    self.ds = NDDataset(getDatasetName(self.token, self.channels, self.colors, self.slice_type))
     self.getFileName() 
-    self.tkey = tilekey.tileKey(self.ds.dsid, self.res, self.xvalue, self.yvalue, self.zvalue, self.tvalue)
+    self.tkey = tilekey.tileKey(self.ds.getDatasetId(), self.res, self.xvalue, self.yvalue, self.zvalue, self.tvalue)
   
   def getFileName (self):
     """Genarate the file name based on the values"""

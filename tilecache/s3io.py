@@ -113,7 +113,7 @@ class S3IO:
     
     for super_zidx in super_listofidxs:
       try:
-        super_cube = self.client.get_object(Bucket=generateS3BucketName(ch.getProjectName()), Key=generateS3Key(ch.getChannelName(), res, super_zidx)).get('Body').read()
+        super_cube = self.client.get_object(Bucket=generateS3BucketName(self.ds.getProjectName()), Key=generateS3Key(ch.getChannelName(), res, super_zidx)).get('Body').read()
         yield (super_zidx, blosc.unpack_array(super_cube))
       except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == 'NoSuchKey':

@@ -28,7 +28,7 @@ import MySQLdb
 from django.conf import settings
 
 from cachedb import CacheDB
-from dataset import Dataset
+from nddataset import NDDataset
 from util import getURL, window
 import tilekey
 from ndtype import IMAGE_CHANNELS, TIMESERIES_CHANNELS, ANNOTATION_CHANNELS, DTYPE_uint8, DTYPE_uint16, DTYPE_uint32 
@@ -57,7 +57,7 @@ class TileCache:
     self.server = settings.SERVER
     self.dataset_name = getDatasetName(self.token, self.channels, self.colors, self.slice_type)
     # set the datasetname
-    self.ds = Dataset(self.dataset_name)
+    self.ds = NDDataset(self.dataset_name)
   
 
   def loadCube (self, cuboidurl, cubedata):
@@ -217,7 +217,7 @@ class TileCache:
         fobj = open(tilefname, "w")
         img.save(fobj, "PNG")
         try:
-          self.ds.db.insert(tilekey.tileKey(self.ds.dsid, res, tile1, tile2, value+mini), tilefname) 
+          self.ds.db.insert(tilekey.tileKey(self.ds.getDatasetId(), res, tile1, tile2, value+mini), tilefname) 
           newtiles += 1 
         except MySQLdb.Error, e: 
           # ignore duplicate entries
@@ -247,7 +247,7 @@ class TileCache:
         fobj = open(tilefname, "w")
         img.save(fobj, "PNG")
         try:
-          self.ds.db.insert(tilekey.tileKey(self.ds.dsid, res, tile1, tile2, value+mini), tilefname) 
+          self.ds.db.insert(tilekey.tileKey(self.ds.getDatasetId(), res, tile1, tile2, value+mini), tilefname) 
           newtiles += 1 
         except MySQLdb.Error, e: 
           # ignore duplicate entries

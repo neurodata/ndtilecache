@@ -52,10 +52,11 @@ class Installer:
     try:
       cursor = self.conn.cursor()
       # creating the contents table
-      cursor.execute("CREATE TABLE contents (highkey BIGINT, lowkey BIGINT, filename varchar(255), reftime TIMESTAMP, PRIMARY KEY ( highkey, lowkey));")
       # creating the datasets table
-      cursor.execute("CREATE TABLE datasets (dataset VARCHAR(255) PRIMARY KEY, datasetid INT UNIQUE AUTO_INCREMENT, ximagesz INT, yimagesz INT, zimagesz INT, xoffset INT, yoffset INT, zoffset INT, xvoxelres DOUBLE, yvoxelres DOUBLE, zvoxelres DOUBLE, scalingoption INT, scalinglevels INT, starttime INT, endtime INT);")
-      cursor.execute("CREATE TABLE channels (channel_name VARCHAR(255) ,dataset VARCHAR(255) REFERENCES datasets(dataset), PRIMARY KEY (channel_name,dataset), channel_type VARCHAR(255), channel_datatype VARCHAR(255), startwindow INT, endwindow INT);")
+      # cursor.execute("CREATE TABLE datasets (dataset VARCHAR(255) PRIMARY KEY, datasetid INT UNIQUE AUTO_INCREMENT, ximagesz INT, yimagesz INT, zimagesz INT, xoffset INT, yoffset INT, zoffset INT, xvoxelres DOUBLE, yvoxelres DOUBLE, zvoxelres DOUBLE, scalingoption INT, scalinglevels INT, starttime INT, endtime INT);")
+      # cursor.execute("CREATE TABLE projects (project_name VARCHAR(255) PRIMARY KEY, dataset VARCHAR(255) REFERENCES datasets(dataset), ;")
+      # cursor.execute("CREATE TABLE channels (channel_name VARCHAR(255) ,dataset VARCHAR(255) REFERENCES datasets(dataset), PRIMARY KEY (channel_name,dataset), channel_type VARCHAR(255), channel_datatype VARCHAR(255), startwindow INT, endwindow INT);")
+      cursor.execute("CREATE TABLE contents (highkey BIGINT, lowkey BIGINT, filename varchar(255), reftime TIMESTAMP, PRIMARY KEY ( highkey, lowkey));")
       cursor.execute("CREATE TABLE metadata (numtiles BIGINT);")
       cursor.execute("CREATE TABLE fetching (url VARCHAR(255) PRIMARY KEY);")
       cursor.execute("INSERT INTO metadata (numtiles) VALUES (0);")

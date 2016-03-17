@@ -241,109 +241,109 @@ class CacheDB:
       cursor.close()
 
 
-  def getDataset(self, ds):
+  # def getDataset(self, ds):
 
-    cursor = self.conn.cursor()
+    # cursor = self.conn.cursor()
 
-    sql = "SELECT datasetid, ximagesz, yimagesz, zimagesz, xoffset, yoffset, zoffset, xvoxelres, yvoxelres, zvoxelres, scalingoption, scalinglevels, starttime, endtime FROM datasets WHERE dataset = '{}';".format(ds.dataset_name)
-    try:
-      cursor.execute(sql)
-      r = cursor.fetchone()
-    except MySQLdb.Error, e:
-      logger.warning ("Failed to fetch dataset {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-      raise NDTILECACHEError("Failed to fetch dataset {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-    finally:
-      cursor.close()
+    # sql = "SELECT datasetid, ximagesz, yimagesz, zimagesz, xoffset, yoffset, zoffset, xvoxelres, yvoxelres, zvoxelres, scalingoption, scalinglevels, starttime, endtime FROM datasets WHERE dataset = '{}';".format(ds.dataset_name)
+    # try:
+      # cursor.execute(sql)
+      # r = cursor.fetchone()
+    # except MySQLdb.Error, e:
+      # logger.warning ("Failed to fetch dataset {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      # raise NDTILECACHEError("Failed to fetch dataset {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+    # finally:
+      # cursor.close()
 
-    if r is not None:
-      (ds.dsid, ds.ximagesz, ds.yimagesz, ds.zimagesz, ds.xoffset, ds.yoffset, ds.zoffset, ds.xvoxelres, ds.yvoxelres, ds.zvoxelres, ds.scalingoption, ds.scalinglevels, ds.starttime, ds.endtime) = r
-    else:
-      raise Exception("Dataset not found")
+    # if r is not None:
+      # (ds.dsid, ds.ximagesz, ds.yimagesz, ds.zimagesz, ds.xoffset, ds.yoffset, ds.zoffset, ds.xvoxelres, ds.yvoxelres, ds.zvoxelres, ds.scalingoption, ds.scalinglevels, ds.starttime, ds.endtime) = r
+    # else:
+      # raise Exception("Dataset not found")
 
-  def addDataset (self, ds):
-    """Add a dataset to the list of cacheable datasets"""
+  # def addDataset (self, ds):
+    # """Add a dataset to the list of cacheable datasets"""
     
-    cursor = self.conn.cursor()
+    # cursor = self.conn.cursor()
 
-    try:
-      sql = "INSERT INTO datasets (dataset, ximagesz, yimagesz, zimagesz, xoffset, yoffset, zoffset, xvoxelres, yvoxelres, zvoxelres, scalingoption, scalinglevels, starttime, endtime) VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}', '{}', '{}');".format(ds.dataset_name, ds.ximagesz, ds.yimagesz, ds.zimagesz, ds.xoffset, ds.yoffset, ds.zoffset, ds.xvoxelres, ds.yvoxelres, ds.zvoxelres, ds.scalingoption, ds.scalinglevels, ds.starttime, ds.endtime)
-      cursor.execute (sql)
+    # try:
+      # sql = "INSERT INTO datasets (dataset, ximagesz, yimagesz, zimagesz, xoffset, yoffset, zoffset, xvoxelres, yvoxelres, zvoxelres, scalingoption, scalinglevels, starttime, endtime) VALUES ('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}', '{}', '{}');".format(ds.dataset_name, ds.ximagesz, ds.yimagesz, ds.zimagesz, ds.xoffset, ds.yoffset, ds.zoffset, ds.xvoxelres, ds.yvoxelres, ds.zvoxelres, ds.scalingoption, ds.scalinglevels, ds.starttime, ds.endtime)
+      # cursor.execute (sql)
 
-      for ch in ds.channel_list:
-        sql = "INSERT INTO channels (channel_name, dataset, channel_type, channel_datatype, startwindow, endwindow) VALUES ('{}','{}','{}','{}','{}','{}');".format(ch.channel_name, ch.dataset, ch.channel_type, ch.channel_datatype, ch.startwindow, ch.endwindow)
-        cursor.execute (sql)
+      # for ch in ds.channel_list:
+        # sql = "INSERT INTO channels (channel_name, dataset, channel_type, channel_datatype, startwindow, endwindow) VALUES ('{}','{}','{}','{}','{}','{}');".format(ch.channel_name, ch.dataset, ch.channel_type, ch.channel_datatype, ch.startwindow, ch.endwindow)
+        # cursor.execute (sql)
 
-      self.conn.commit()
+      # self.conn.commit()
     
-    except MySQLdb.Error, e:
-      self.conn.rollback()
-      logger.warning ("Failed to insert dataset/channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-      raise NDTILECACHEError("Failed to insert dataset/channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-    finally:
-      cursor.close()
+    # except MySQLdb.Error, e:
+      # self.conn.rollback()
+      # logger.warning ("Failed to insert dataset/channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      # raise NDTILECACHEError("Failed to insert dataset/channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+    # finally:
+      # cursor.close()
 
 
-  def removeDataset(self, dataset_name):
+  # def removeDataset(self, dataset_name):
 
-    cursor = self.conn.cursor()
-    sql = "SELECT highkey, lowkey FROM contents WHERE filename LIKE '{}/{}/%';".format(settings.CACHE_DIR, dataset_name)
+    # cursor = self.conn.cursor()
+    # sql = "SELECT highkey, lowkey FROM contents WHERE filename LIKE '{}/{}/%';".format(settings.CACHE_DIR, dataset_name)
 
-    try:
-      cursor.execute(sql)
-    except MySQLdb.Error, e:
-      logger.warning ("Failed to remove dataset {}. {}:{}. sql={}".format(dataset_nam, e.args[0], e.args[1], sql))
-      raise NDTILECACHEError("Failed to remove dataset {}. {}:{}. sql={}".format(dataset_nam, e.args[0], e.args[1], sql))
+    # try:
+      # cursor.execute(sql)
+    # except MySQLdb.Error, e:
+      # logger.warning ("Failed to remove dataset {}. {}:{}. sql={}".format(dataset_nam, e.args[0], e.args[1], sql))
+      # raise NDTILECACHEError("Failed to remove dataset {}. {}:{}. sql={}".format(dataset_nam, e.args[0], e.args[1], sql))
           
-    result = cursor.fetchall()
+    # result = cursor.fetchall()
 
-    if result == ():
-      logger.warning("Found no cache entries for dataset {}.".format(dataset_name))
-      return
+    # if result == ():
+      # logger.warning("Found no cache entries for dataset {}.".format(dataset_name))
+      # return
 
-    tilekeys = [(int(item[0]),int(item[1])) for item in result]
-    numitems = len(tilekeys)
+    # tilekeys = [(int(item[0]),int(item[1])) for item in result]
+    # numitems = len(tilekeys)
 
-    sql = "DELETE FROM contents WHERE (highkey,lowkey) IN (%s)"
-    in_p=', '.join(map(lambda x: str(x), tilekeys))
-    sql = sql % in_p
-    try:
-      cursor.execute(sql)
-      self.decrease(numitems)
-      self.conn.commit()
-    except MySQLdb.Error, e:
-      logger.warning ("Failed to remove items from cache {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-      raise
-    finally:
-      cursor.close()
+    # sql = "DELETE FROM contents WHERE (highkey,lowkey) IN (%s)"
+    # in_p=', '.join(map(lambda x: str(x), tilekeys))
+    # sql = sql % in_p
+    # try:
+      # cursor.execute(sql)
+      # self.decrease(numitems)
+      # self.conn.commit()
+    # except MySQLdb.Error, e:
+      # logger.warning ("Failed to remove items from cache {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      # raise
+    # finally:
+      # cursor.close()
 
-  def addChannel(self, ch):
-    """Add a channel to the channels table"""
+  # def addChannel(self, ch):
+    # """Add a channel to the channels table"""
 
-    cursor = self.conn.cursor()
-    sql = "INSERT INTO channels (channel_name, dataset, channel_type, channel_datatype, startwindow, endwindow) VALUES ('{}','{}','{}','{}','{}','{}');".format(ch.channel_name, ch.dataset, ch.channel_type, ch.channel_datatype, ch.startwindow, ch.endwindow)
+    # cursor = self.conn.cursor()
+    # sql = "INSERT INTO channels (channel_name, dataset, channel_type, channel_datatype, startwindow, endwindow) VALUES ('{}','{}','{}','{}','{}','{}');".format(ch.channel_name, ch.dataset, ch.channel_type, ch.channel_datatype, ch.startwindow, ch.endwindow)
     
-    try:
-      cursor.execute (sql)
-      self.conn.commit()
-    except MySQLdb.Error, e:
-      logger.warning ("Failed to insert channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-      raise NDTILECACHEError("Failed to insert channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-    finally:
-      cursor.close()
+    # try:
+      # cursor.execute (sql)
+      # self.conn.commit()
+    # except MySQLdb.Error, e:
+      # logger.warning ("Failed to insert channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      # raise NDTILECACHEError("Failed to insert channel {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+    # finally:
+      # cursor.close()
 
-  def getChannel(self, ds):
-    """Get a channel from the channels table"""
+  # def getChannel(self, ds):
+    # """Get a channel from the channels table"""
 
-    cursor = self.conn.cursor()
-    sql = "SELECT channel_name, dataset, channel_type, channel_datatype, startwindow, endwindow FROM channels where dataset='{}';".format(ds.dataset_name)
+    # cursor = self.conn.cursor()
+    # sql = "SELECT channel_name, dataset, channel_type, channel_datatype, startwindow, endwindow FROM channels where dataset='{}';".format(ds.dataset_name)
 
-    try:
-      cursor.execute (sql)
-      from dataset import Channel
-      for row in cursor:
-        ds.channel_list.append(Channel(*row))
-    except MySQLdb.Error, e:
-      logger.warning ("Failed to fetch channel. {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-      raise NDTILECACHEError("Failed to fetch channel. {}: {}. sql={}".format(e.args[0], e.args[1], sql))
-    finally:
-      cursor.close()
+    # try:
+      # cursor.execute (sql)
+      # from dataset import Channel
+      # for row in cursor:
+        # ds.channel_list.append(Channel(*row))
+    # except MySQLdb.Error, e:
+      # logger.warning ("Failed to fetch channel. {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+      # raise NDTILECACHEError("Failed to fetch channel. {}: {}. sql={}".format(e.args[0], e.args[1], sql))
+    # finally:
+      # cursor.close()
