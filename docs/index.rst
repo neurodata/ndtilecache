@@ -25,7 +25,7 @@
   <div>
     <img style="width:30px;height:30px;vertical-align:middle">
     <span style=""></span>
-    <IMG SRC="_static/GitHub.png" height="50" width="50"> <a href="https://github.com/openconnectome/ndtilecache/zipball/master"> [ZIP]   </a>  
+    <IMG SRC="_static/GitHub.png" height="50" width="50"> <a href="https://github.com/neurodata/ndtilecache/zipball/master"> [ZIP]   </a>  
     <a image="_static/GitHub.png" href="https://github.com/neurodata/ndtilecache/tarball/master">[TAR.GZ] </a></p>
   </div>
 
