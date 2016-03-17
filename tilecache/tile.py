@@ -14,6 +14,7 @@
 
 import urllib2
 import numpy as np
+import blosc
 import cStringIO
 from PIL import Image
 import MySQLdb
@@ -24,6 +25,7 @@ from dataset import Dataset
 from cachedb import CacheDB
 from tilecache import TileCache
 
+import s3io
 from ndtilecacheerror import NDTILECACHEError
 import logging
 logger=logging.getLogger("ndtilecache")
@@ -102,7 +104,7 @@ class Tile:
 
     # these are relative to the cuboids in the server
     if self.slice_type == 'xy':
-      self.zslab_offset = (self.zvalue - zoffset) % zdim
+      self.zslab_offset = (self.zvalue - zoffset) % zsuperdim
       self.zslab = (self.zvalue - zoffset) / zdim
       self.zoff = (self.zvalue - zoffset) % zdim
       self.xmin = self.xvalue * self.tilesize
@@ -195,8 +197,6 @@ class Tile:
 
       # return f.read()
       
-      import s3io
-      import blosc
       test = s3io.S3IO(self.ds, self.channels)
       import time
       start = time.time()
@@ -204,7 +204,7 @@ class Tile:
       print time.time() - start
       tiledata = cubedata[:, self.zslab_offset, : ,: ]
       [zdim, ydim, xdim] = tiledata.shape
-      fetchcube.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url, cubedata)
+      # fetchcube.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url, cubedata)
       
       img = Image.frombuffer ( 'L', [ydim,xdim], tiledata.flatten(), 'raw', 'L', 0, 1)
 

@@ -14,6 +14,7 @@
 
 import re
 import boto3
+import botocore
 import blosc
 import numpy as np
 from operator import add, sub, mul, div, mod
@@ -21,6 +22,7 @@ from operator import add, sub, mul, div, mod
 from django.conf import settings
 import ndlib
 from ndtype import ND_dtypetonp
+from s3util import generateS3BucketName, generateS3Key
 
 from ndtilecacheerror import NDTILECACHEError
 import logging
@@ -49,7 +51,12 @@ class S3IO:
     
 
     # get the size of the image and cube
-    [ xsupercubedim, ysupercubedim, zsupercubedim ] = supercubedim = self.ds.supercubedim [ res ] 
+    [xsupercubedim, ysupercubedim, zsupercubedim] = supercubedim = self.ds.supercubedim[res] 
+    [old_xoffset, old_yoffset, old_zoffset] = old_offset = self.ds.offset[res]
+    
+    zmin = zmin - old_zoffset
+    zmax = zmax - old_zoffset
+    
     corner = [xmin, ymin, zmin]
     dim = map(sub, [xmax, ymax, zmax], [xmin, ymin, zmin])
 
@@ -104,7 +111,12 @@ class S3IO:
   def getSuperCubes(self, ch, res, super_listofidxs):
     """Get SuperCubes"""
     
-    from s3util import generateS3BucketName, generateS3Key
     for super_zidx in super_listofidxs:
-      super_cube = self.client.get_object(Bucket=generateS3BucketName(ch.getProjectName(), ch.getChannelName()), Key=generateS3Key(super_zidx, res)).get('Body').read()
-      yield (super_zidx, blosc.unpack_array(super_cube))
+      try:
+        super_cube = self.client.get_object(Bucket=generateS3BucketName(ch.getProjectName()), Key=generateS3Key(ch.getChannelName(), res, super_zidx)).get('Body').read()
+        yield (super_zidx, blosc.unpack_array(super_cube))
+      except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == 'NoSuchKey':
+          continue
+        if e.response['Error']['Code'] == 'NoSuchBucket':
+          pass

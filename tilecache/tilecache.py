@@ -277,8 +277,8 @@ class TileCache:
             tile = np.uint8(tile)
             return Image.frombuffer ( 'L', [xdim,ydim], tile.flatten(), 'raw', 'L', 0, 1 )
           else:
-          outimage = Image.frombuffer ( 'I;16', [xdim,ydim], tile.flatten(), 'raw', 'I;16', 0, 1)
-          return outimage.point(lambda i:i*(1./256)).convert('L')
+            outimage = Image.frombuffer ( 'I;16', [xdim,ydim], tile.flatten(), 'raw', 'I;16', 0, 1)
+            return outimage.point(lambda i:i*(1./256)).convert('L')
         elif ch.channel_datatype in DTYPE_uint32 :
           return Image.fromarray( tile[0,:,:], 'RGBA')
 
