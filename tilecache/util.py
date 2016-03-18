@@ -45,7 +45,7 @@ def window(data, ch, window_range=None):
   
   [startwindow, endwindow] = window_range
   
-  if ch.getChannelType() in IMAGE_CHANNELS and ch.getDataType() in DTYPE_uint16:
+  if ch.getChannelType() in IMAGE_CHANNELS and ch.getChannelDataType() in DTYPE_uint16:
     if (startwindow == endwindow == 0):
       return np.uint8(data * 1.0/256)
     elif endwindow!=0:

@@ -60,7 +60,7 @@ class Dataset (models.Model):
     return self.dataset_id
 
 class Channel (models.Model):
-  channel_name = models.CharField(max_length=255, unique=True)
+  channel_name = models.CharField(max_length=255)
   dataset = models.ForeignKey(Dataset) 
   CHANNELTYPE_CHOICES = (
     (IMAGE, 'IMAGES'),

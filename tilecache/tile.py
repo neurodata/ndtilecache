@@ -21,11 +21,14 @@ import MySQLdb
 
 from util import getURL, getDatasetName
 import tilekey
+from PIL import Image
 from nddataset import NDDataset
 from cachedb import CacheDB
 from tilecache import TileCache
 
 import s3io
+import mcfc
+import ndlib
 from ndtilecacheerror import NDTILECACHEError
 import logging
 logger=logging.getLogger("ndtilecache")
@@ -104,30 +107,53 @@ class Tile:
 
     # these are relative to the cuboids in the server
     if self.slice_type == 'xy':
-      self.zslab_offset = (self.zvalue - zoffset) % zsuperdim
-      self.zslab = (self.zvalue - zoffset) / zdim
-      self.zoff = (self.zvalue - zoffset) % zdim
+      
+      if self.ds.getS3Backend():
+        self.zslab_offset = (self.zvalue - zoffset) % zsuperdim
+        self.zslab = (self.zvalue - zoffset) / zsuperdim
+        self.zoff = (self.zvalue - zoffset) % zsuperdim
+        self.zmin = (self.zslab)*zsuperdim + zoffset
+        self.zmax = min ((self.zslab+1)*zsuperdim + zoffset, zimagesize+zoffset+1)
+      else:
+        self.zslab_offset = (self.zvalue - zoffset) % zdim
+        self.zslab = (self.zvalue - zoffset) / zdim
+        self.zoff = (self.zvalue - zoffset) % zdim
+        self.zmin = (self.zslab)*zdim + zoffset
+        self.zmax = min ((self.zslab+1)*zdim + zoffset, zimagesize+zoffset+1)
+      
       self.xmin = self.xvalue * self.tilesize
       self.xmax = min ((self.xvalue+1)*self.tilesize + xoffset, ximagesize+xoffset)
       self.ymin = self.yvalue * self.tilesize
       self.ymax = min ((self.yvalue+1)*self.tilesize + yoffset, yimagesize+yoffset)
-      self.zmin = (self.zslab)*zdim + zoffset
-      self.zmax = min ((self.zslab+1)*zdim + zoffset, zimagesize+zoffset+1)
 
     elif self.slice_type == 'xz':
-      self.yslab = (self.yvalue) / ydim
+      
+      if self.ds.getS3Backend():
+        self.yslab = (self.yvalue) / ysuperdim
+        self.ymin = self.yslab * ysuperdim
+        self.ymax = min ((self.yslab+1)*ysuperdim, yimagesize)
+      else:
+        self.yslab = (self.yvalue) / ydim
+        self.ymin = self.yslab * ydim
+        self.ymax = min ((self.yslab+1)*ydim, yimagesize)
+      
       self.xmin = self.xvalue * self.tilesize
       self.xmax = min ((self.xvalue+1)*self.tilesize, ximagesize)
-      self.ymin = self.yslab * ydim
-      self.ymax = min ((self.yslab+1)*ydim, yimagesize)
       # scale the z cutout by the scalefactor
       self.zmin = int((self.zvalue*self.tilesize)/scale + zoffset)
       self.zmax = min(int((self.zvalue+1)*self.tilesize/scale + zoffset), zimagesize+1)
 
     elif self.slice_type == 'yz':
-      self.xslab = (self.xvalue) / xdim
-      self.xmin = self.xslab * xdim
-      self.xmax = min ((self.xslab+1)*xdim, ximagesize)
+      
+      if self.ds.getS3Backend():
+        self.xslab = (self.xvalue) / xsuperdim
+        self.xmin = self.xslab * xsuperdim
+        self.xmax = min ((self.xslab+1)*xsuperdim, ximagesize)
+      else:
+        self.xslab = (self.xvalue) / xdim
+        self.xmin = self.xslab * xdim
+        self.xmax = min ((self.xslab+1)*xdim, ximagesize)
+      
       self.ymin = self.yvalue * self.tilesize
       self.ymax = min ((self.yvalue+1)*self.tilesize, yimagesize)
       # scale the z cutout by the scalefactor
@@ -186,29 +212,47 @@ class Tile:
         img.save(fileobj, "PNG")
         fileobj.seek(0)
         return fileobj.read()
+      
 
-      # call the celery process to fetch the url
       from tasks import fetchcube
-      #fetchurl (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
-      # fetchcube.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
-      # fetchcube (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
-      # logger.warning("Tile fetch {}".format(self.tile_url))
-      # f = getURL(self.tile_url)
 
-      # return f.read()
-      
-      test = s3io.S3IO(self.ds, self.channels)
-      import time
-      start = time.time()
-      cubedata = test.getCutout(self.cuboid_url)
-      print time.time() - start
-      tiledata = cubedata[:, self.zslab_offset, : ,: ]
-      [zdim, ydim, xdim] = tiledata.shape
-      # fetchcube.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url, cubedata)
-      
-      img = Image.frombuffer ( 'L', [ydim,xdim], tiledata.flatten(), 'raw', 'L', 0, 1)
+      # check if there is S3 backend and do the calls accordingly
+      if self.ds.getS3Backend():
+        s3_backend = s3io.S3IO(self.ds, self.channels)
+        cubedata = s3_backend.getCutout(self.cuboid_url)
+        tile_data = cubedata[:, self.zslab_offset, : ,:]
+        # fetchcube(self.token, self.slice_type, self.channels, self.colors, self.cuboid_url, cubedata)
+        fetchcube.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url, cubedata)
+        
+        # checking the channel type to process the data correctly
+        if self.colors:
+          img = mcfc.mcfcPNG (tile_data, self.colors)
+        elif self.channels[0].getChannelType() in IMAGE_CHANNELS + TIMESERIES_CHANNELS:
+          
+          if self.channels[0].getChannelDataType() in DTYPE_uint8:
+            img = Image.frombuffer('L', tile_data.shape[1:][::-1], tile_data.flatten(), 'raw', 'L', 0, 1)
+          elif self.channels[0].getChannelDataType() in DTYPE_uint16:
+            if ch.getWindowRange() != [0,0]:
+              tile_data = np.uint8(tile_data)
+              img = Image.frombuffer('L', tile_data.shape[1:][::-1], tile_data.flatten(), 'raw', 'L', 0, 1)
+            else:
+              img = Image.frombuffer ( 'I;16', tile_data.shape[1:][::-1], tile_data.flatten(), 'raw', 'I;16', 0, 1)
+              img.point(lambda i:i*(1./256)).convert('L')
+          elif self.channels[0].getChannelDataType() in DTYPE_uint32 :
+            img =  Image.fromarray( tile_data[0,:,:], 'RGBA')
+        elif ch.getChannelType() in ANNOTATION_CHANNELS:
+          tile_data = tile_data[0,:]
+          ndlib.recolor_ctype(tile_data, tile_data)
+          img = Image.frombuffer('RGBA', tile_data.shape[1:][::-1], tile_data.flatten(), 'raw', 'RGBA', 0, 1)
 
-      fileobj = cStringIO.StringIO ( )
-      img.save ( fileobj, "PNG" )
-      fileobj.seek(0)
-      return fileobj.read()
+        fileobj = cStringIO.StringIO()
+        img.save ( fileobj, "PNG" )
+        fileobj.seek(0)
+        return fileobj.read()
+      else:
+        # call the celery process to fetch the url
+        #fetchurl (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
+        fetchcube.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
+        # fetchcube (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url)
+        logger.warning("Tile fetch {}".format(self.tile_url))
+        return getURL(self.tile_url).read()

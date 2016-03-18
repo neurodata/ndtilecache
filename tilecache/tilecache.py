@@ -60,47 +60,42 @@ class TileCache:
     self.ds = NDDataset(self.dataset_name)
   
 
-  def loadCube (self, cuboidurl, cubedata):
+  def loadCube (self, cuboid_url, cube_data):
     """Load a cube of data into the cache"""
 
     try:
       # argument of the form /ca/token/channel/blosc/cutoutargs
-      m = re.match("^http://.*/ca/\w+/(?:[\w+,]+/)?blosc/(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+)?,?(\d+)?/?$", cuboidurl)
+      m = re.match("^http://.*/ca/\w+/(?:[\w+,]+/)?blosc/(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+),(\d+)/(\d+)?,?(\d+)?/?$", cuboid_url)
       [res, xmin, xmax, ymin, ymax, zmin, zmax, tmin, tmax] = [int(i) if i is not None else None for i in m.groups()]
     except Exception, e:
-      logger.error("Failed to parse url {}".format(cuboidurl))
-      raise NDTILECACHEError("Failed to parse url {}".format(cuboidurl))
+      logger.error("Failed to parse url {}".format(cuboid_url))
+      raise NDTILECACHEError("Failed to parse url {}".format(cuboid_url))
 
     # otherwise load a cube
-    logger.warning ("Loading cache for {}".format(cuboidurl))
+    logger.warning ("Loading cache for {}".format(cuboid_url))
 
     # ensure only one request of a cube at a time
     try:
-      self.ds.db.fetchlock(cuboidurl)
+      self.ds.db.fetchlock(cuboid_url)
     except Exception, e:
-      logger.warning("Already fetching {}. Returning.".format(cuboidurl))
+      logger.warning("Already fetching {}. Returning.".format(cuboid_url))
       return
 
     # try block to ensure that we call fetchrelease
     try:
-
-      try:
-        # Get cube in question
-        # import pdb; pdb.set_trace()
-        import s3io
-        test = s3io.S3IO(self.ds, self.channels)
-        import time
-        start = time.time()
-        # cubedata = test.getCutout(cuboidurl)
-        print time.time()-start
-        # f = getURL(cuboidurl)
-        # cubedata = blosc.unpack_array(f.read())
-      except urllib2.URLError, e:
-        # release the fetch lock
-        self.ds.db.fetchrelease(cuboidurl)
-        raise
       
-      # get the cutout data
+      if not self.ds.getS3Backend():
+        try:
+          # Get cube in question
+          # cube_data = test.getCutout(cuboidurl)
+          # get the cutout data
+          cube_data = blosc.unpack_array(getURL(cuboid_url).read())
+        except urllib2.URLError, e:
+          # release the fetch lock
+          self.ds.db.fetchrelease(cuboid_url)
+          logger.error("Could not fetch the cuboid {}".format(cuboid_url))
+          raise NDTILECACHEError("Could not fetch the cuboid {}".format(cuboid_url))
+      
 
       # properties
       [ximagesize, yimagesize, zimagesize] = self.ds.imagesz[res]
@@ -113,15 +108,15 @@ class TileCache:
         if self.colors:
           # 3d cutout if not a channel database
           # multi-channel cutout.  turn into false color
-          cuboid = np.zeros ((cubedata.shape[0], zdim, settings.TILESIZE, settings.TILESIZE), dtype = cubedata.dtype)
-          cuboid[:, 0:(zmax-zmin), 0:(ymax-ymin), 0:(xmax-xmin)] = cubedata
+          cuboid = np.zeros ((cube_data.shape[0], zdim, settings.TILESIZE, settings.TILESIZE), dtype = cube_data.dtype)
+          cuboid[:, 0:(zmax-zmin), 0:(ymax-ymin), 0:(xmax-xmin)] = cube_data
         else:
           # Check to see is this is a partial cutout if so pad the space
-          cuboid = np.zeros((cubedata.shape[0], zsuperdim, settings.TILESIZE, settings.TILESIZE), dtype=cubedata.dtype)
-          cuboid[:, 0:zsuperdim, 0:(ymax-ymin), 0:(xmax-xmin)] = cubedata[:, :, 0:(ymax-ymin), 0:(xmax-xmin)]
+          cuboid = np.zeros((cube_data.shape[0], zsuperdim, settings.TILESIZE, settings.TILESIZE), dtype=cube_data.dtype)
+          cuboid[:, 0:zsuperdim, 0:(ymax-ymin), 0:(xmax-xmin)] = cube_data[:, :, 0:(ymax-ymin), 0:(xmax-xmin)]
           # cuboid[:, 0:(zmax-zmin), 0:(ymax-ymin), 0:(xmax-xmin)] = cubedata
       else:
-        cuboid = cubedata
+        cuboid = cube_data
 
       if self.slice_type == 'xy':
         xtile = xmin / settings.TILESIZE
@@ -145,11 +140,11 @@ class TileCache:
         cuboid_args = (ytile, ztile, zmin, zdim, tmin)
       
       self.addCuboid(cuboid, res, cuboid_args)
-      logger.warning ("Load suceeded for {}".format(cuboidurl))
+      logger.warning ("Load suceeded for {}".format(cuboid_url))
     
     finally:
       # release the fetch lock
-      self.ds.db.fetchrelease(cuboidurl)
+      self.ds.db.fetchrelease(cuboid_url)
 
 
   def checkDirHier(self, res, time=None):
@@ -268,21 +263,21 @@ class TileCache:
     else:
       ch = self.ds.getChannelObj(self.channels[0])
       # write it as a png file
-      if ch.channel_type in IMAGE_CHANNELS + TIMESERIES_CHANNELS:
+      if ch.getChannelType() in IMAGE_CHANNELS + TIMESERIES_CHANNELS:
 
-        if ch.channel_datatype in DTYPE_uint8:
+        if ch.getChannelDataType() in DTYPE_uint8:
           return Image.frombuffer ( 'L', [xdim,ydim], tile.flatten(), 'raw', 'L', 0, 1 )
-        elif ch.channel_datatype in DTYPE_uint16:
+        elif ch.getChannelDataType() in DTYPE_uint16:
           if ch.getWindowRange() != [0,0]:
             tile = np.uint8(tile)
             return Image.frombuffer ( 'L', [xdim,ydim], tile.flatten(), 'raw', 'L', 0, 1 )
           else:
             outimage = Image.frombuffer ( 'I;16', [xdim,ydim], tile.flatten(), 'raw', 'I;16', 0, 1)
             return outimage.point(lambda i:i*(1./256)).convert('L')
-        elif ch.channel_datatype in DTYPE_uint32 :
+        elif ch.getChannelDataType() in DTYPE_uint32 :
           return Image.fromarray( tile[0,:,:], 'RGBA')
 
-      elif ch.channel_type in ANNOTATION_CHANNELS:
+      elif ch.getChannelType() in ANNOTATION_CHANNELS:
         tile = tile[0,:]
         ndlib.recolor_ctype(tile, tile)
         return Image.frombuffer ( 'RGBA', [xdim,ydim], tile.flatten(), 'raw', 'RGBA', 0, 1 )

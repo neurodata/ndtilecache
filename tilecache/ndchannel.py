@@ -48,7 +48,7 @@ class NDChannel:
   def getChannelType(self):
     return self.ch.channel_type
   
-  def getDataType(self):
+  def getChannelDataType(self):
     return self.ch.channel_datatype
   
   def getChannelName(self):

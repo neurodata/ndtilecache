@@ -18,6 +18,7 @@ from operator import mul
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 
+from cachedb import CacheDB
 from models import Dataset, Channel
 from ndchannel import NDChannel
 from ndtype import ZSLICES, ISOTROPIC, ND_scalingtoint, SUPERCUBESIZE
@@ -36,6 +37,7 @@ class NDDataset:
     
     self.dataset_name = dataset_name
     self.channel_list = []
+    self.db = CacheDB()
 
     try:
       self.ds = Dataset.objects.get(dataset_name = dataset_name)

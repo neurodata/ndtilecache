@@ -68,7 +68,7 @@ class S3IO:
     xnumsupercubes = (corner[0] + dim[0] + xsupercubedim - 1) / xsupercubedim - xstart
 
     ch = self.ds.getChannelObj(self.channels[0])
-    outcube = np.zeros([len(self.channels), znumsupercubes*zsupercubedim, ynumsupercubes*ysupercubedim, xnumsupercubes*xsupercubedim], dtype= ND_dtypetonp[ch.getDataType()])
+    outcube = np.zeros([len(self.channels), znumsupercubes*zsupercubedim, ynumsupercubes*ysupercubedim, xnumsupercubes*xsupercubedim], dtype= ND_dtypetonp[ch.getChannelDataType()])
                                         
     # Build a list of indexes to access
     listofidxs = []
