@@ -13,7 +13,7 @@
 
   
   
-    <link rel="shortcut icon" href="../_static/ocp_favicon.ico"/>
+    <link rel="shortcut icon" href="../_static/nd_favicon.ico"/>
   
 
   
@@ -57,7 +57,7 @@
 
           
             
-            <img src="../_static/ocp_main.png" class="logo" />
+            <img src="../_static/nd_main.png" class="logo" />
           
           </a>
 
@@ -100,10 +100,9 @@
 <p class="caption"><span class="caption-text">Further Reading</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="functions.html">ndtilecache Functions</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://gitter.im/openconnectome/ndtilecache">Gitter chatroom</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://groups.google.com/forum/#!forum/ocp-support/">Mailing List</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/openconnectome/ndtilecache">Github repo</a></li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/openconnectome/ndtilecache/releases/">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/neurodata/ndtilecache">Github repo</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/neurodata/ndtilecache/releases/">Release Notes</a></li>
 </ul>
 
             
@@ -150,12 +149,12 @@
             
   <div class="section" id="tilecache-api-s">
 <h1>Tilecache API&#8217;s<a class="headerlink" href="#tilecache-api-s" title="Permalink to this headline">¶</a></h1>
-<p>You can also view the <a class="reference external" href="http://docs.neurodata.io/open-connectome/api/tile_api.html">OCP Tile API&#8217;s</a> which work similarly for <a class="reference external" href="http://docs.neurodata.io/open-connectome/index.html">openconnectome</a>.</p>
+<p>You can also view the <a class="reference external" href="http://docs.neurodata.io/ndstore/api/tile_api.html">NeuroData Tile API&#8217;s</a> which work similarly for <a class="reference external" href="http://docs.neurodata.io/ndstore/index.html">ndstore</a>.</p>
 <div class="section" id="getsimpletile">
 <h2>getSimpleTile<a class="headerlink" href="#getsimpletile" title="Permalink to this headline">¶</a></h2>
 <dl class="get">
-<dt id="get-(string-server_name)-ocptilecache-tilecache-(string-token_name)-(string-channel_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png">
-<code class="descname">GET </code><code class="descname"></code><span class="sig-paren">(</span><em class="property">string: </em><em>server_name</em><span class="sig-paren">)</span><code class="descname">/ocptilecache/tilecache/</code><span class="sig-paren">(</span><em class="property">string: </em><em>token_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>channel_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>slice_type</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>time</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>zvalue</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>ytile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>xtile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>resolution</em><span class="sig-paren">)</span><code class="descname">.png</code><a class="headerlink" href="#get-(string-server_name)-ocptilecache-tilecache-(string-token_name)-(string-channel_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png" title="Permalink to this definition">¶</a></dt>
+<dt id="get-(string-server_name)-ndtilecache-tilecache-(string-token_name)-(string-channel_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png">
+<code class="descname">GET </code><code class="descname"></code><span class="sig-paren">(</span><em class="property">string: </em><em>server_name</em><span class="sig-paren">)</span><code class="descname">/ndtilecache/tilecache/</code><span class="sig-paren">(</span><em class="property">string: </em><em>token_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>channel_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>slice_type</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>time</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>zvalue</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>ytile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>xtile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>resolution</em><span class="sig-paren">)</span><code class="descname">.png</code><a class="headerlink" href="#get-(string-server_name)-ndtilecache-tilecache-(string-token_name)-(string-channel_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -164,9 +163,9 @@
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>server_name</strong> (<em>string</em>) &#8211; Server Name in OCP. In the general case this is ocp.me.</li>
-<li><strong>token_name</strong> (<em>string</em>) &#8211; Token Name in OCP.</li>
-<li><strong>channel_name</strong> (<em>string</em>) &#8211; Channel Name in OCP.</li>
+<li><strong>server_name</strong> (<em>string</em>) &#8211; Server Name in NeuroData. In the general case this is ocp.me.</li>
+<li><strong>token_name</strong> (<em>string</em>) &#8211; Token Name in NeuroData.</li>
+<li><strong>channel_name</strong> (<em>string</em>) &#8211; Channel Name in NeuroData.</li>
 <li><strong>slice_type</strong> (<em>string</em>) &#8211; Type of Slice cutout. Can be xy/yz/xz</li>
 <li><strong>time</strong> (<em>int</em>) &#8211; Time value. <em>Optional</em>. Only possible in timeseries datasets.</li>
 <li><strong>zvalue</strong> (<em>int</em>) &#8211; Zslice value.</li>
@@ -185,7 +184,7 @@
 </tbody>
 </table>
 <p><strong>Example Request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">GET</span>  <span class="nn">/ocptilecache/tilecache/kasthuri11/image/xy/1/1_1_4.png</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http"><div class="highlight"><pre><span class="nf">GET</span>  <span class="nn">/ndtilecache/tilecache/kasthuri11/image/xy/1/1_1_4.png</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">openconnecto.me</span>
 </pre></div>
 </div>
@@ -203,8 +202,8 @@
 <div class="section" id="getmcfctile">
 <h2>getMcfcTile<a class="headerlink" href="#getmcfctile" title="Permalink to this headline">¶</a></h2>
 <dl class="get">
-<dt id="get-(string-server_name)-ocptilecache-tilecache-mcfc-(string-token_name)-(string-channel_name)-(string-color_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png">
-<code class="descname">GET </code><code class="descname"></code><span class="sig-paren">(</span><em class="property">string: </em><em>server_name</em><span class="sig-paren">)</span><code class="descname">/ocptilecache/tilecache/mcfc/</code><span class="sig-paren">(</span><em class="property">string: </em><em>token_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>channel_name</em><span class="sig-paren">)</span><code class="descname">:</code><span class="sig-paren">(</span><em class="property">string: </em><em>color_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>slice_type</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>time</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>zvalue</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>ytile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>xtile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>resolution</em><span class="sig-paren">)</span><code class="descname">.png</code><a class="headerlink" href="#get-(string-server_name)-ocptilecache-tilecache-mcfc-(string-token_name)-(string-channel_name)-(string-color_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png" title="Permalink to this definition">¶</a></dt>
+<dt id="get-(string-server_name)-ndtilecache-tilecache-mcfc-(string-token_name)-(string-channel_name)-(string-color_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png">
+<code class="descname">GET </code><code class="descname"></code><span class="sig-paren">(</span><em class="property">string: </em><em>server_name</em><span class="sig-paren">)</span><code class="descname">/ndtilecache/tilecache/mcfc/</code><span class="sig-paren">(</span><em class="property">string: </em><em>token_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>channel_name</em><span class="sig-paren">)</span><code class="descname">:</code><span class="sig-paren">(</span><em class="property">string: </em><em>color_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">string: </em><em>slice_type</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>time</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>zvalue</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>ytile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>xtile</em><span class="sig-paren">)</span><code class="descname">_</code><span class="sig-paren">(</span><em class="property">int: </em><em>resolution</em><span class="sig-paren">)</span><code class="descname">.png</code><a class="headerlink" href="#get-(string-server_name)-ndtilecache-tilecache-mcfc-(string-token_name)-(string-channel_name)-(string-color_name)-(string-slice_type)-(int-time)-(int-zvalue)-(int-ytile)_(int-xtile)_(int-resolution).png" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -213,9 +212,9 @@
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>server_name</strong> (<em>string</em>) &#8211; Server Name in OCP. In the general case this is ocp.me.</li>
-<li><strong>token_name</strong> (<em>string</em>) &#8211; Token Name in OCP.</li>
-<li><strong>channel_name</strong> (<em>string</em>) &#8211; Channel Name in OCP.</li>
+<li><strong>server_name</strong> (<em>string</em>) &#8211; Server Name in NeuroData. In the general case this is ocp.me.</li>
+<li><strong>token_name</strong> (<em>string</em>) &#8211; Token Name in NeuroData.</li>
+<li><strong>channel_name</strong> (<em>string</em>) &#8211; Channel Name in NeuroData.</li>
 <li><strong>color_name</strong> (<em>string</em>) &#8211; Color Name. Can be &#8216;C/M/Y/R/G/B&#8217;. <em>Optional</em> If Missing will default to &#8220;CMYRGB&#8221;.</li>
 <li><strong>slice_type</strong> (<em>string</em>) &#8211; Type of Slice cutout. Can be xy/yz/xz</li>
 <li><strong>time</strong> (<em>int</em>) &#8211; Time value. <em>Optional</em>. Only possible in timeseries datasets.</li>
@@ -235,7 +234,7 @@
 </tbody>
 </table>
 <p><strong>Example Request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">GET</span>  <span class="nn">/ocptilecache/tilecache/mcfc/Thy1eYFPBrain10/Grayscale/xy/500/0_0_3.png</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http"><div class="highlight"><pre><span class="nf">GET</span>  <span class="nn">/ndtilecache/tilecache/mcfc/Thy1eYFPBrain10/Grayscale/xy/500/0_0_3.png</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">openconnecto.me</span>
 </pre></div>
 </div>
@@ -253,8 +252,8 @@
 <div class="section" id="getvikingtile">
 <h2>getVikingTile<a class="headerlink" href="#getvikingtile" title="Permalink to this headline">¶</a></h2>
 <dl class="get">
-<dt id="get-(string-server_name)-ocptilecache-tilecache-viking-(string-token_name)-volume-(string-channel_name)-(int-resolution)-X(int-xtile)_Y(int-xtile)_Z(int-zvalue).png">
-<code class="descname">GET </code><code class="descname"></code><span class="sig-paren">(</span><em class="property">string: </em><em>server_name</em><span class="sig-paren">)</span><code class="descname">/ocptilecache/tilecache/viking/</code><span class="sig-paren">(</span><em class="property">string: </em><em>token_name</em><span class="sig-paren">)</span><code class="descname">/volume/</code><span class="sig-paren">(</span><em class="property">string: </em><em>channel_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>resolution</em><span class="sig-paren">)</span><code class="descname">/X</code><span class="sig-paren">(</span><em class="property">int: </em><em>xtile</em><span class="sig-paren">)</span><code class="descname">_Y</code><span class="sig-paren">(</span><em class="property">int: </em><em>xtile</em><span class="sig-paren">)</span><code class="descname">_Z</code><span class="sig-paren">(</span><em class="property">int: </em><em>zvalue</em><span class="sig-paren">)</span><code class="descname">.png</code><a class="headerlink" href="#get-(string-server_name)-ocptilecache-tilecache-viking-(string-token_name)-volume-(string-channel_name)-(int-resolution)-X(int-xtile)_Y(int-xtile)_Z(int-zvalue).png" title="Permalink to this definition">¶</a></dt>
+<dt id="get-(string-server_name)-ndtilecache-tilecache-viking-(string-token_name)-volume-(string-channel_name)-(int-resolution)-X(int-xtile)_Y(int-xtile)_Z(int-zvalue).png">
+<code class="descname">GET </code><code class="descname"></code><span class="sig-paren">(</span><em class="property">string: </em><em>server_name</em><span class="sig-paren">)</span><code class="descname">/ndtilecache/tilecache/viking/</code><span class="sig-paren">(</span><em class="property">string: </em><em>token_name</em><span class="sig-paren">)</span><code class="descname">/volume/</code><span class="sig-paren">(</span><em class="property">string: </em><em>channel_name</em><span class="sig-paren">)</span><code class="descname">/</code><span class="sig-paren">(</span><em class="property">int: </em><em>resolution</em><span class="sig-paren">)</span><code class="descname">/X</code><span class="sig-paren">(</span><em class="property">int: </em><em>xtile</em><span class="sig-paren">)</span><code class="descname">_Y</code><span class="sig-paren">(</span><em class="property">int: </em><em>xtile</em><span class="sig-paren">)</span><code class="descname">_Z</code><span class="sig-paren">(</span><em class="property">int: </em><em>zvalue</em><span class="sig-paren">)</span><code class="descname">.png</code><a class="headerlink" href="#get-(string-server_name)-ndtilecache-tilecache-viking-(string-token_name)-volume-(string-channel_name)-(int-resolution)-X(int-xtile)_Y(int-xtile)_Z(int-zvalue).png" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -263,9 +262,9 @@
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>server_name</strong> (<em>string</em>) &#8211; Server Name in OCP. In the general case this is openconnecto.me.</li>
-<li><strong>token_name</strong> (<em>string</em>) &#8211; Token Name in OCP.</li>
-<li><strong>channel_name</strong> (<em>string</em>) &#8211; Channel Name in OCP.</li>
+<li><strong>server_name</strong> (<em>string</em>) &#8211; Server Name in NeuroData. In the general case this is openconnecto.me.</li>
+<li><strong>token_name</strong> (<em>string</em>) &#8211; Token Name in NeuroData.</li>
+<li><strong>channel_name</strong> (<em>string</em>) &#8211; Channel Name in NeuroData.</li>
 <li><strong>resolution</strong> (<em>int</em>) &#8211; Resolution value.</li>
 <li><strong>xtile</strong> (<em>int</em>) &#8211; X-Tile value. Each tile is 512x512.</li>
 <li><strong>ytile</strong> (<em>int</em>) &#8211; Y-Tile value. Each tile is 512x512.</li>
@@ -282,7 +281,7 @@
 </tbody>
 </table>
 <p><strong>Example Request</strong>:</p>
-<div class="highlight-http"><div class="highlight"><pre><span class="nf">GET</span>  <span class="nn">/ocptilecache/tilecache/viking/kasthuri11/volume/image/4/X1_Y1_Z10.png</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<div class="highlight-http"><div class="highlight"><pre><span class="nf">GET</span>  <span class="nn">/ndtilecache/tilecache/viking/kasthuri11/volume/image/4/X1_Y1_Z10.png</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 <span class="na">Host</span><span class="o">:</span> <span class="l">openconnecto.me</span>
 </pre></div>
 </div>
@@ -318,7 +317,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015, Open Connectome Project.
+        &copy; Copyright 2015, NeuroData.
 
     </p>
   </div>
