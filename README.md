@@ -8,3 +8,7 @@ Caching gateway to connect a CATMAID (or other visualization) server to the Neur
 #### Architecture
 
 ![](./docs/images/ndtilecache_cluster.png)
+
+
+#### Benchmarks
+![](./docs/image/ndtilecache_read_speed.png)
