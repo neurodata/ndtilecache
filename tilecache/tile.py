@@ -29,6 +29,7 @@ from tilecache import TileCache
 import s3io
 import mcfc
 import ndlib
+from ndtype import IMAGE_CHANNELS, TIMESERIES_CHANNELS, ANNOTATION_CHANNELS, DTYPE_uint8, DTYPE_uint16, DTYPE_uint32
 from ndtilecacheerror import NDTILECACHEError
 import logging
 logger=logging.getLogger("ndtilecache")
@@ -224,21 +225,23 @@ class Tile:
         # fetchcube(self.token, self.slice_type, self.channels, self.colors, self.cuboid_url, cubedata)
         fetchcube.delay (self.token, self.slice_type, self.channels, self.colors, self.cuboid_url, cubedata)
         
+        ch = self.ds.getChannelObj(self.channels[0])
+        
         # checking the channel type to process the data correctly
         if self.colors:
           img = mcfc.mcfcPNG (tile_data, self.colors)
-        elif self.channels[0].getChannelType() in IMAGE_CHANNELS + TIMESERIES_CHANNELS:
+        elif ch.getChannelType() in IMAGE_CHANNELS + TIMESERIES_CHANNELS:
           
-          if self.channels[0].getChannelDataType() in DTYPE_uint8:
+          if ch.getChannelDataType() in DTYPE_uint8:
             img = Image.frombuffer('L', tile_data.shape[1:][::-1], tile_data.flatten(), 'raw', 'L', 0, 1)
-          elif self.channels[0].getChannelDataType() in DTYPE_uint16:
+          elif ch.getChannelDataType() in DTYPE_uint16:
             if ch.getWindowRange() != [0,0]:
               tile_data = np.uint8(tile_data)
               img = Image.frombuffer('L', tile_data.shape[1:][::-1], tile_data.flatten(), 'raw', 'L', 0, 1)
             else:
               img = Image.frombuffer ( 'I;16', tile_data.shape[1:][::-1], tile_data.flatten(), 'raw', 'I;16', 0, 1)
               img.point(lambda i:i*(1./256)).convert('L')
-          elif self.channels[0].getChannelDataType() in DTYPE_uint32 :
+          elif ch.getChannelDataType() in DTYPE_uint32 :
             img =  Image.fromarray( tile_data[0,:,:], 'RGBA')
         elif ch.getChannelType() in ANNOTATION_CHANNELS:
           tile_data = tile_data[0,:]
