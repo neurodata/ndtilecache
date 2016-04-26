@@ -131,7 +131,7 @@ LOGGING = {
     'logfile': {
       'level': 'DEBUG',
       'class': 'logging.handlers.RotatingFileHandler',
-      'filename': '/var/log/ndtilecache/ndtilecache.log',
+      'filename': '/var/log/neurodata/ndtilecache.log',
       'maxBytes': 500000,
       'backupCount' : 7,
       'formatter': 'standard',
@@ -162,9 +162,8 @@ LOGGING = {
 
 # NDTILECACHE Settings
 SERVER = 'openconnecto.me/ocp'
-#SERVER = 'localhost:8080'
 DBNAME = 'ndtilecache'
-TILESIZE = 512
+TILESIZE = 1024
 CACHE_DIR = settings_secret.CACHE_DIR
 CACHE_SIZE = 1000000 # In MB
 

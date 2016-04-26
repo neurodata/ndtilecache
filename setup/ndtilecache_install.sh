@@ -15,10 +15,10 @@ echo "mysql-server-5.6 mysql-server/root_password_again password neur0data" | su
 sudo apt-get -y install nginx git bash-completion python-virtualenv libxslt1-dev libhdf5-dev libmemcached-dev g++ libjpeg-dev virtualenvwrapper python-dev mysql-server-5.6 libmysqlclient-dev xfsprogs supervisor rabbitmq-server uwsgi uwsgi-plugin-python wget memcached
 
 # create the log directory
-sudo mkdir /var/log/ndtilecache
-sudo mkdir /var/log/ndtilecache/nd.log
-sudo chown -R www-data:www-data /var/log/ndtilecache
-sudo chmod -R 777 /var/log/ndtilecache
+sudo mkdir /var/log/neurodata
+sudo mkdir /var/log/neurodata/ndtilecache.log
+sudo chown -R www-data:www-data /var/log/neurodata
+sudo chmod -R 777 /var/log/neurodata
 
 # add group and user neurodata
 sudo addgroup neurodata
@@ -48,11 +48,11 @@ sudo -u neurodata cp settings.py.example settings.py
 sudo -u neurodata ln -s /home/neurodata/ndtilecache/setup/docker_config/django docker_settings_secret.py settings_secret.py
 
 # create the necessary database and tables
-python create_database.py
+#python create_database.py
 
 # migrate the database and create the superuser
 sudo chmod -R 777 /var/log/neurodata/
-cd /home/neurodata/ndtilecache/ndtilecache
+cd /home/neurodata/ndtilecache/
 sudo -u neurodata python manage.py migrate
 echo "from django.contrib.auth.models import User; User.objects.create_superuser('neurodata', 'abc@xyz.com', 'neur0data')" | python manage.py shell
 sudo -u neurodata python manage.py collectstatic --noinput
