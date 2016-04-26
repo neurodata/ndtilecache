@@ -9,10 +9,10 @@ apt-get update && apt-get upgrade -y
 # apt-get install mysql packages
 echo "mysql-server-5.6 mysql-server/root_password password neur0data" | sudo debconf-set-selections
 echo "mysql-server-5.6 mysql-server/root_password_again password neur0data" | sudo debconf-set-selections
-sudo apt-get -y install mysql-client-core-5.6 libhdf5-serial-dev mysql-client-5.6
+#sudo apt-get -y install mysql-client-core-5.6 libhdf5-serial-dev mysql-client-5.6
 
 # apt-get install packages
-apt-get -y install nginx git bash-completion python-virtualenv libxslt1dev libhdf5-dev libmemcached-dev g++ libjpeg-dev virtualenvwrapper libxslt python-dev mysql-server-5.6 libmysqlclient-dev xfsprogs supervisor rabbitmq-server uwsgi uwsgi-plugin-python
+sudo apt-get -y install nginx git bash-completion python-virtualenv libxslt1-dev libhdf5-dev libmemcached-dev g++ libjpeg-dev virtualenvwrapper python-dev mysql-server-5.6 libmysqlclient-dev xfsprogs supervisor rabbitmq-server uwsgi uwsgi-plugin-python wget memcached
 
 # create the log directory
 sudo mkdir /var/log/ndtilecache
@@ -68,10 +68,10 @@ sudo rm /etc/uwsgi/apps-enabled/ndtilecache.ini
 sudo ln -s /home/neurodata/ndtilecache/setup/docker_config/uwsgi/ndtilecache.ini /etc/uwsgi/apps-enabled/
 
 # move celery config files and start service
-sudo rm /etc/supervisor/conf.d/propagate.conf
-sudo ln -s /home/neurodata/ndtilecache/setup/docker_config/celery/propagate.conf /etc/supervisor/conf.d/propagate.conf
-sudo rm /etc/supervisor/conf.d/ingest.conf
-sudo ln -s /home/neurodata/ndtilecache/setup/docker_config/celery/ingest.conf /etc/supervisor/conf.d/ingest.conf
+sudo rm /etc/supervisor/conf.d/prefetch.conf
+sudo ln -s /home/neurodata/ndtilecache/setup/docker_config/celery/prefetch.conf /etc/supervisor/conf.d/prefetch.conf
+sudo rm /etc/supervisor/conf.d/reclaim.conf
+sudo ln -s /home/neurodata/ndtilecache/setup/docker_config/celery/reclaim.conf /etc/supervisor/conf.d/reclaim.conf
 
 # starting all the services
 sudo service nginx restart
