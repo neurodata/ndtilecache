@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Configuration &mdash; ndtilecache v0.7.0 documentation</title>
+  <title>Configuration &mdash; ndtilecache v1.0.1 documentation</title>
   
 
   
@@ -32,7 +32,7 @@
   
 
   
-    <link rel="top" title="ndtilecache v0.7.0 documentation" href="../index.html"/>
+    <link rel="top" title="ndtilecache v1.0.1 documentation" href="../index.html"/>
         <link rel="next" title="Frequently Asked Questions (FAQ)" href="faq.html"/>
         <link rel="prev" title="&lt;no title&gt;" href="../index.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                v0.7.0
+                v1.0
               </div>
             
           
@@ -144,15 +144,11 @@
             
   <div class="section" id="configuration">
 <h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
-<p>You can install ndtilecache and configure it by looking at the README in the setup folder. Software required for this repo are</p>
-<blockquote>
-<div><ul class="simple">
-<li>Python 2.7+</li>
-<li>MySQL</li>
-<li>Nginx + uWSGI</li>
-<li>Celery + Supervisor + RabbitMq</li>
-</ul>
-</div></blockquote>
+<p>You can install ndtilecache on a fresh Ubuntu 14.04 node using the install script in the setup folder.</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="go">sudo ./ndtilecache_install.sh</span>
+</pre></div>
+</div>
+<p>If you want to connect the ndtilecache to the S3-backend, then add your AWS credentials to the settings_secret.py file in the ndtilecache folder. You will need the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY for this which is available in the AWS Management Console-&gt;Security Credentials.</p>
 </div>
 
 
@@ -196,7 +192,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'v0.7.0',
+            VERSION:'v1.0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

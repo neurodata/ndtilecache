@@ -14,11 +14,9 @@
     :height: 500px  
     :width: 500px
     :align: center
-    :alt: Spatially Registered Databases in NeuroData. 
+    :alt: Architecture of Ndtilecache. 
     
-    Spatially Registered Databases in NeuroData   
-
-    Electron microscopy images of a mouse somatosensory cortex (left), a probability map output by a computer vision algorithm that detects membranes (center), and an annotation database that describes axons and dendrites (right).
+    Architecture of Ndtilecache   
 
 .. raw:: html
  

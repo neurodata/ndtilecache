@@ -1,9 +1,10 @@
 Configuration
 *************
 
-You can install ndtilecache and configure it by looking at the README in the setup folder. Software required for this repo are
- 
- * Python 2.7+
- * MySQL
- * Nginx + uWSGI
- * Celery + Supervisor + RabbitMq
+You can install ndtilecache on a fresh Ubuntu 14.04 node using the install script in the setup folder.
+
+.. code-block:: console
+   
+   sudo ./ndtilecache_install.sh
+
+If you want to connect the ndtilecache to the S3-backend, then add your AWS credentials to the settings_secret.py file in the ndtilecache folder. You will need the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY for this which is available in the AWS Management Console->Security Credentials.
