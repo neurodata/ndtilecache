@@ -9,7 +9,7 @@ apt-get update && apt-get upgrade -y
 # apt-get install mysql packages
 echo "mysql-server-5.6 mysql-server/root_password password neur0data" | sudo debconf-set-selections
 echo "mysql-server-5.6 mysql-server/root_password_again password neur0data" | sudo debconf-set-selections
-#sudo apt-get -y install mysql-client-core-5.6 libhdf5-serial-dev mysql-client-5.6
+sudo apt-get -y install mysql-client-core-5.6 libhdf5-serial-dev mysql-client-5.6
 
 # apt-get install packages
 sudo apt-get -y install nginx git bash-completion python-virtualenv libxslt1-dev libhdf5-dev libmemcached-dev g++ libjpeg-dev virtualenvwrapper python-dev mysql-server-5.6 libmysqlclient-dev xfsprogs supervisor rabbitmq-server uwsgi uwsgi-plugin-python wget memcached
@@ -32,7 +32,9 @@ sudo -u neurodata git submodule init
 sudo -u neurodata git submodule update
 
 # pip install the python packages
-pip install cython numpy django pytest posix_ipc boto3 nibabel networkx requests lxml h5py pylibmc pillow blosc django-registration django-registration-redux django-celery mysql-python libtiff
+sudo pip install cython numpy
+sudp pip install h5py
+sudo pip install django pytest posix_ipc boto3 nibabel networkx requests lxml pylibmc pillow blosc django-registration django-registration-redux django-celery mysql-python libtiff
 
 # switch user to neurodata and make ctypes functions
 cd /home/neurodata/ndtilecache/ndlib/c_version
@@ -43,9 +45,9 @@ sudo service mysql start
 mysql -u root -pneur0data -i -e "create user 'neurodata'@'localhost' identified by 'neur0data';" && mysql -u root -pneur0data -i -e "grant all privileges on *.* to 'neurodata'@'localhost' with grant option;" && mysql -u neurodata -pneur0data -i -e "CREATE DATABASE ndtilecache_django;"
 
 # configure django settings
-cd /home/neurodata/ndtilecache/ndtilecache
+cd /home/neurodata/ndtilecache/ndtilecache/
 sudo -u neurodata cp settings.py.example settings.py
-sudo -u neurodata ln -s /home/neurodata/ndtilecache/setup/docker_config/django docker_settings_secret.py settings_secret.py
+sudo -u neurodata ln -s /home/neurodata/ndtilecache/setup/docker_config/django/docker_settings_secret.py settings_secret.py
 
 # create the necessary database and tables
 #python create_database.py
@@ -59,7 +61,7 @@ sudo -u neurodata python manage.py collectstatic --noinput
 
 # move the nginx config files and start service
 sudo rm /etc/nginx/sites-enabled/default
-sudo ln -s /home/neurodata/ndtilecache/setup/docker_config/nginx/neurodata.conf /etc/nginx/sites-enabled/default
+sudo ln -s /home/neurodata/ndtilecache/setup/docker_config/nginx/ndtilecache.conf /etc/nginx/sites-enabled/default
 
 # move uwsgi config files and start service
 sudo rm /etc/uwsgi/apps-available/ndtilecache.ini
