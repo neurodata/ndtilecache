@@ -161,7 +161,7 @@ LOGGING = {
 }
 
 # NDTILECACHE Settings
-SERVER = 'openconnecto.me/ocp'
+SERVER = 'cloud.neurodata.io/nd'
 DBNAME = 'ndtilecache'
 TILESIZE = 1024
 CACHE_DIR = settings_secret.CACHE_DIR

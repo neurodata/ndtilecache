@@ -50,7 +50,8 @@ sudo -u neurodata cp settings.py.example settings.py
 sudo -u neurodata ln -s /home/neurodata/ndtilecache/setup/docker_config/django/docker_settings_secret.py settings_secret.py
 
 # create the necessary database and tables
-#python create_database.py
+cd /home/neurodata/ndtilecache/setup/
+python create_database.py
 
 # migrate the database and create the superuser
 sudo chmod -R 777 /var/log/neurodata/
