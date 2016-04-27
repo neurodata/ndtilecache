@@ -16,7 +16,7 @@ sudo apt-get -y install nginx git bash-completion python-virtualenv libxslt1-dev
 
 # create the log directory
 sudo mkdir /var/log/neurodata
-sudo mkdir /var/log/neurodata/ndtilecache.log
+sudo touch /var/log/neurodata/ndtilecache.log
 sudo chown -R www-data:www-data /var/log/neurodata
 sudo chmod -R 777 /var/log/neurodata
 

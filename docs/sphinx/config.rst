@@ -1,9 +1,6 @@
 Configuration
 *************
 
-You can install ndtilecache and configure it by looking at the README in the setup folder. Software required for this repo are
- 
- * Python 2.7+
- * MySQL
- * Nginx + uWSGI
- * Celery + Supervisor + RabbitMq
+You can install ndtilecache on a fresh Ubuntu 14.04 node using the install script in the setup folder.
+.. sourcecode:: sh
+   sudo ./ndtilecache_install.sh
