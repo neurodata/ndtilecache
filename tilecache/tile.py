@@ -99,6 +99,7 @@ class Tile:
     #    if projserver.exists():
     #      server = projserver[0].server
     #    else:
+    # TODO KL implement multiple projects to fetch token from
     xdim, ydim, zdim = self.ds.cubedim[self.res]
     xoffset, yoffset, zoffset = self.ds.offset[self.res]
     ximagesize, yimagesize, zimagesize = self.ds.imagesz[self.res]
@@ -114,13 +115,14 @@ class Tile:
         self.zslab = (self.zvalue - zoffset) / zsuperdim
         self.zoff = (self.zvalue - zoffset) % zsuperdim
         self.zmin = (self.zslab)*zsuperdim + zoffset
-        self.zmax = min ((self.zslab+1)*zsuperdim + zoffset, zimagesize+zoffset+1)
+        self.zmax = min ((self.zslab+1)*zsuperdim + zoffset, zimagesize-zoffset+1)
       else:
         self.zslab_offset = (self.zvalue - zoffset) % zdim
         self.zslab = (self.zvalue - zoffset) / zdim
         self.zoff = (self.zvalue - zoffset) % zdim
         self.zmin = (self.zslab)*zdim + zoffset
-        self.zmax = min ((self.zslab+1)*zdim + zoffset, zimagesize+zoffset+1)
+        # import pdb; pdb.set_trace()
+        self.zmax = min ((self.zslab+1)*zdim + zoffset, zimagesize-zoffset+1)
       
       self.xmin = self.xvalue * self.tilesize
       self.xmax = min ((self.xvalue+1)*self.tilesize + xoffset, ximagesize+xoffset)
