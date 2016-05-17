@@ -21,7 +21,7 @@ from django.conf import settings
 from cachedb import CacheDB
 from models import Dataset, Channel
 from ndchannel import NDChannel
-from ndtype import ZSLICES, ISOTROPIC, ND_scalingtoint, SUPERCUBESIZE
+from ndtype import ZSLICES, ISOTROPIC, ND_scalingtoint, SUPERCUBESIZE, S3_TRUE
 from restutil import getURL
 
 from ndtilecacheerror import NDTILECACHEError
@@ -138,7 +138,10 @@ class NDDataset:
         else:
           self.cubedim[i] = [64, 64, 64]
       
-      self.supercubedim[i] = map(mul, self.cubedim[i], SUPERCUBESIZE)
+      if self.ds.s3backend == S3_TRUE:
+        self.supercubedim[i] = map(mul, self.cubedim[i], SUPERCUBESIZE)
+      else:
+        self.supercubedim[i] = self.cubedim[i]
 
       # Make an exception for bock11 data -- just an inconsistency in original ingest
       if self.ds.ximagesize == 135424 and i == 5:

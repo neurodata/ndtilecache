@@ -110,19 +110,18 @@ class Tile:
     # these are relative to the cuboids in the server
     if self.slice_type == 'xy':
       
-      if self.ds.getS3Backend():
-        self.zslab_offset = (self.zvalue - zoffset) % zsuperdim
-        self.zslab = (self.zvalue - zoffset) / zsuperdim
-        self.zoff = (self.zvalue - zoffset) % zsuperdim
-        self.zmin = (self.zslab)*zsuperdim + zoffset
-        self.zmax = min ((self.zslab+1)*zsuperdim + zoffset, zimagesize-zoffset+1)
-      else:
-        self.zslab_offset = (self.zvalue - zoffset) % zdim
-        self.zslab = (self.zvalue - zoffset) / zdim
-        self.zoff = (self.zvalue - zoffset) % zdim
-        self.zmin = (self.zslab)*zdim + zoffset
-        # import pdb; pdb.set_trace()
-        self.zmax = min ((self.zslab+1)*zdim + zoffset, zimagesize-zoffset+1)
+      # if self.ds.getS3Backend():
+      self.zslab_offset = (self.zvalue - zoffset) % zsuperdim
+      self.zslab = (self.zvalue - zoffset) / zsuperdim
+      self.zoff = (self.zvalue - zoffset) % zsuperdim
+      self.zmin = (self.zslab)*zsuperdim + zoffset
+      self.zmax = min ((self.zslab+1)*zsuperdim + zoffset, zimagesize-zoffset+1)
+      # else:
+        # self.zslab_offset = (self.zvalue - zoffset) % zdim
+        # self.zslab = (self.zvalue - zoffset) / zdim
+        # self.zoff = (self.zvalue - zoffset) % zdim
+        # self.zmin = (self.zslab)*zdim + zoffset
+        # self.zmax = min ((self.zslab+1)*zdim + zoffset, zimagesize-zoffset+1)
       
       self.xmin = self.xvalue * self.tilesize
       self.xmax = min ((self.xvalue+1)*self.tilesize + xoffset, ximagesize+xoffset)

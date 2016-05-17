@@ -113,7 +113,7 @@ class TileCache:
         else:
           # Check to see is this is a partial cutout if so pad the space
           cuboid = np.zeros((cube_data.shape[0], zsuperdim, settings.TILESIZE, settings.TILESIZE), dtype=cube_data.dtype)
-          cuboid[:, 0:zsuperdim, 0:(ymax-ymin), 0:(xmax-xmin)] = cube_data[:, :, 0:(ymax-ymin), 0:(xmax-xmin)]
+          cuboid[:, 0:zmax-zmin, 0:(ymax-ymin), 0:(xmax-xmin)] = cube_data[:, :, 0:(ymax-ymin), 0:(xmax-xmin)]
           # cuboid[:, 0:(zmax-zmin), 0:(ymax-ymin), 0:(xmax-xmin)] = cubedata
       else:
         cuboid = cube_data
