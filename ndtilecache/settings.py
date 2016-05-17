@@ -163,7 +163,7 @@ LOGGING = {
 # NDTILECACHE Settings
 SERVER = 'cloud.neurodata.io/nd'
 DBNAME = 'ndtilecache'
-TILESIZE = 1024
+TILESIZE = 512
 CACHE_DIR = settings_secret.CACHE_DIR
 CACHE_SIZE = 1000000 # In MB
 

@@ -50,8 +50,8 @@ def prefetch ( token, res, xmin, xmax, ymin, ymax, zmin, zmax ):
   info = json.loads ( f.read() )
   
   # cutout a a tilesize region
-  xdim = 512
-  ydim = 512
+  xdim = settings.TILESIZE
+  ydim = settings.TILESIZE
 
   zoffset = info['dataset']['slicerange'][0]
   zimagesize = info['dataset']['slicerange'][1]+1

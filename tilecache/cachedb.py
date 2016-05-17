@@ -157,19 +157,19 @@ class CacheDB:
     if (cachesize - currentsize)*20 < cachesize:
       numitems = (currentsize-int(0.9*cachesize))/(settings.TILESIZE*settings.TILESIZE)
     else:
-      logger.warning ( "Not reclaiming cache of {} tiles.  Capacity {}.".format(numtiles,cachesize/512/512))
+      logger.warning("Not reclaiming cache of {} tiles. Capacity {}.".format(numtiles, cachesize/settings.TILESIZE/settings.TILESIZE))
       return
 
     cursor = self.conn.cursor()
 
-    logger.warning ("Cache has {} tiles.  Capacity of {} tiles.  Reclaiming {}".format(numtiles,cachesize/512/512,numitems))
+    logger.warning("Cache has {} tiles. Capacity of {} tiles. Reclaiming {}".format(numtiles, cachesize/settings.TILESIZE/settings.TILESIZE, numitems))
 
     sql = "SELECT highkey, lowkey, filename FROM contents ORDER BY reftime ASC LIMIT {}".format(numitems)
 
     try:
       cursor.execute ( sql )
     except MySQLdb.Error, e:
-      logger.warning ("Failed to query cache for reclamation s%d: %s. sql=%s" % (e.args[0], e.args[1], sql))
+      logger.warning ("Failed to query cache for reclamation {}: {}. sql={}".format(e.args[0], e.args[1], sql))
       raise
 
     result = cursor.fetchall()
@@ -190,7 +190,7 @@ class CacheDB:
     try:
       cursor.execute(sql)
     except MySQLdb.Error, e:
-      logger.warning ("Failed to remove items from cache %d: %s. sql=%s" % (e.args[0], e.args[1], sql))
+      logger.warning("Failed to remove items from cache {}: {}. sql={}".format(e.args[0], e.args[1], sql))
       raise
 
     self.decrease(numitems)

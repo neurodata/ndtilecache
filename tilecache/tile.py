@@ -208,7 +208,7 @@ class Tile:
         self.initForFetch()
       except OOBException:
         logger.warning("OOB request. Returning black tile. url={}".format(self.tile_url))
-        img = Image.new("L", (512, 512))
+        img = Image.new("L", (settings.TILESIZE, settings.TILESIZE))
         fileobj = cStringIO.StringIO()
         img.save(fileobj, "PNG")
         fileobj.seek(0)
