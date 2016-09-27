@@ -20,7 +20,7 @@ import numpy as np
 from operator import add, sub, mul, div, mod
 
 from django.conf import settings
-import ndlib
+from ndctypelib import  XYZMorton, MortonXYZ
 from ndtype import ND_dtypetonp
 from s3util import generateS3BucketName, generateS3Key
 
@@ -34,6 +34,7 @@ class S3IO:
     """Connect to the s3 backend"""
     
     self.ds = ds
+    self.project_name = ds.getProjectName()
     self.channels = channels
     self.client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
   
@@ -75,14 +76,14 @@ class S3IO:
     for z in range ( znumsupercubes ):
       for y in range ( ynumsupercubes ):
         for x in range ( xnumsupercubes ):
-          mortonidx = ndlib.XYZMorton ( [x+xstart, y+ystart, z+zstart] )
+          mortonidx = XYZMorton ( [x+xstart, y+ystart, z+zstart] )
           listofidxs.append ( mortonidx )
 
     # Sort the indexes in Morton order
     listofidxs.sort()
     
     # xyz offset stored for later use
-    lowxyz = ndlib.MortonXYZ ( listofidxs[0] )
+    lowxyz = MortonXYZ ( listofidxs[0] )
     
     for channel_index, channel_name in enumerate(self.channels):
       
@@ -93,7 +94,7 @@ class S3IO:
       for idx, data in super_cuboids:
 
         #add the query result cube to the bigger cube
-        curxyz = ndlib.MortonXYZ(int(idx))
+        curxyz = MortonXYZ(int(idx))
         offset = [ curxyz[0]-lowxyz[0], curxyz[1]-lowxyz[1], curxyz[2]-lowxyz[2] ]
         
         # add it to the output cube
@@ -113,7 +114,7 @@ class S3IO:
     
     for super_zidx in super_listofidxs:
       try:
-        super_cube = self.client.get_object(Bucket=generateS3BucketName(self.ds.getProjectName()), Key=generateS3Key(ch.getChannelName(), res, super_zidx)).get('Body').read()
+        super_cube = self.client.get_object(Bucket=generateS3BucketName(), Key=generateS3Key(self.project_name, ch.getChannelName(), res, super_zidx)).get('Body').read()
         yield (super_zidx, blosc.unpack_array(super_cube))
       except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == 'NoSuchKey':

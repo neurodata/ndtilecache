@@ -175,5 +175,7 @@ CELERY_ACCEPT_CONTENT=['json', 'pickle']
 CELERYD_PREFETCH_MULTIPLIER = 1
 
 # Amazon Settings
+REGION_NAME = 'us-east-1'
+S3_CUBOID_BUCKET = 'neurodata-cuboid-store'
 AWS_ACCESS_KEY_ID = settings_secret.AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY = settings_secret.AWS_SECRET_ACCESS_KEY

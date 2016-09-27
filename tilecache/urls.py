@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import url
+from . import views
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('tilecache.views',
-    # viking tile in the cache
-    url(r'^viking/(?P<webargs>.*)$', 'getVikingTile'),
-    # everything else matches the tile cache
-    url(r'^(?P<webargs>.*)$', 'getTile'),
-)
+urlpatterns = [
+    # viking tile
+    url(r'^viking/(?P<webargs>.*)$', views.getVikingTile),
+    # all other tiles
+    url(r'^(?P<webargs>.*)$', views.getTile),
+]
